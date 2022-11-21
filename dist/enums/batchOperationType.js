@@ -1,0 +1,23 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.BatchOperationType = void 0;
+var BatchOperationType;
+(function (BatchOperationType) {
+    BatchOperationType[BatchOperationType["Publish"] = 1] = "Publish";
+    BatchOperationType[BatchOperationType["Unpublish"] = 2] = "Unpublish";
+    BatchOperationType[BatchOperationType["Approve"] = 3] = "Approve";
+    BatchOperationType[BatchOperationType["Decline"] = 4] = "Decline";
+    BatchOperationType[BatchOperationType["RequestApproval"] = 5] = "RequestApproval";
+    BatchOperationType[BatchOperationType["Copy"] = 6] = "Copy";
+    BatchOperationType[BatchOperationType["ClonePageTemplate"] = 7] = "ClonePageTemplate";
+    BatchOperationType[BatchOperationType["Sync"] = 8] = "Sync";
+    BatchOperationType[BatchOperationType["TagExport"] = 9] = "TagExport";
+    BatchOperationType[BatchOperationType["TagImport"] = 10] = "TagImport";
+    BatchOperationType[BatchOperationType["ContentExport"] = 11] = "ContentExport";
+    BatchOperationType[BatchOperationType["ContentImport"] = 12] = "ContentImport";
+    BatchOperationType[BatchOperationType["InstanctTemplateImport"] = 13] = "InstanctTemplateImport";
+    BatchOperationType[BatchOperationType["InsertContent"] = 14] = "InsertContent";
+    BatchOperationType[BatchOperationType["DeleteContent"] = 15] = "DeleteContent";
+    BatchOperationType[BatchOperationType["SavePage"] = 16] = "SavePage";
+    BatchOperationType[BatchOperationType["DeletePage"] = 17] = "DeletePage";
+})(BatchOperationType = exports.BatchOperationType || (exports.BatchOperationType = {}));
