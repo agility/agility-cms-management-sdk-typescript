@@ -30,3 +30,10 @@ export class ContentScripts {
     top: string | null;
     bottom: string | null;
 }
+
+export class ContentList{
+    recordOffset: number | null;
+    totalCount: number | null;
+    pageSize: number | null;
+    items: any[] | null;
+}

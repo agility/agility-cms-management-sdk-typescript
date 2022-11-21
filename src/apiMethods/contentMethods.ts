@@ -1,6 +1,6 @@
 import { Options } from "../models/options";
 import { ClientInstance } from "./clientInstance";
-import { ContentItem } from "../models/contentItem";
+import { ContentItem, ContentList } from "../models/contentItem";
 import { BatchMethods } from "./batchMethods";
 
 export class ContentMethods{
@@ -152,4 +152,17 @@ export class ContentMethods{
             throw 'Unable to create contents.';
         }
     }
+
+    async getContentItems(referenceName: string, filter: string = '', fields: string = null, 
+        sortDirection: string = null, sortField: string = null,
+        take: number = 50, skip: number = 0){
+            try{
+                let apiPath = `${this._options.locale}/list/${referenceName}?filter=${filter}&fields=${fields}&sortDirection=${sortDirection}&sortField=${sortField}&take=${take}&skip=${skip}`;
+                const resp = await this._clientInstance.executeGet(apiPath, this._options);
+
+                return resp.data as ContentList;
+            } catch(err) {
+                throw `Unable retreive the content details for reference name: ${referenceName}, ${err}`
+              };
+        }
 }
