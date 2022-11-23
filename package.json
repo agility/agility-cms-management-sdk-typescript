@@ -1,5 +1,5 @@
 {
-  "name": "agility-cms-management-sdk-typescript",
+  "name": "@agility/management-sdk",
   "version": "0.1.0",
   "description": "Agility CMS Tyescript SDK for Management API.",
   "repository": {
@@ -10,7 +10,7 @@
     "url": "https://github.com/agility/agility-cms-management-sdk-typescript/issues"
   },
   "homepage": "https://github.com/agility/agility-cms-management-sdk-typescript#readme",
-  "main": "index.js",
+  "main": "/dist/index.js",
   "scripts": {
     "clean": "git clean -Xf",
 		"build": "tsc",
