@@ -3,6 +3,7 @@ import { ClientInstance } from "./clientInstance";
 import { InstanceUser } from "../models/instanceUser";
 import { WebsiteUser } from "../models/websiteUser";
 import { InstanceRole } from "../models/instanceRole";
+import { Exception } from "../models/exception";
 
 export class InstanceUserMethods{
     _options!: Options;
@@ -20,7 +21,7 @@ export class InstanceUserMethods{
 
             return resp.data as WebsiteUser;
         } catch(err){
-            throw `Unable to retreive users.`;
+            throw new Exception(`Unable to retreive users.`, err);
         }
     }
 
@@ -31,7 +32,7 @@ export class InstanceUserMethods{
 
             return resp.data as InstanceUser;
         } catch(err){
-            throw `Unable to retreive users.`;
+            throw new Exception(`Unable to retreive users.`, err);
         }
     }
 
@@ -42,7 +43,7 @@ export class InstanceUserMethods{
 
             return resp.data as string;
         } catch(err){
-            throw `Unable to delete the user for id: ${userId}`;
+            throw new Exception(`Unable to delete the user for id: ${userId}`, err);
         }
     }
 }

@@ -2,6 +2,7 @@ import { Options } from "../models/options";
 import { ClientInstance } from "./clientInstance";
 import { ContentItem, ContentList } from "../models/contentItem";
 import { BatchMethods } from "./batchMethods";
+import { Exception } from "../models/exception";
 
 export class ContentMethods{
     _options!: Options;
@@ -21,7 +22,7 @@ export class ContentMethods{
 
             return resp.data as ContentItem;
         } catch(err){
-            throw `Unable to retreive the content for id: ${contentID}`;
+            throw new Exception(`Unable to retreive the content for id: ${contentID}`, err);
         }
     }
 
@@ -37,7 +38,7 @@ export class ContentMethods{
             batch.items.forEach(element => contentIDs.push(element.itemID));
             return contentIDs;
         } catch(err){
-            throw `Unable to publish the content for id: ${contentID}`;
+            throw new Exception(`Unable to publish the content for id: ${contentID}`, err);
         }
     }
 
@@ -53,7 +54,7 @@ export class ContentMethods{
             batch.items.forEach(element => contentIDs.push(element.itemID));
             return contentIDs;
         } catch(err){
-            throw `Unable to un-publish the content for id: ${contentID}`;
+            throw new Exception(`Unable to un-publish the content for id: ${contentID}`, err);
         }
     }
 
@@ -69,7 +70,7 @@ export class ContentMethods{
             batch.items.forEach(element => contentIDs.push(element.itemID));
             return contentIDs;
         } catch(err){
-            throw `Unable to request approval the content for id: ${contentID}`;
+            throw new Exception(`Unable to request approval the content for id: ${contentID}`, err);
         }
     }
 
@@ -85,7 +86,7 @@ export class ContentMethods{
             batch.items.forEach(element => contentIDs.push(element.itemID));
             return contentIDs;
         } catch(err){
-            throw `Unable to approve the content for id: ${contentID}`;
+            throw new Exception(`Unable to approve the content for id: ${contentID}`, err);
         }
     }
 
@@ -101,7 +102,7 @@ export class ContentMethods{
             batch.items.forEach(element => contentIDs.push(element.itemID));
             return contentIDs;
         } catch(err){
-            throw `Unable to decline the content for id: ${contentID}`;
+            throw new Exception(`Unable to decline the content for id: ${contentID}`, err);
         }
     }
 
@@ -117,7 +118,7 @@ export class ContentMethods{
             batch.items.forEach(element => contentIDs.push(element.itemID));
             return contentIDs;
         } catch(err){
-            throw `Unable to delete the content for id: ${contentID}`;
+            throw new Exception(`Unable to delete the content for id: ${contentID}`, err);
         }
     }
 
@@ -133,7 +134,7 @@ export class ContentMethods{
             batch.items.forEach(element => contentIDs.push(element.itemID));
             return contentIDs;
         } catch(err){
-            throw 'Unable to create content.';
+            throw new Exception('Unable to create content.', err);
         }
     }
 
@@ -149,7 +150,7 @@ export class ContentMethods{
             batch.items.forEach(element => contentIDs.push(element.itemID));
             return contentIDs;
         } catch(err){
-            throw 'Unable to create contents.';
+            throw new Exception('Unable to create contents.', err);
         }
     }
 
@@ -162,7 +163,7 @@ export class ContentMethods{
 
                 return resp.data as ContentList;
             } catch(err) {
-                throw `Unable retreive the content details for reference name: ${referenceName}, ${err}`
-              };
+                throw new Exception(`Unable retreive the content details for reference name: ${referenceName}`, err);
+            }
         }
 }

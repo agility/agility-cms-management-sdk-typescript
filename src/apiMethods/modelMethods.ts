@@ -1,6 +1,7 @@
 import { Options } from "../models/options";
 import { ClientInstance } from "./clientInstance";
 import { Model } from "../models/model";
+import { Exception } from "../models/exception";
 
 export class ModelMethods{
     _options!: Options;
@@ -18,7 +19,7 @@ export class ModelMethods{
 
             return resp.data as Model;
         } catch(err){
-            throw `Unable to retreive model for id: ${id}.`;
+            throw new Exception(`Unable to retreive model for id: ${id}.`, err);
         }
     }
 
@@ -29,7 +30,7 @@ export class ModelMethods{
 
             return resp.data as Model[];
         } catch(err){
-            throw `Unable to retreive content modules.`;
+            throw new Exception(`Unable to retreive content modules.`, err);
         }
     }
 
@@ -40,7 +41,7 @@ export class ModelMethods{
 
             return resp.data as Model[];
         } catch(err){
-            throw `Unable to retreive page modules.`;
+            throw new Exception(`Unable to retreive page modules.`, err);
         }
     }
 
@@ -51,7 +52,7 @@ export class ModelMethods{
 
             return resp.data as Model;
         } catch(err){
-            throw `Unable to save the model ${err}`;
+            throw new Exception(`Unable to save the model.`, err);
         }
     }
 
@@ -62,7 +63,7 @@ export class ModelMethods{
 
             return resp.data as string;
         } catch(err){
-            throw `Unable to delete the model ${err}`;
+            throw new Exception(`Unable to delete the model`, err);
         }
     }
 }

@@ -1,6 +1,7 @@
 import { Options } from "../models/options";
 import { ClientInstance } from "./clientInstance";
 import { AssetMediaList, Media } from "../models/media";
+import { Exception } from "../models/exception";
 
 export class AssetMethods{
     _options!: Options;
@@ -17,7 +18,7 @@ export class AssetMethods{
           const resp = await this._clientInstance.executeDelete(apiPath, this._options);;
           return resp.data as string;
         } catch(err){
-            throw `Unable to delete the media for mediaID: ${mediaID}`;
+            throw new Exception(`Unable to delete the media for mediaID: ${mediaID}`, err);
         }
     }
 
@@ -29,7 +30,7 @@ export class AssetMethods{
           const resp = await this._clientInstance.executePost(apiPath, this._options, null);
           return resp.data as Media;
         } catch(err){
-            throw `Unable to move the media for mediaID: ${mediaID} ${err}`;
+            throw new Exception(`Unable to move the media for mediaID: ${mediaID}`, err);
         }
     }
 
@@ -40,7 +41,7 @@ export class AssetMethods{
             const resp = await this._clientInstance.executeGet(apiPath, this._options);
             return resp.data as AssetMediaList;
         } catch(err){
-            throw `Unable to retrieve assets for the website.`;
+            throw new Exception(`Unable to retrieve assets for the website.`, err);
         }
     }
 
@@ -51,7 +52,7 @@ export class AssetMethods{
 
           return resp.data as Media;
         } catch(err){
-            throw `Unable to retrieve asset for mediaID ${mediaID}`;
+            throw new Exception(`Unable to retrieve asset for mediaID ${mediaID}`, err);
         }
     }
 
@@ -62,7 +63,7 @@ export class AssetMethods{
 
             return resp.data as Media;
         } catch(err){
-            throw `Unable to retrieve asset for url ${url}`;
+            throw new Exception(`Unable to retrieve asset for url ${url}`, err);
         }
     }
 
@@ -73,7 +74,7 @@ export class AssetMethods{
             
             return resp.data as Media[];
         } catch(err){
-            throw `Unable to upload media.`;
+            throw new Exception(`Unable to upload media.`, err);
         }
     }
 }

@@ -2,6 +2,7 @@ import { Options } from "../models/options";
 import { ClientInstance } from "./clientInstance";
 import { Batch } from "../models/batch";
 import { BatchState } from "../enums/batchState.";
+import { Exception } from "../models/exception";
 
 export class BatchMethods{
     _options!: Options;
@@ -19,7 +20,7 @@ export class BatchMethods{
 
             return resp.data as Batch;
         } catch(err){
-            throw `Unable to retreive the batch for id: ${batchID}`;
+            throw new Exception(`Unable to retreive the batch for id: ${batchID}`, err);
         }
     }
 

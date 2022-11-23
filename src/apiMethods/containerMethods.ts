@@ -2,6 +2,7 @@ import { Options } from "../models/options";
 import { ClientInstance } from "./clientInstance";
 import { Container } from "../models/container";
 import { Notification } from "../models/notification";
+import { Exception } from "../models/exception";
 
 export class ContainerMethods{
     _options!: Options;
@@ -19,7 +20,7 @@ export class ContainerMethods{
 
             return resp.data as Container;
         } catch(err){
-            throw `Unable to retreive the contianer for id: ${id}`;
+            throw new Exception(`Unable to retreive the contianer for id: ${id}`, err);
         }
     }
 
@@ -30,7 +31,7 @@ export class ContainerMethods{
 
             return resp.data as Container;
         } catch(err){
-            throw `Unable to retreive the contianer for referenceName: ${referenceName}`;
+            throw new Exception(`Unable to retreive the contianer for referenceName: ${referenceName}`, err);
         }
     }
 
@@ -41,7 +42,7 @@ export class ContainerMethods{
 
             return resp.data as Container;
         } catch(err){
-            throw `Unable to retreive the contianer for id: ${id}`;
+            throw new Exception(`Unable to retreive the contianer for id: ${id}`, err);
         }
     }
 
@@ -52,7 +53,7 @@ export class ContainerMethods{
 
             return resp.data as Container[];
         } catch(err){
-            throw `Unable to retreive the contianer list`;
+            throw new Exception(`Unable to retreive the contianer list`, err);
         }
     }
 
@@ -63,7 +64,7 @@ export class ContainerMethods{
 
             return resp.data as Notification[];
         } catch(err){
-            throw `Unable to retreive the notifications for contianer id: ${id}`;
+            throw new Exception(`Unable to retreive the notifications for contianer id: ${id}`, err);
         }
     }
 
@@ -74,7 +75,7 @@ export class ContainerMethods{
 
             return resp.data as Container;
         } catch(err){
-            throw `Unable to save the contianer`;
+            throw new Exception(`Unable to save the contianer`, err);
         }
     }
 
@@ -85,7 +86,7 @@ export class ContainerMethods{
 
             return resp.data as string;
         } catch(err){
-            throw `Unable to delete the contianer for id: ${id}`;
+            throw new Exception(`Unable to delete the contianer for id: ${id}`, err);
         }
     }
 }

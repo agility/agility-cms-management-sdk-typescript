@@ -3,6 +3,7 @@ import { ClientInstance } from "./clientInstance";
 import { PageItem } from "../models/pageItem";
 import { Sitemap } from "../models/sitemap";
 import { BatchMethods } from "./batchMethods";
+import { Exception } from "../models/exception";
 
 export class PageMethods{
     _options!: Options;
@@ -22,7 +23,7 @@ export class PageMethods{
 
             return resp.data as Sitemap[];
         } catch(err){
-            throw `Unable to retreive sitemap.`;
+            throw new Exception(`Unable to retreive sitemap.`, err);
         }
     }
 
@@ -33,7 +34,7 @@ export class PageMethods{
 
             return resp.data as PageItem;
         } catch(err){
-            throw `Unable to retreive page for id ${pageID}.`;
+            throw new Exception(`Unable to retreive page for id ${pageID}.`, err);
         }
     }
 
@@ -49,7 +50,7 @@ export class PageMethods{
             batch.items.forEach(element => pageIDs.push(element.itemID));
             return pageIDs;
         } catch(err){
-            throw `Unable to publish the page for id: ${pageID}`;
+            throw new Exception(`Unable to publish the page for id: ${pageID}`, err);
         }
     }
 
@@ -65,7 +66,7 @@ export class PageMethods{
             batch.items.forEach(element => pageIDs.push(element.itemID));
             return pageIDs;
         } catch(err){
-            throw `Unable to un-publish the page for id: ${pageID}`;
+            throw new Exception(`Unable to un-publish the page for id: ${pageID}`, err);
         }
     }
 
@@ -81,7 +82,7 @@ export class PageMethods{
             batch.items.forEach(element => pageIDs.push(element.itemID));
             return pageIDs;
         } catch(err){
-            throw `Unable to request approval the page for id: ${pageID}`;
+            throw new Exception(`Unable to request approval the page for id: ${pageID}`, err);
         }
     }
 
@@ -97,7 +98,7 @@ export class PageMethods{
             batch.items.forEach(element => pageIDs.push(element.itemID));
             return pageIDs;
         } catch(err){
-            throw `Unable to approve the page for id: ${pageID}`;
+            throw new Exception(`Unable to approve the page for id: ${pageID}`, err);
         }
     }
 
@@ -113,7 +114,7 @@ export class PageMethods{
             batch.items.forEach(element => pageIDs.push(element.itemID));
             return pageIDs;
         } catch(err){
-            throw `Unable to decline the page for id: ${pageID}`;
+            throw new Exception(`Unable to decline the page for id: ${pageID}`, err);
         }
     }
 
@@ -129,7 +130,7 @@ export class PageMethods{
               batch.items.forEach(element => pageIDs.push(element.itemID));
               return pageIDs;
         } catch(err){
-            throw `Unable to delete the page for id: ${pageID}`;
+            throw new Exception(`Unable to delete the page for id: ${pageID}`, err);
         }
     }
 
@@ -145,7 +146,7 @@ export class PageMethods{
               batch.items.forEach(element => pageIDs.push(element.itemID));
               return pageIDs;
         } catch(err){
-            throw `Unable to create page. ${err}`;
+            throw new Exception(`Unable to create page. ${err}`, err);
         }
     }
 }
