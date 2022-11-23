@@ -384,11 +384,6 @@ Returns: An array of ```pageID``` of the requested page.
 - [Official site](https://agilitycms.com)
 - [Documentation](https://help.agilitycms.com/hc/en-us)
 
-### .NET 6
-
-- [Official site](https://dotnet.microsoft.com/)
-- [Documentation](https://docs.microsoft.com/en-us/dotnet/)
-
 ### Community
 
 - [Official Slack](https://join.slack.com/t/agilitycommunity/shared_invite/enQtNzI2NDc3MzU4Njc2LWI2OTNjZTI3ZGY1NWRiNTYzNmEyNmI0MGZlZTRkYzI3NmRjNzkxYmI5YTZjNTg2ZTk4NGUzNjg5NzY3OWViZGI)
