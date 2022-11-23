@@ -1,7 +1,5 @@
 # Agility CMS & Management API TypeScript SDK
 
-To start using the Agility CMS & .NET 5 Starter, [sign up](https://agilitycms.com/free) for a FREE account and create a new Instance using the Blog Template.
-
 ## About the Management API SDK
 
 - Provides a facility to developers to use the new Agility Management API more effectively.
