@@ -1,6 +1,6 @@
 {
   "name": "@agility/management-sdk",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Agility CMS Tyescript SDK for Management API.",
   "repository": {
     "type": "git",
@@ -10,9 +10,9 @@
     "url": "https://github.com/agility/agility-cms-management-sdk-typescript/issues"
   },
   "homepage": "https://github.com/agility/agility-cms-management-sdk-typescript#readme",
-  "main": "/dist/index.js",
+  "main": "dist/index.js",
   "scripts": {
-    "clean": "git clean -Xf",
+    "clean": "git clean -Xf && rm -rf ./dist",
 		"build": "tsc",
     "prepare": "yarn build",
     "test": "echo \"Error: no test specified\" && exit 1"
