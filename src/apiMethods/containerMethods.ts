@@ -13,10 +13,10 @@ export class ContainerMethods{
         this._clientInstance = new ClientInstance();
     }
 
-    async getContainerByID(id: number){
+    async getContainerByID(id: number, guid: string){
         try{
             let apiPath = `container/${id}`;
-            const resp = await this._clientInstance.executeGet(apiPath, this._options);
+            const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
 
             return resp.data as Container;
         } catch(err){
@@ -24,10 +24,10 @@ export class ContainerMethods{
         }
     }
 
-    async getContainerByReferenceName(referenceName: string){
+    async getContainerByReferenceName(referenceName: string, guid: string){
         try{
             let apiPath = `container/${referenceName}`;
-            const resp = await this._clientInstance.executeGet(apiPath, this._options);
+            const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
 
             return resp.data as Container;
         } catch(err){
@@ -35,10 +35,10 @@ export class ContainerMethods{
         }
     }
 
-    async getContainerSecurity(id: number){
+    async getContainerSecurity(id: number, guid: string){
         try{
             let apiPath = `container/${id}/security`;
-            const resp = await this._clientInstance.executeGet(apiPath, this._options);
+            const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
 
             return resp.data as Container;
         } catch(err){
@@ -46,10 +46,10 @@ export class ContainerMethods{
         }
     }
 
-    async getContainerList(){
+    async getContainerList(guid: string){
         try{
             let apiPath = `container/list`;
-            const resp = await this._clientInstance.executeGet(apiPath, this._options);
+            const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
 
             return resp.data as Container[];
         } catch(err){
@@ -57,10 +57,10 @@ export class ContainerMethods{
         }
     }
 
-    async getNotificationList(id: number){
+    async getNotificationList(id: number, guid: string){
         try{
             let apiPath = `container/${id}/notifications`;
-            const resp = await this._clientInstance.executeGet(apiPath, this._options);
+            const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
 
             return resp.data as Notification[];
         } catch(err){
@@ -68,10 +68,10 @@ export class ContainerMethods{
         }
     }
 
-    async saveContainer(container: Container){
+    async saveContainer(container: Container, guid: string){
         try{
             let apiPath = `container`;
-            const resp = await this._clientInstance.executePost(apiPath, this._options, container);
+            const resp = await this._clientInstance.executePost(apiPath, guid, this._options.token, container);
 
             return resp.data as Container;
         } catch(err){
@@ -79,10 +79,10 @@ export class ContainerMethods{
         }
     }
 
-    async deleteContainer(id: number){
+    async deleteContainer(id: number, guid: string){
         try{
             let apiPath = `container/${id}`;
-            const resp = await this._clientInstance.executeDelete(apiPath, this._options);
+            const resp = await this._clientInstance.executeDelete(apiPath, guid, this._options.token);
 
             return resp.data as string;
         } catch(err){

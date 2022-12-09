@@ -14,10 +14,10 @@ export class InstanceUserMethods{
         this._clientInstance = new ClientInstance();
     }
 
-    async getUsers(){
+    async getUsers(guid: string){
         try{
             let apiPath = `user/list`;
-            const resp = await this._clientInstance.executeGet(apiPath, this._options);
+            const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
 
             return resp.data as WebsiteUser;
         } catch(err){
@@ -25,10 +25,10 @@ export class InstanceUserMethods{
         }
     }
 
-    async saveUser(emailAddress: string, roles: InstanceRole[], firstName: string = null, lastName: string = null){
+    async saveUser(emailAddress: string, roles: InstanceRole[], guid: string, firstName: string = null, lastName: string = null){
         try{
             let apiPath = `user/save?emailAddress=${emailAddress}&firstName=${firstName}&lastName=${lastName}`;
-            const resp = await this._clientInstance.executePost(apiPath, this._options, roles);
+            const resp = await this._clientInstance.executePost(apiPath, guid, this._options.token, roles);
 
             return resp.data as InstanceUser;
         } catch(err){
@@ -36,10 +36,10 @@ export class InstanceUserMethods{
         }
     }
 
-    async deleteUser(userId: number){
+    async deleteUser(userId: number, guid: string){
         try{
             let apiPath = `user/delete/${userId}`;
-            const resp = await this._clientInstance.executeDelete(apiPath, this._options);
+            const resp = await this._clientInstance.executeDelete(apiPath, guid, this._options.token);
 
             return resp.data as string;
         } catch(err){

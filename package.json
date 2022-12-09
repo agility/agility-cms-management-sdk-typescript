@@ -1,6 +1,6 @@
 {
   "name": "@agility/management-sdk",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Agility CMS Tyescript SDK for Management API.",
   "repository": {
     "type": "git",
