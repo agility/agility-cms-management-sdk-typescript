@@ -15,10 +15,10 @@ export class ContentMethods{
         this._batchMethods = new BatchMethods(this._options);
     }
 
-   async getContentItem(contentID: number){
+   async getContentItem(contentID: number, guid: string, locale: string){
         try{
-            let apiPath = `${this._options.locale}/item/${contentID}`;
-            const resp = await this._clientInstance.executeGet(apiPath, this._options);
+            let apiPath = `${locale}/item/${contentID}`;
+            const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
 
             return resp.data as ContentItem;
         } catch(err){
@@ -26,13 +26,13 @@ export class ContentMethods{
         }
     }
 
-     async publishContent (contentID: number,comments: string = null ){
+     async publishContent (contentID: number, guid: string, locale: string, comments: string = null ){
         try{
-            let apiPath = `${this._options.locale}/item/${contentID}/publish?comments=${comments}`;
-            const resp = await this._clientInstance.executeGet(apiPath, this._options);
+            let apiPath = `${locale}/item/${contentID}/publish?comments=${comments}`;
+            const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
 
             let batchID = resp.data as number;
-            var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID));
+            var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID, guid));
             let contentIDs: number[]= [];
 
             batch.items.forEach(element => contentIDs.push(element.itemID));
@@ -42,13 +42,13 @@ export class ContentMethods{
         }
     }
 
-    async unPublishContent (contentID: number,comments: string = null ){
+    async unPublishContent (contentID: number, guid: string, locale: string,comments: string = null ){
         try{
-            let apiPath = `${this._options.locale}/item/${contentID}/unpublish?comments=${comments}`;
-            const resp = await this._clientInstance.executeGet(apiPath, this._options);
+            let apiPath = `${locale}/item/${contentID}/unpublish?comments=${comments}`;
+            const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
 
             let batchID = resp.data as number;
-            var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID));
+            var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID, guid));
             let contentIDs: number[]= [];
   
             batch.items.forEach(element => contentIDs.push(element.itemID));
@@ -58,13 +58,13 @@ export class ContentMethods{
         }
     }
 
-    async contentRequestApproval (contentID: number,comments: string = null  ){
+    async contentRequestApproval (contentID: number, guid: string, locale: string ,comments: string = null  ){
         try{
-            let apiPath = `${this._options.locale}/item/${contentID}/request-approval?comments=${comments}`;
-            const resp = await this._clientInstance.executeGet(apiPath, this._options);
+            let apiPath = `${locale}/item/${contentID}/request-approval?comments=${comments}`;
+            const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
 
             let batchID = resp.data as number;
-            var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID));
+            var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID, guid));
             let contentIDs: number[]= [];
   
             batch.items.forEach(element => contentIDs.push(element.itemID));
@@ -74,13 +74,13 @@ export class ContentMethods{
         }
     }
 
-    async approveContent (contentID: number,comments: string = null ){
+    async approveContent (contentID: number, guid: string, locale: string,comments: string = null ){
         try{
-            let apiPath = `${this._options.locale}/item/${contentID}/approve?comments=${comments}`;
-            const resp = await this._clientInstance.executeGet(apiPath, this._options);
+            let apiPath = `${locale}/item/${contentID}/approve?comments=${comments}`;
+            const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
 
             let batchID = resp.data as number;
-            var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID));
+            var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID, guid));
             let contentIDs: number[]= [];
   
             batch.items.forEach(element => contentIDs.push(element.itemID));
@@ -90,13 +90,13 @@ export class ContentMethods{
         }
     }
 
-    async declineContent (contentID: number,comments: string = null ){
+    async declineContent (contentID: number, guid: string, locale: string,comments: string = null ){
         try{
-            let apiPath = `${this._options.locale}/item/${contentID}/decline?comments=${comments}`;
-            const resp = await this._clientInstance.executeGet(apiPath, this._options);
+            let apiPath = `${locale}/item/${contentID}/decline?comments=${comments}`;
+            const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
 
             let batchID = resp.data as number;
-            var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID));
+            var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID, guid));
             let contentIDs: number[]= [];
   
             batch.items.forEach(element => contentIDs.push(element.itemID));
@@ -106,13 +106,13 @@ export class ContentMethods{
         }
     }
 
-    async deleteContent (contentID: number,comments: string = null ){
+    async deleteContent (contentID: number, guid: string, locale: string,comments: string = null ){
         try{
-            let apiPath = `${this._options.locale}/item/${contentID}?comments=${comments}`;
-            const resp = await this._clientInstance.executeDelete(apiPath, this._options);
+            let apiPath = `${locale}/item/${contentID}?comments=${comments}`;
+            const resp = await this._clientInstance.executeDelete(apiPath, guid, this._options.token);
 
             let batchID = resp.data as number;
-            var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID));
+            var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID, guid));
             let contentIDs: number[]= [];
   
             batch.items.forEach(element => contentIDs.push(element.itemID));
@@ -122,13 +122,13 @@ export class ContentMethods{
         }
     }
 
-    async saveContentItem(contentItem: ContentItem){
+    async saveContentItem(contentItem: ContentItem, guid: string, locale: string){
         try{
-            let apiPath = `${this._options.locale}/item`;
-            const resp = await this._clientInstance.executePost(apiPath, this._options, contentItem);
+            let apiPath = `${locale}/item`;
+            const resp = await this._clientInstance.executePost(apiPath, guid, this._options.token, contentItem);
 
             let batchID = resp.data as number;
-            var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID));
+            var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID, guid));
             let contentIDs: number[]= [];
   
             batch.items.forEach(element => contentIDs.push(element.itemID));
@@ -138,13 +138,13 @@ export class ContentMethods{
         }
     }
 
-    async saveContentItems(contentItems: ContentItem[]){
+    async saveContentItems(contentItems: ContentItem[], guid: string, locale: string){
         try{
-            let apiPath = `${this._options.locale}/item/multi`;
-            const resp = await this._clientInstance.executePost(apiPath, this._options, contentItems);
+            let apiPath = `${locale}/item/multi`;
+            const resp = await this._clientInstance.executePost(apiPath, guid, this._options.token, contentItems);
               
             let batchID = resp.data as number;
-            var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID));
+            var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID, guid));
             let contentIDs: number[]= [];
   
             batch.items.forEach(element => contentIDs.push(element.itemID));
@@ -154,12 +154,12 @@ export class ContentMethods{
         }
     }
 
-    async getContentItems(referenceName: string, filter: string = '', fields: string = null, 
+    async getContentItems(referenceName: string, guid: string, locale: string, filter: string = '', fields: string = null, 
         sortDirection: string = null, sortField: string = null,
         take: number = 50, skip: number = 0){
             try{
-                let apiPath = `${this._options.locale}/list/${referenceName}?filter=${filter}&fields=${fields}&sortDirection=${sortDirection}&sortField=${sortField}&take=${take}&skip=${skip}`;
-                const resp = await this._clientInstance.executeGet(apiPath, this._options);
+                let apiPath = `${locale}/list/${referenceName}?filter=${filter}&fields=${fields}&sortDirection=${sortDirection}&sortField=${sortField}&take=${take}&skip=${skip}`;
+                const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
 
                 return resp.data as ContentList;
             } catch(err) {
