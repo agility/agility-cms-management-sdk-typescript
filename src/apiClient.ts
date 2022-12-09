@@ -1,11 +1,11 @@
-import { ContentMethods } from "./src/apiMethods/contentMethods";
-import { AssetMethods } from "./src/apiMethods/assetMethods";
-import { BatchMethods } from "./src/apiMethods/batchMethods";
-import { ContainerMethods } from "./src/apiMethods/containerMethods";
-import { InstanceUserMethods } from "./src/apiMethods/instanceUserMethods";
-import { ModelMethods } from "./src/apiMethods/modelMethods";
-import { PageMethods } from "./src/apiMethods/pageMethods";
-import { Options } from "./src/models/options";
+import { ContentMethods } from "./apiMethods/contentMethods";
+import { AssetMethods } from "./apiMethods/assetMethods";
+import { BatchMethods } from "./apiMethods/batchMethods";
+import { ContainerMethods } from "./apiMethods/containerMethods";
+import { InstanceUserMethods } from "./apiMethods/instanceUserMethods";
+import { ModelMethods } from "./apiMethods/modelMethods";
+import { PageMethods } from "./apiMethods/pageMethods";
+import { Options } from "./models/options";
 
 export class ApiClient {
     _options!: Options;
