@@ -16,10 +16,10 @@ export class PageMethods{
         this._batchMethods = new BatchMethods(this._options);
     }
 
-    async getSitemap(){
+    async getSitemap(guid: string, locale: string){
         try{
-            let apiPath = `${this._options.locale}/sitemap`;
-            const resp = await this._clientInstance.executeGet(apiPath, this._options);
+            let apiPath = `${locale}/sitemap`;
+            const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
 
             return resp.data as Sitemap[];
         } catch(err){
@@ -27,10 +27,10 @@ export class PageMethods{
         }
     }
 
-    async getPage(pageID: number){
+    async getPage(pageID: number, guid: string, locale: string){
         try{
-            let apiPath = `${this._options.locale}/page/${pageID}`;
-            const resp = await this._clientInstance.executeGet(apiPath, this._options);
+            let apiPath = `${locale}/page/${pageID}`;
+            const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
 
             return resp.data as PageItem;
         } catch(err){
@@ -38,13 +38,13 @@ export class PageMethods{
         }
     }
 
-    async publishPage (pageID: number,comments: string = null){
+    async publishPage (pageID: number, guid: string, locale: string, comments: string = null){
         try{
-            let apiPath = `${this._options.locale}/page/${pageID}/publish?comments=${comments}`;
-            const resp = await this._clientInstance.executeGet(apiPath, this._options);
+            let apiPath = `${locale}/page/${pageID}/publish?comments=${comments}`;
+            const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
 
             let batchID = resp.data as number;
-            var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID));
+            var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID, guid));
             let pageIDs: number[]= [];
   
             batch.items.forEach(element => pageIDs.push(element.itemID));
@@ -54,13 +54,13 @@ export class PageMethods{
         }
     }
 
-    async unPublishPage (pageID: number,comments: string = null){
+    async unPublishPage (pageID: number, guid: string, locale: string,comments: string = null){
         try{
-            let apiPath = `${this._options.locale}/page/${pageID}/unpublish?comments=${comments}`;
-            const resp = await this._clientInstance.executeGet(apiPath, this._options);
+            let apiPath = `${locale}/page/${pageID}/unpublish?comments=${comments}`;
+            const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
 
             let batchID = resp.data as number;
-            var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID));
+            var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID, guid));
             let pageIDs: number[]= [];
   
             batch.items.forEach(element => pageIDs.push(element.itemID));
@@ -70,13 +70,13 @@ export class PageMethods{
         }
     }
 
-    async pageRequestApproval (pageID: number,comments: string = null){
+    async pageRequestApproval (pageID: number, guid: string, locale: string,comments: string = null){
         try{
-            let apiPath = `${this._options.locale}/page/${pageID}/request-approval?comments=${comments}`;
-            const resp = await this._clientInstance.executeGet(apiPath, this._options);
+            let apiPath = `${locale}/page/${pageID}/request-approval?comments=${comments}`;
+            const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
 
             let batchID = resp.data as number;
-            var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID));
+            var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID, guid));
             let pageIDs: number[]= [];
   
             batch.items.forEach(element => pageIDs.push(element.itemID));
@@ -86,13 +86,13 @@ export class PageMethods{
         }
     }
 
-    async approvePage (pageID: number,comments: string = null){
+    async approvePage (pageID: number, guid: string, locale: string,comments: string = null){
         try{
-            let apiPath = `${this._options.locale}/page/${pageID}/approve?comments=${comments}`;
-            const resp = await this._clientInstance.executeGet(apiPath, this._options);
+            let apiPath = `${locale}/page/${pageID}/approve?comments=${comments}`;
+            const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
 
             let batchID = resp.data as number;
-            var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID));
+            var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID, guid));
             let pageIDs: number[]= [];
   
             batch.items.forEach(element => pageIDs.push(element.itemID));
@@ -102,13 +102,13 @@ export class PageMethods{
         }
     }
 
-    async declinePage (pageID: number,comments: string = null){
+    async declinePage (pageID: number, guid: string, locale: string,comments: string = null){
         try{
-            let apiPath = `${this._options.locale}/page/${pageID}/decline?comments=${comments}`;
-            const resp = await this._clientInstance.executeGet(apiPath, this._options);
+            let apiPath = `${locale}/page/${pageID}/decline?comments=${comments}`;
+            const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
 
             let batchID = resp.data as number;
-            var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID));
+            var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID, guid));
             let pageIDs: number[]= [];
   
             batch.items.forEach(element => pageIDs.push(element.itemID));
@@ -118,13 +118,13 @@ export class PageMethods{
         }
     }
 
-    async deletePage (pageID: number,comments: string = null){
+    async deletePage (pageID: number, guid: string, locale: string,comments: string = null){
         try{
-            let apiPath = `${this._options.locale}/page/${pageID}?comments=${comments}`;
-            const resp = await this._clientInstance.executeDelete(apiPath, this._options);
+            let apiPath = `${locale}/page/${pageID}?comments=${comments}`;
+            const resp = await this._clientInstance.executeDelete(apiPath, guid, this._options.token);
 
               let batchID = resp.data as number;
-              var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID));
+              var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID, guid));
               let pageIDs: number[]= [];
   
               batch.items.forEach(element => pageIDs.push(element.itemID));
@@ -134,13 +134,13 @@ export class PageMethods{
         }
     }
 
-    async savePage(pageItem: PageItem, parentPageID: number = -1, placeBeforePageItemID: number = -1){
+    async savePage(pageItem: PageItem, guid: string, locale: string, parentPageID: number = -1, placeBeforePageItemID: number = -1){
         try{
-            let apiPath = `${this._options.locale}/page?parentPageID=${parentPageID}&placeBeforePageItemID=${placeBeforePageItemID}`;
-            const resp = await this._clientInstance.executePost(apiPath, this._options, pageItem);
+            let apiPath = `${locale}/page?parentPageID=${parentPageID}&placeBeforePageItemID=${placeBeforePageItemID}`;
+            const resp = await this._clientInstance.executePost(apiPath, guid, this._options.token, pageItem);
 
               let batchID = resp.data as number;
-              var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID));
+              var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID, guid));
               let pageIDs: number[]= [];
   
               batch.items.forEach(element => pageIDs.push(element.itemID));

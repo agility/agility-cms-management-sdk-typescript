@@ -13,10 +13,10 @@ export class BatchMethods{
         this._clientInstance = new ClientInstance();
     }
 
-    async getBatch(batchID: number){
+    async getBatch(batchID: number, guid: string){
         try{
             let apiPath = `batch/${batchID}`;
-            const resp = await this._clientInstance.executeGet(apiPath, this._options);
+            const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
 
             return resp.data as Batch;
         } catch(err){

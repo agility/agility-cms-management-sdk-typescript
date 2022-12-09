@@ -12,10 +12,10 @@ export class ModelMethods{
         this._clientInstance = new ClientInstance();
     }
 
-    async getContentModel(id: number){
+    async getContentModel(id: number, guid: string){
         try{
             let apiPath = `model/${id}`;
-            const resp = await this._clientInstance.executeGet(apiPath, this._options);
+            const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
 
             return resp.data as Model;
         } catch(err){
@@ -23,10 +23,10 @@ export class ModelMethods{
         }
     }
 
-    async getContentModules(includeDefaults: boolean, includeModules: boolean = false){
+    async getContentModules(includeDefaults: boolean, guid: string, includeModules: boolean = false){
         try{
             let apiPath = `model/list/${includeDefaults}?includeModules=${includeModules}`;
-            const resp = await this._clientInstance.executeGet(apiPath, this._options);
+            const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
 
             return resp.data as Model[];
         } catch(err){
@@ -34,10 +34,10 @@ export class ModelMethods{
         }
     }
 
-    async getPageModules(includeDefault: boolean){
+    async getPageModules(includeDefault: boolean, guid: string){
         try{
             let apiPath = `model/list-page-modules/${includeDefault}`;
-            const resp = await this._clientInstance.executeGet(apiPath, this._options);
+            const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
 
             return resp.data as Model[];
         } catch(err){
@@ -45,10 +45,10 @@ export class ModelMethods{
         }
     }
 
-    async saveModel(model: Model){
+    async saveModel(model: Model, guid: string){
         try{
             let apiPath = `model`;
-            const resp = await this._clientInstance.executePost(apiPath, this._options, model);
+            const resp = await this._clientInstance.executePost(apiPath, guid, this._options.token, model);
 
             return resp.data as Model;
         } catch(err){
@@ -56,10 +56,10 @@ export class ModelMethods{
         }
     }
 
-    async deleteModel(id: number){
+    async deleteModel(id: number, guid: string){
         try{
             let apiPath = `model/${id}`;
-            const resp = await this._clientInstance.executeDelete(apiPath, this._options);
+            const resp = await this._clientInstance.executeDelete(apiPath, guid, this._options.token);
 
             return resp.data as string;
         } catch(err){
