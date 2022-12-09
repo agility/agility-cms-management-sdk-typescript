@@ -14,8 +14,6 @@
 2. Import the index file to make use of the Options class.
 3. Create an object of the Options class to provide values of - 
 	- token -> Bearer token to authenticate a Rest Request to perform an operation.
-	- locale -> The locale under which your application is hosted. Example en-us.
-    - guid -> The guid under which your application is hosted.
 4. Create an object of Method class(es), which can be used to create and perform operations. Following is the description of Classes and their respective methods -
 
 ### Making a Request
@@ -25,12 +23,14 @@ import * as index from "./index";
 //initialize the Options Class
 let options = new index.Options();
 
-options.token = "<<Provide Auth Token>>";
-options.guid = "<<Provide the Guid of the Website>>";
-options.locale = "<<Provide the locale of the Website>>"; //Example: en-us
+//Initialize the APIClient Class
+let apiClient = new ApiClient(options);
 
-//Initialize the Method Class
-let contentMethods = new index.ContentMethods(options);
+let token = "<<Provide Auth Token>>";
+let guid = "<<Provide the Guid of the Website>>";
+let locale = "<<Provide the locale of the Website>>"; //Example: en-us
+
+
 
 //make the request: get a content item with the ID '22'
 var contentItem = await contentMethods.getContentItem(22);
