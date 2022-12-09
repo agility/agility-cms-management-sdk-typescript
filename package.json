@@ -1,6 +1,6 @@
 {
   "name": "@agility/management-sdk",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Agility CMS Tyescript SDK for Management API.",
   "repository": {
     "type": "git",
@@ -13,22 +13,22 @@
   "main": "dist/index.js",
   "scripts": {
     "clean": "git clean -Xf && rm -rf ./dist",
-		"build": "tsc",
+    "build": "tsc",
     "prepare": "yarn build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
     "typescript",
-		"agility",
-		"cms",
-		"headlesscms",
+    "agility",
+    "cms",
+    "headlesscms",
     "management-api"
   ],
   "author": "Agility CMS",
   "contributors": [
-		"Joel Varty",
+    "Joel Varty",
     "Mohit Vashishtha"
-	],
+  ],
   "license": "MIT",
   "dependencies": {
     "axios": "^0.27.2"
