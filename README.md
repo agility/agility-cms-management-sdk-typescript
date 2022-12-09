@@ -33,7 +33,7 @@ let locale = "<<Provide the locale of the Website>>"; //Example: en-us
 
 
 //make the request: get a content item with the ID '22'
-var contentItem = await contentMethods.getContentItem(22);
+var contentItem = await apiClient.contentMethods.getContentItem(124,guid, locale);
 
 //To log the response of the contentItem object in console.
 console.log(JSON.stringify(contentItem));
