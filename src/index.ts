@@ -11,4 +11,4 @@ export * from "./models/model";
 export * from "./models/notification";
 export * from "./models/pageItem";
 export * from "./models/sitemap";
-export * from "../apiClient";
+export * from "./apiClient";
