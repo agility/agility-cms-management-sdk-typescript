@@ -11,5 +11,5 @@
 	  "skipLibCheck": true,
 	  "allowSyntheticDefaultImports": true
 	},
-  "include": ["src", "apiClient.ts"]
+  "include": ["src", "src/apiClient.ts"]
   }
