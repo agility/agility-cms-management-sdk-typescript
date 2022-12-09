@@ -24,7 +24,7 @@ import * as index from "./index";
 let options = new index.Options();
 
 //Initialize the APIClient Class
-let apiClient = new ApiClient(options);
+let apiClient = new index.ApiClient(options);
 
 let token = "<<Provide Auth Token>>";
 let guid = "<<Provide the Guid of the Website>>";
