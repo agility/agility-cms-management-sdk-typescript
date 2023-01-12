@@ -23,6 +23,17 @@ export class ModelMethods{
         }
     }
 
+    async getModelByReferenceName(referenceName: string, guid: string){
+        try{
+            let apiPath = `model/${referenceName}`;
+            const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
+
+            return resp.data as Model;
+        } catch(err){
+            throw new Exception(`Unable to retreive model for referenceName: ${referenceName}.`, err);
+        }
+    }
+
     async getContentModules(includeDefaults: boolean, guid: string, includeModules: boolean = false){
         try{
             let apiPath = `model/list/${includeDefaults}?includeModules=${includeModules}`;
