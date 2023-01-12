@@ -13,13 +13,13 @@ export class ClientInstance{
         else if(seperator[1] ==='u'){
             return "https://mgmt.aglty.io";
         }
-        else if(seperator[1] === 'ca'){
+        else if(seperator[1] === 'c'){
             return "https://mgmt-ca.aglty.io";
         }
-        else if(seperator[1] === 'eu'){
-            return "https://mgmt-aus.aglty.io";
+        else if(seperator[1] === 'e'){
+            return "https://mgmt-eu.aglty.io";
         }
-        else if(seperator[1] === 'aus'){
+        else if(seperator[1] === 'a'){
             return "https://mgmt-aus.aglty.io";
         }
 
