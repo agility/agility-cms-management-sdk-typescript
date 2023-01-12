@@ -303,6 +303,12 @@ This class is used to perform operations related to Models. The following are th
 
 Returns: An object of ```Model``` class.
 
+### GetModelByReferenceName
+| Parameter | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `referenceName` | `string` | The referenceName of the requested model.|
+| `guid` | `string` | The guid of the requested model.|
+
 ### getContentModules
 | Parameter | Type     | Description                |
 | :-------- | :------- | :------------------------- |
