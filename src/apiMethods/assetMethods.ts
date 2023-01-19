@@ -77,4 +77,15 @@ export class AssetMethods{
             throw new Exception(`Unable to upload media.`, err);
         }
     }
+
+    async createFolder(originKey: string, guid: string){
+        try{
+            let apiPath = `asset/folder?originKey=${originKey}`;
+            const resp = await this._clientInstance.executePost(apiPath, guid, this._options.token, null);
+
+            return resp.data as Media;
+        } catch(err){
+            throw new Exception('Unable to create folder.', err);
+        }
+    }
 }
