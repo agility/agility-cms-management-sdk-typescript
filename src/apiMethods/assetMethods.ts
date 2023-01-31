@@ -2,6 +2,9 @@ import { Options } from "../models/options";
 import { ClientInstance } from "./clientInstance";
 import { AssetMediaList, Media } from "../models/media";
 import { Exception } from "../models/exception";
+import { assetGalleries } from "../models/assetGalleries";
+import { assetMediaGrouping } from "../models/assetMediaGrouping";
+import { assetContainer } from "../models/assetContainer";
 
 export class AssetMethods{
     _options!: Options;
@@ -42,6 +45,72 @@ export class AssetMethods{
             return resp.data as AssetMediaList;
         } catch(err){
             throw new Exception(`Unable to retrieve assets for the website.`, err);
+        }
+    }
+
+    async getGalleries(guid: string, search: string = null, pageSize: number = null, rowIndex: number = null){
+        try{
+            let apiPath = `asset/galleries?search=${search}&pageSize=${pageSize}&rowIndex=${rowIndex}`;
+
+            const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
+            return resp.data as assetGalleries;
+        } catch(err){
+            throw new Exception(`Unable to retrieve galleries for the website.`, err);
+        }
+    }
+
+    async getGalleryById(guid: string, id: number){
+        try{
+            let apiPath = `/asset/gallery/${id}`;
+
+            const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
+            return resp.data as assetMediaGrouping
+        } catch(err){
+            throw new Exception(`Unable to retrieve gallery for id ${id}`, err);
+        }
+    }
+
+    async getGalleryByName(guid: string, galleryName: string){
+        try{
+            let apiPath = `/asset/gallery?galleryName=${galleryName}`;
+
+            const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
+            return resp.data as assetMediaGrouping
+        } catch(err){
+            throw new Exception(`Unable to retrieve gallery for name ${galleryName}`, err);
+        }
+    }
+
+    async getDefaultContainer(guid: string){
+        try{
+            let apiPath = `/asset/container`;
+
+            const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
+            return resp.data as assetContainer;
+        } catch(err){
+            throw new Exception(`Unable to retrieve container for guid ${guid}`, err);
+        }
+    }
+
+    async saveGallery(guid: string, gallery: assetMediaGrouping){
+        try{
+            let apiPath = `/asset/gallery`;
+
+            const resp = await this._clientInstance.executePost(apiPath, guid, this._options.token, gallery);
+            return resp.data as assetMediaGrouping;
+        } catch(err){
+            throw new Exception(`Unable to save gallery`, err);
+        }
+    }
+
+    async deleteGallery(guid: string, id: number){
+        try{
+            let apiPath = `/asset/gallery/${id}`
+
+            const resp = await this._clientInstance.executeDelete(apiPath, guid, this._options.token);
+            return resp.data as string;
+        } catch(err){
+            throw new Exception(`Unable to delete gallery for id ${id}`, err);
         }
     }
 
