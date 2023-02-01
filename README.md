@@ -23,10 +23,10 @@ import * as index from "./index";
 //initialize the Options Class
 let options = new index.Options();
 
+options.token = "<<Provide Auth Token>>"
 //Initialize the APIClient Class
 let apiClient = new index.ApiClient(options);
 
-let token = "<<Provide Auth Token>>";
 let guid = "<<Provide the Guid of the Website>>";
 let locale = "<<Provide the locale of the Website>>"; //Example: en-us
 
@@ -48,6 +48,14 @@ This class is used to perform operations related to Assets. The following are th
 | `agilityFolderPath` | `string` | Path of the folder in Agility where the file(s) needs to be uploaded.|
 | `guid` | `string` | Current website guid.|
 | `groupingID` | `number` | Path of the folder in Agility where the file(s) needs to be uploaded.|
+
+Returns: A collection of ```Media``` class Object.
+
+### createFolder
+| Parameter | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `originKey` | `string` | The origin key of the requested folder.  |
+| `guid` | `string` | Current website guid.|
 
 Returns: A collection of ```Media``` class Object.
 
@@ -76,6 +84,55 @@ Returns: An object of ```Media``` class with the new location of the file.
 | `guid` | `string` | Current website guid.|
 
 Returns: An object of ```AssetMediaList``` class.
+
+### getGalleryById
+| Parameter | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `guid` | `string` | Current website guid.|
+| `id` | `number` | The ID of the requested gallery.|
+
+Returns: An object of ```assetMediaGrouping``` class.
+
+### getGalleryByName
+| Parameter | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `guid` | `string` | Current website guid.|
+| `galleryName` | `string` | The name of the requested gallery.|
+
+Returns: An object of ```assetMediaGrouping``` class.
+
+### getDefaultContainer
+| Parameter | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `guid` | `string` | Current website guid.|
+
+Returns: An object of ```assetContainer``` class.
+
+### getGalleries
+| Parameter | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `guid` | `string` | Current website guid.|
+| `search` | `string` | String to search a specific gallery item.|
+| `pageSize` | `number` | The pageSize on which the galleries needs to be selected.|
+| `rowIndex` | `number` | The rowIndex value for the resultant record set.|
+
+Returns: An object of ```assetGalleries``` class.
+
+### saveGallery
+| Parameter | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `guid` | `string` | Current website guid.|
+| `gallery` | `assetMediaGrouping` | Object of AssetMediaGrouping class.|
+
+Returns: An object of ```assetMediaGrouping``` class.
+
+### deleteGallery
+| Parameter | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `guid` | `string` | Current website guid.|
+| `id` | `number` | The id of the gallery to be deleted.|
+
+A ```string``` response if the gallery has been deleted.
 
 ### getAssetByID
 | Parameter | Type     | Description                |
