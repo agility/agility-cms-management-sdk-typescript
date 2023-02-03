@@ -11,7 +11,7 @@ export class ContentMethods{
 
     constructor(options: Options){
         this._options = options;
-        this._clientInstance = new ClientInstance();
+        this._clientInstance = new ClientInstance(options);
         this._batchMethods = new BatchMethods(this._options);
     }
 
@@ -50,7 +50,7 @@ export class ContentMethods{
             let batchID = resp.data as number;
             var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID, guid));
             let contentIDs: number[]= [];
-  
+
             batch.items.forEach(element => contentIDs.push(element.itemID));
             return contentIDs;
         } catch(err){
@@ -66,7 +66,7 @@ export class ContentMethods{
             let batchID = resp.data as number;
             var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID, guid));
             let contentIDs: number[]= [];
-  
+
             batch.items.forEach(element => contentIDs.push(element.itemID));
             return contentIDs;
         } catch(err){
@@ -82,7 +82,7 @@ export class ContentMethods{
             let batchID = resp.data as number;
             var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID, guid));
             let contentIDs: number[]= [];
-  
+
             batch.items.forEach(element => contentIDs.push(element.itemID));
             return contentIDs;
         } catch(err){
@@ -98,7 +98,7 @@ export class ContentMethods{
             let batchID = resp.data as number;
             var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID, guid));
             let contentIDs: number[]= [];
-  
+
             batch.items.forEach(element => contentIDs.push(element.itemID));
             return contentIDs;
         } catch(err){
@@ -114,7 +114,7 @@ export class ContentMethods{
             let batchID = resp.data as number;
             var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID, guid));
             let contentIDs: number[]= [];
-  
+
             batch.items.forEach(element => contentIDs.push(element.itemID));
             return contentIDs;
         } catch(err){
@@ -130,7 +130,7 @@ export class ContentMethods{
             let batchID = resp.data as number;
             var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID, guid));
             let contentIDs: number[]= [];
-  
+
             batch.items.forEach(element => contentIDs.push(element.itemID));
             return contentIDs;
         } catch(err){
@@ -142,11 +142,11 @@ export class ContentMethods{
         try{
             let apiPath = `${locale}/item/multi`;
             const resp = await this._clientInstance.executePost(apiPath, guid, this._options.token, contentItems);
-              
+
             let batchID = resp.data as number;
             var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID, guid));
             let contentIDs: number[]= [];
-  
+
             batch.items.forEach(element => contentIDs.push(element.itemID));
             return contentIDs;
         } catch(err){
@@ -154,7 +154,7 @@ export class ContentMethods{
         }
     }
 
-    async getContentItems(referenceName: string, guid: string, locale: string, filter: string = '', fields: string = null, 
+    async getContentItems(referenceName: string, guid: string, locale: string, filter: string = '', fields: string = null,
         sortDirection: string = null, sortField: string = null,
         take: number = 50, skip: number = 0){
             try{

@@ -12,7 +12,7 @@
 ### Prerequisites
 1. Clone the repository agility-cms-management-sdk-typescript.
 2. Import the index file to make use of the Options class.
-3. Create an object of the Options class to provide values of - 
+3. Create an object of the Options class to provide values of -
 	- token -> Bearer token to authenticate a Rest Request to perform an operation.
 4. Create an object of Method class(es), which can be used to create and perform operations. Following is the description of Classes and their respective methods -
 
@@ -39,7 +39,7 @@ var contentItem = await apiClient.contentMethods.getContentItem(22,guid, locale)
 console.log(JSON.stringify(contentItem));
 ```
 ## Class AssetMethods
-This class is used to perform operations related to Assets. The following are the methods: - 
+This class is used to perform operations related to Assets. The following are the methods: -
 
 ### upload
 | Parameter | Type     | Description                |
@@ -151,7 +151,7 @@ Returns: An object of ```Media``` class with the information of the asset.
 Returns: An object of ```Media``` class with the information of the asset.
 
 ## Class BatchMethods
-This class is used to perform operations related to Batches. The following are the methods: - 
+This class is used to perform operations related to Batches. The following are the methods: -
 
 ### getBatch
 | Parameter | Type     | Description                |
@@ -162,7 +162,7 @@ This class is used to perform operations related to Batches. The following are t
 Returns: A object of ```Batch``` class.
 
 ## Class ContainerMethods
-This class is used to perform operations related to Containers. The following are the methods: - 
+This class is used to perform operations related to Containers. The following are the methods: -
 
 ### getContainerByID
 | Parameter | Type     | Description                |
@@ -217,7 +217,7 @@ Returns: An object of ```Container``` class.
 Returns: A ```string``` response if a container has been deleted.
 
 ## Class ContentMethods
-This class is used to perform operations related to Content. The following are the methods: - 
+This class is used to perform operations related to Content. The following are the methods: -
 
 ### getContentItem
 | Parameter | Type     | Description                |
@@ -322,7 +322,7 @@ Returns: An array of ```contentID``` of the requested content.
 Returns: An object of ```ContentList``` class of the requested content.
 
 ## Class InstanceUserMethods
-This class is used to perform operations related to User. The following are the methods: - 
+This class is used to perform operations related to User. The following are the methods: -
 
 ### getUsers
 | Parameter | Type     | Description                |
@@ -350,7 +350,7 @@ Returns: An object of the ```InstanceUser``` class.
 Returns: A ```string``` response if a user has been deleted.
 
 ## Class ModelMethods
-This class is used to perform operations related to Models. The following are the methods: - 
+This class is used to perform operations related to Models. The following are the methods: -
 
 ### getContentModel
 | Parameter | Type     | Description                |
@@ -400,7 +400,7 @@ Returns: An object of ```Model``` class.
 Returns: A ```string``` response if a model is deleted.
 
 ## Class PageMethods
-This class is used to perform operations related to Pages. The following are the methods: - 
+This class is used to perform operations related to Pages. The following are the methods: -
 
 ### getSitemap
 | Parameter | Type     | Description                |
@@ -494,7 +494,7 @@ Returns: An array of ```pageID``` of the requested page.
 
 - `npm run clean`
 - `npm run prepare`
-- `npm run build` 
+- `npm run build`
 
 ## How It Works
 
