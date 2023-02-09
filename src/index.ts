@@ -16,4 +16,8 @@ export * from "./models/assetContainer";
 export * from "./models/assetGalleries";
 export * from "./models/assetMediaGrouping";
 export * from "./models/assetMediaGroupingMetaData";
+export * from "./models/contentSectionDefaultModule";
+export * from "./models/contentSectionDefinition";
+export * from "./models/sharedModule";
+export * from "./models/pageModel";
 export * from "./apiClient";
