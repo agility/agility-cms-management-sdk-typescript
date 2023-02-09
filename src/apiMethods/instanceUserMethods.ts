@@ -11,7 +11,7 @@ export class InstanceUserMethods{
 
     constructor(options: Options){
         this._options = options;
-        this._clientInstance = new ClientInstance();
+        this._clientInstance = new ClientInstance(this._options);
     }
 
     async getUsers(guid: string){

@@ -11,7 +11,7 @@ export class ContentMethods{
 
     constructor(options: Options){
         this._options = options;
-        this._clientInstance = new ClientInstance(options);
+        this._clientInstance = new ClientInstance(this._options);
         this._batchMethods = new BatchMethods(this._options);
     }
 

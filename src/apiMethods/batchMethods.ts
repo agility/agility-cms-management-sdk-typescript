@@ -10,7 +10,7 @@ export class BatchMethods{
 
     constructor(options: Options){
         this._options = options;
-        this._clientInstance = new ClientInstance();
+        this._clientInstance = new ClientInstance(this._options);
     }
 
     async getBatch(batchID: number, guid: string){

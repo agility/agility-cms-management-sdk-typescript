@@ -4,6 +4,7 @@ import { PageItem } from "../models/pageItem";
 import { Sitemap } from "../models/sitemap";
 import { BatchMethods } from "./batchMethods";
 import { Exception } from "../models/exception";
+import { PageModel } from "../models/pageModel";
 
 export class PageMethods{
     _options!: Options;
@@ -12,7 +13,7 @@ export class PageMethods{
 
     constructor(options: Options){
         this._options = options;
-        this._clientInstance = new ClientInstance();
+        this._clientInstance = new ClientInstance(this._options);
         this._batchMethods = new BatchMethods(this._options);
     }
 
@@ -24,6 +25,62 @@ export class PageMethods{
             return resp.data as Sitemap[];
         } catch(err){
             throw new Exception(`Unable to retreive sitemap.`, err);
+        }
+    }
+
+    async getPageTemplates(guid: string, locale: string, includeModuleZones: boolean, searchFilter: string = null){
+        try{
+            let apiPath = `${locale}/page/templates?includeModuleZones=${includeModuleZones}&searchFilter=${searchFilter}`;
+            const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
+
+            return resp.data as PageModel[];
+        } catch(err){
+            throw new Exception(`Unable to retreive Page Templates.`, err);
+        }
+    }
+
+    async getPageTemplate(guid: string, locale: string, pageTemplateId: number){
+        try{
+            let apiPath = `${locale}/page/template/${pageTemplateId}`;
+            const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
+
+            return resp.data as PageModel;
+        } catch(err){
+            throw new Exception(`Unable to retreive Page Template.`, err);
+        }
+    }
+
+    async getPageTemplateName(guid: string, locale: string, templateName: string){
+        try{
+            let apiPath = `${locale}/page/template/${templateName}`;
+            const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
+
+            return resp.data as PageModel;
+        } catch(err){
+            throw new Exception(`Unable to retreive Page Template.`, err);
+        }
+    }
+
+    async deletePageTemplate(guid: string, locale: string, pageTemplateId: number){
+        try{
+            let apiPath = `${locale}/page/template?pageTemplateId=${pageTemplateId}`;
+
+            const resp = await this._clientInstance.executeDelete(apiPath, guid, this._options.token);
+
+            return resp.data as string;
+        } catch(err){
+            throw new Exception(`Unable to delete Page Template.`, err);
+        }
+    }
+
+    async savePageTemplate(guid: string, locale: string, pageModel: PageModel){
+        try{
+            let apiPath = `${locale}/page/template`;
+            const resp = await this._clientInstance.executePost(apiPath, guid, this._options.token, pageModel);
+
+            return resp.data as PageModel;
+        } catch(err){
+            throw new Exception(`Unable to save Page Template.`, err);
         }
     }
 
