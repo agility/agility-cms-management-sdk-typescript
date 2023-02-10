@@ -12,7 +12,7 @@ export class AssetMethods{
 
     constructor(options: Options){
         this._options = options;
-        this._clientInstance = new ClientInstance();
+        this._clientInstance = new ClientInstance(this._options);
     }
 
     async deleteFile(mediaID: number, guid: string){
