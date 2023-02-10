@@ -10,7 +10,7 @@ export class ContainerMethods{
 
     constructor(options: Options){
         this._options = options;
-        this._clientInstance = new ClientInstance();
+        this._clientInstance = new ClientInstance(this._options);
     }
 
     async getContainerByID(id: number, guid: string){
