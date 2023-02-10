@@ -30,6 +30,7 @@ export class PageMethods{
 
     async getPageTemplates(guid: string, locale: string, includeModuleZones: boolean, searchFilter: string = null){
         try{
+            if(!searchFilter) searchFilter = '';
             let apiPath = `${locale}/page/templates?includeModuleZones=${includeModuleZones}&searchFilter=${searchFilter}`;
             const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
 
@@ -63,7 +64,7 @@ export class PageMethods{
 
     async deletePageTemplate(guid: string, locale: string, pageTemplateId: number){
         try{
-            let apiPath = `${locale}/page/template?pageTemplateId=${pageTemplateId}`;
+            let apiPath = `${locale}/page/template/${pageTemplateId}`;
 
             const resp = await this._clientInstance.executeDelete(apiPath, guid, this._options.token);
 
