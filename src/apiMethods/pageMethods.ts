@@ -5,6 +5,7 @@ import { Sitemap } from "../models/sitemap";
 import { BatchMethods } from "./batchMethods";
 import { Exception } from "../models/exception";
 import { PageModel } from "../models/pageModel";
+import { ContentSectionDefinition } from "../models/contentSectionDefinition";
 
 export class PageMethods{
     _options!: Options;
@@ -71,6 +72,17 @@ export class PageMethods{
             return resp.data as string;
         } catch(err){
             throw new Exception(`Unable to delete Page Template.`, err);
+        }
+    }
+
+    async getPageItemTemplates(guid: string, locale: string, id: number){
+        try{
+            let apiPath = `${locale}/page/template/items/${id}`;
+            const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
+
+            return resp.data as ContentSectionDefinition[];
+        } catch(err){
+            throw new Exception(`Unable to retreive Page Template Items.`, err);
         }
     }
 
