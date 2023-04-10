@@ -24,6 +24,17 @@ export class ContainerMethods{
         }
     }
 
+    async getContainersByModel(modelId: number, guid: string){
+        try{
+            let apiPath = `container/model/${modelId}`;
+            const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
+
+            return resp.data as Container[];
+        } catch(err){
+            throw new Exception(`Unable to retreive the containers for id: ${modelId}`, err);
+        }
+    }
+
     async getContainerByReferenceName(referenceName: string, guid: string){
         try{
             let apiPath = `container/${referenceName}`;
