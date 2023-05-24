@@ -136,11 +136,21 @@ export class AssetMethods{
         }
     }
 
-    async upload(formData: FormData, agilityFolderPath: string, guid: string, groupingID: number = -1){
+    /**
+ * Uploads a file to the specified folder path.
+ *
+ * @param {*} formData - FormData object that axios is expecting for the Upload.
+ * @param {string} agilityFolderPath
+ * @param {string} guid
+ * @param {number} [groupingID=-1]
+ * @returns
+ * @memberof AssetMethods
+ */
+    async upload(formData: any, agilityFolderPath: string, guid: string, groupingID: number = -1){
         try{
             let apiPath = `asset/upload?folderPath=${agilityFolderPath}&groupingID=${groupingID}`;
             const resp = await this._clientInstance.executePost(apiPath, guid, this._options.token, formData);
-            
+
             return resp.data as Media[];
         } catch(err){
             throw new Exception(`Unable to upload media.`, err);
