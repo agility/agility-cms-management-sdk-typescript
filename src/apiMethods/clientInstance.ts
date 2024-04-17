@@ -45,7 +45,9 @@ export class ClientInstance {
     getInstance(guid: string): AxiosInstance {
         let baseUrl = this.determineBaseUrl(guid);
         let instance = axios.create({
-            baseURL: `${baseUrl}/api/v1/instance/${guid}`
+            baseURL: `${baseUrl}/api/v1/instance/${guid}`,
+            maxContentLength: Infinity,
+            maxBodyLength: Infinity
         })
         return instance;
     }
