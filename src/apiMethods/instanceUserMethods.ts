@@ -4,6 +4,7 @@ import { InstanceUser } from "../models/instanceUser";
 import { WebsiteUser } from "../models/websiteUser";
 import { InstanceRole } from "../models/instanceRole";
 import { Exception } from "../models/exception";
+import { ServerUser } from "../models/serverUser";
 
 export class InstanceUserMethods{
     _options!: Options;
@@ -44,6 +45,17 @@ export class InstanceUserMethods{
             return resp.data as string;
         } catch(err){
             throw new Exception(`Unable to delete the user for id: ${userId}`, err);
+        }
+    }
+
+    async me(guid: string){
+        try{
+            let apiPath = `users/me`;
+            const resp = await this._clientInstance.executeServerGet(apiPath, guid, this._options.token);
+
+            return resp.data as ServerUser;
+        } catch(err){
+            throw new Exception('Unable to retrieve user information.');
         }
     }
 }
