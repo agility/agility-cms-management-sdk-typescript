@@ -33,26 +33,4 @@ export class ServerUserMethods{
             throw new Exception('Unable to retrieve user information.');
         }
     }
-
-    async getPreference(guid: string, key: string){
-        try{
-            let apiPath = `users/GetPreference?key=${key}&instanceGuid=${guid}`;
-            const resp = await this._clientInstance.executeServerGet(apiPath, guid, this._options.token);
-
-            return resp.data;
-        } catch(err){
-            throw new Exception('Unable to get the user preference.')
-        }
-    }
-
-    async getPreferencesList(guid: string){
-        try{
-            let apiPath = `users/GetPreferencesList?guid=${guid}`;
-            const resp = await this._clientInstance.executeServerGet(apiPath, guid, this._options.token);
-
-            return resp.data;
-        } catch(err){
-            throw new Exception('Unable to get the user preferences list.')
-        }
-    }
 }
