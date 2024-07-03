@@ -3,6 +3,7 @@ import { ClientInstance } from "./clientInstance";
 import { ContentItem, ContentList } from "../models/contentItem";
 import { BatchMethods } from "./batchMethods";
 import { Exception } from "../models/exception";
+import { ContentListFilterModel } from "../models/contentListFilterModel";
 
 export class ContentMethods{
     _options!: Options;
@@ -166,4 +167,16 @@ export class ContentMethods{
                 throw new Exception(`Unable retreive the content details for reference name: ${referenceName}`, err);
             }
         }
+
+        async getContentList(referenceName: string, guid: string, locale: string, take: number = 50, skip: number = 0, showDeleted: boolean = false, 
+            fields: string = '', sortDirection: string = "asc", sortField: string = '', filterObject:ContentListFilterModel = null){
+                try{
+                    let apiPath = `${locale}/list/${referenceName}?fields=${fields}&sortDirection=${sortDirection}&sortField=${sortField}&take=${take}&skip=${skip}`
+                    const resp = await this._clientInstance.executePost(apiPath, guid, this._options.token, filterObject)
+
+                    return resp.data as ContentList;
+                } catch(err){
+                    throw new Exception(`Unable retreive the content details for list with reference name: ${referenceName}`, err);
+                }
+            }
 }
