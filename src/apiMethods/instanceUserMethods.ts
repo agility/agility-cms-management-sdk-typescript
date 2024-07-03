@@ -48,14 +48,4 @@ export class InstanceUserMethods{
         }
     }
 
-    async me(guid: string){
-        try{
-            let apiPath = `users/me`;
-            const resp = await this._clientInstance.executeServerGet(apiPath, guid, this._options.token);
-
-            return resp.data as ServerUser;
-        } catch(err){
-            throw new Exception('Unable to retrieve user information.');
-        }
-    }
 }
