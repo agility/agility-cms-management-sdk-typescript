@@ -6,6 +6,8 @@ import { BatchMethods } from "./batchMethods";
 import { Exception } from "../models/exception";
 import { PageModel } from "../models/pageModel";
 import { ContentSectionDefinition } from "../models/contentSectionDefinition";
+import { PageHistory } from "../models/pageHistory";
+import { ItemComments } from "../models/itemComments";
 
 export class PageMethods{
     _options!: Options;
@@ -217,6 +219,28 @@ export class PageMethods{
               return pageIDs;
         } catch(err){
             throw new Exception(`Unable to create page. ${err}`, err);
+        }
+    }
+
+    async getPageHistory(locale: string, guid: string, pageID: number, take: number = 50, skip: number = 0){
+        try{
+            let apiPath = `${locale}/item/${pageID}/history?take=${take}&skip=${skip}`;
+            const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
+
+            return resp.data as PageHistory;
+        } catch(err){
+            throw new Exception(`Unable to retrieve history for pageID: ${pageID}`)
+        }
+    }
+
+    async getPageComments(locale: string, guid: string, pageID: number, take: number = 50, skip: number = 0 ){
+        try{
+            let apiPath = `${locale}/item/${pageID}/history?take=${take}&skip=${skip}`;
+            const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
+
+            return resp.data as ItemComments;
+        } catch(err){
+            throw new Exception(`Unable to retrieve history for pageID: ${pageID}`)
         }
     }
 }
