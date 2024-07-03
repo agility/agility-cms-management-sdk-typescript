@@ -6,6 +6,7 @@ import { InstanceUserMethods } from "./apiMethods/instanceUserMethods";
 import { ModelMethods } from "./apiMethods/modelMethods";
 import { PageMethods } from "./apiMethods/pageMethods";
 import { Options } from "./models/options";
+import { ServerUserMethods } from "./apiMethods/serverUserMethods";
 
 export class ApiClient {
     _options!: Options;
@@ -16,6 +17,7 @@ export class ApiClient {
     instanceUserMethods!: InstanceUserMethods
     modelMethods!: ModelMethods
     pageMethods!: PageMethods
+    serverUserMethods!: ServerUserMethods
     constructor(options: Options){
         this._options = options;
         this.contentMethods = new ContentMethods(this._options);
@@ -25,6 +27,7 @@ export class ApiClient {
         this.instanceUserMethods = new InstanceUserMethods(this._options);
         this.modelMethods = new ModelMethods(this._options);
         this.pageMethods = new PageMethods(this._options);
+        this.serverUserMethods = new ServerUserMethods(this._options);
     }
 
 }
