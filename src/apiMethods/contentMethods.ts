@@ -6,6 +6,7 @@ import { Exception } from "../models/exception";
 import { ContentListFilterModel } from "../models/contentListFilterModel";
 import { ContentItemHistory } from "../models/contentItemHistory";
 import { ItemComments } from "../models/itemComments";
+import { ListParams } from "../models/listParams";
 
 export class ContentMethods{
     _options!: Options;
@@ -157,11 +158,9 @@ export class ContentMethods{
         }
     }
 
-    async getContentItems(referenceName: string, guid: string, locale: string, filter: string = '', fields: string = null,
-        sortDirection: string = null, sortField: string = null,
-        take: number = 50, skip: number = 0){
+    async getContentItems(referenceName: string, guid: string, locale: string, listParams: ListParams){
             try{
-                let apiPath = `${locale}/list/${referenceName}?filter=${filter}&fields=${fields}&sortDirection=${sortDirection}&sortField=${sortField}&take=${take}&skip=${skip}`;
+                let apiPath = `${locale}/list/${referenceName}?filter=${listParams.filter}&fields=${listParams.fields}&sortDirection=${listParams.sortDirection}&sortField=${listParams.sortField}&take=${listParams.take}&skip=${listParams.skip}`;
                 const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
 
                 return resp.data as ContentList;
@@ -170,10 +169,9 @@ export class ContentMethods{
             }
         }
 
-    async getContentList(referenceName: string, guid: string, locale: string, take: number = 50, skip: number = 0, showDeleted: boolean = false, 
-        fields: string = '', sortDirection: string = "asc", sortField: string = '', filterObject:ContentListFilterModel = null){
+    async getContentList(referenceName: string, guid: string, locale: string, listParams: ListParams, filterObject:ContentListFilterModel = null){
             try{
-                let apiPath = `${locale}/list/${referenceName}?fields=${fields}&sortDirection=${sortDirection}&sortField=${sortField}&take=${take}&skip=${skip}&showDeleted=${showDeleted}`
+                let apiPath = `${locale}/list/${referenceName}?fields=${listParams.fields}&sortDirection=${listParams.sortDirection}&sortField=${listParams.sortField}&take=${listParams.take}&skip=${listParams.skip}&showDeleted=${listParams.showDeleted}`
                 const resp = await this._clientInstance.executePost(apiPath, guid, this._options.token, filterObject)
 
                 return resp.data as ContentList;
