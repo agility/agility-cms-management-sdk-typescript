@@ -18,14 +18,14 @@
 
 ### Making a Request
 ```Javascript
-import * as index from "./index";
+import * as mgmtApi from "./index";
 
 //initialize the Options Class
-let options = new index.Options();
+let options = new mgmtApi.Options();
 
 options.token = "<<Provide Auth Token>>"
 //Initialize the APIClient Class
-let apiClient = new index.ApiClient(options);
+let apiClient = new mgmtApi.ApiClient(options);
 
 let guid = "<<Provide the Guid of the Website>>";
 let locale = "<<Provide the locale of the Website>>"; //Example: en-us
@@ -172,6 +172,14 @@ This class is used to perform operations related to Containers. The following ar
 
 Returns: A object of ```Container``` class.
 
+### getContainersByModel
+| Parameter | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `modelId` | `number` | The model id of the requested container.|
+| `guid` | `string` | Current website guid.|
+
+Returns: A object of ```Container``` class.
+
 ### getContainerByReferenceName
 | Parameter | Type     | Description                |
 | :-------- | :------- | :------------------------- |
@@ -312,14 +320,42 @@ Returns: An array of ```contentID``` of the requested content.
 | `referenceName` | `string` | The reference name of the container for the requested content.|
 | `guid` | `string` | Current website guid.|
 | `locale` | `string` | Current website locale.|
-| `filter` | `string` | The filter condition for the requested content.|
-| `fields` | `string` | The fields mapped to the container.|
-| `sortDirection` | `string` | The direction to sort the result.|
-| `sortField` | `string` | The field on which the sort needs to be performed.|
-| `take` | `number` | The page size for the result.|
-| `skip` | `number` | The record offset for the result.|
+| `listParams` | `ListParams` | The parameters list to apply filter on the content list.|
 
 Returns: An object of ```ContentList``` class of the requested content.
+
+### getContentList
+| Parameter | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `referenceName` | `string` | The reference name of the container for the requested content.|
+| `guid` | `string` | Current website guid.|
+| `locale` | `string` | Current website locale.|
+| `listParams` | `ListParams` | The parameters list to apply filter on the content list.|
+| `filterObject` | `ContentListFilterModel` | To apply filter at the field level.|
+
+Returns: An object of ```ContentList``` class of the requested content.
+
+### getContentHistory
+| Parameter | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `locale` | `string` | Current website locale.|
+| `guid` | `string` | Current website guid.|
+| `contentID` | `number` | The contentID of the requested content.|
+| `take` | `number` | The number of items per record set default value 50.|
+| `skip` | `number` | The skip level on the record set default value 0.|
+
+Returns: An object of ```ContentItemHistory``` class of the requested content history.
+
+### getContentComments
+| Parameter | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `locale` | `string` | Current website locale.|
+| `guid` | `string` | Current website guid.|
+| `contentID` | `number` | The contentID of the requested content.|
+| `take` | `number` | The number of items per record set default value 50.|
+| `skip` | `number` | The skip level on the record set default value 0.|
+
+Returns: An object of ```ItemComments``` class of the requested content comments.
 
 ## Class InstanceUserMethods
 This class is used to perform operations related to User. The following are the methods: -
@@ -409,6 +445,54 @@ This class is used to perform operations related to Pages. The following are the
 | `locale` | `string` | Current website locale.|
 Returns: A collection object of ```Sitemap``` class.
 
+### getPageTemplates
+| Parameter | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `guid` | `string` | Current website guid.|
+| `locale` | `string` | Current website locale.|
+| `includeModuleZones` | `boolean` | To include zones in the result set.|
+| `searchFilter` | `string` | To apply search criteria on the requested page template.|
+Returns: A collection object of ```PageModel``` class.
+
+### getPageTemplate
+| Parameter | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `guid` | `string` | Current website guid.|
+| `locale` | `string` | Current website locale.|
+| `pageTemplateId` | `number` | The pageTemplateId of the requested page template.|
+Returns: An object of ```PageModel``` class.
+
+### getPageTemplateName
+| Parameter | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `guid` | `string` | Current website guid.|
+| `locale` | `string` | Current website locale.|
+| `templateName` | `string` | The templateName of the requested page template.|
+Returns: An object of ```PageModel``` class.
+
+### deletePageTemplate
+| Parameter | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `guid` | `string` | Current website guid.|
+| `locale` | `string` | Current website locale.|
+| `pageTemplateId` | `string` | The pageTemplateId of the requested page template.|
+
+### getPageItemTemplates
+| Parameter | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `guid` | `string` | Current website guid.|
+| `locale` | `string` | Current website locale.|
+| `id` | `number` | The id of the requested page template.|
+Returns: A collection of ```ContentSectionDefinition``` class.
+
+### savePageTemplate
+| Parameter | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `guid` | `string` | Current website guid.|
+| `locale` | `string` | Current website locale.|
+| `pageModel` | `PageModel` | The pageModel object of the requested page template.|
+Returns: An object of ```PageModel``` class.
+
 ### getPage
 | Parameter | Type     | Description                |
 | :-------- | :------- | :------------------------- |
@@ -488,6 +572,80 @@ Returns: An array of ```pageID``` of the requested page.
 | `placeBeforePageItemID` | `number` | The id of the page before the page.|
 
 Returns: An array of ```pageID``` of the requested page.
+
+### getPageHistory
+| Parameter | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `locale` | `string` | Current website locale.|
+| `guid` | `string` | Current website guid.|
+| `pageID` | `number` | The pageID of the requested page.|
+| `take` | `number` | The number of items per record set default value 50.|
+| `skip` | `number` | The skip level on the record set default value 0.|
+
+Returns: An object of ```PageHistory``` class of the requested page history.
+
+### getPageComments
+| Parameter | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `locale` | `string` | Current website locale.|
+| `guid` | `string` | Current website guid.|
+| `pageID` | `number` | The pageID of the requested page.|
+| `take` | `number` | The number of items per record set default value 50.|
+| `skip` | `number` | The skip level on the record set default value 0.|
+
+Returns: An object of ```ItemComments``` class of the requested page comments.
+
+## Class ServerUserMethods
+This class is used to perform operations related to Server User. The following are the methods: -
+
+### me
+| Parameter | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `guid` | `string` | Current website guid.|
+
+Returns: An object of ```ServerUser``` class of the requested user.
+
+### you
+| Parameter | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `guid` | `string` | Current website guid.|
+| `serverUserID` | `number` | Current website guid.|
+
+Returns: An object of ```ServerUser``` class of the requested user.
+
+## Class WebhookMethods
+This class is used to perform operations related to Webhooks in the agility instance. The following are the methods: -
+
+### webhookList
+| Parameter | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `guid` | `string` | Current website guid.|
+| `take` | `number` | The number of items per record set default value 20.|
+| `skip` | `number` | The skip level on the record set default value 0.|
+
+Returns: A list of webhooks configured in the instance.
+
+### saveWebhook
+| Parameter | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `guid` | `string` | Current website guid.|
+| `webhook` | `Webhook` | An object of Webhook type with the webhook data.|
+
+Returns: An object with the created Webhook.
+
+### getWebhook
+| Parameter | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `guid` | `string` | Current website guid.|
+| `webhookID` | `string` | The webhookID of the requested webhook.|
+
+Returns: An object with the requested Webhook.
+
+### deleteWebhook
+| Parameter | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `guid` | `string` | Current website guid.|
+| `webhookID` | `string` | The webhookID of the requested webhook.|
 
 
 ## Running the SDK Locally
