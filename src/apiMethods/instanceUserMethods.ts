@@ -4,6 +4,7 @@ import { InstanceUser } from "../models/instanceUser";
 import { WebsiteUser } from "../models/websiteUser";
 import { InstanceRole } from "../models/instanceRole";
 import { Exception } from "../models/exception";
+import { ServerUser } from "../models/serverUser";
 
 export class InstanceUserMethods{
     _options!: Options;
@@ -46,4 +47,5 @@ export class InstanceUserMethods{
             throw new Exception(`Unable to delete the user for id: ${userId}`, err);
         }
     }
+
 }

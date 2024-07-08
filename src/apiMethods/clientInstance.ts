@@ -52,6 +52,32 @@ export class ClientInstance {
         return instance;
     }
 
+    getAxiosInstance(guid: string): AxiosInstance{
+        let baseUrl = this.determineBaseUrl(guid);
+        let instance = axios.create({
+            baseURL: `${baseUrl}/api/v1`,
+            maxContentLength: Infinity,
+            maxBodyLength: Infinity
+        })
+        return instance;
+    }
+
+    async executeServerGet(apiPath: string, guid: string, token: string){
+        let instance = this.getAxiosInstance(guid);
+        try {
+            const resp = await instance.get(apiPath, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Cache-Control': 'no-cache'
+                }
+            })
+            return resp;
+        }
+        catch (err) {
+            throw err;
+        }
+    }
+
     async executeGet(apiPath: string, guid: string, token: string) {
         let instance = this.getInstance(guid);
         try {

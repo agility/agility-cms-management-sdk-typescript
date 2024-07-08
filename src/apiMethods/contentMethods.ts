@@ -3,6 +3,10 @@ import { ClientInstance } from "./clientInstance";
 import { ContentItem, ContentList } from "../models/contentItem";
 import { BatchMethods } from "./batchMethods";
 import { Exception } from "../models/exception";
+import { ContentListFilterModel } from "../models/contentListFilterModel";
+import { ContentItemHistory } from "../models/contentItemHistory";
+import { ItemComments } from "../models/itemComments";
+import { ListParams } from "../models/listParams";
 
 export class ContentMethods{
     _options!: Options;
@@ -154,11 +158,9 @@ export class ContentMethods{
         }
     }
 
-    async getContentItems(referenceName: string, guid: string, locale: string, filter: string = '', fields: string = null,
-        sortDirection: string = null, sortField: string = null,
-        take: number = 50, skip: number = 0){
+    async getContentItems(referenceName: string, guid: string, locale: string, listParams: ListParams){
             try{
-                let apiPath = `${locale}/list/${referenceName}?filter=${filter}&fields=${fields}&sortDirection=${sortDirection}&sortField=${sortField}&take=${take}&skip=${skip}`;
+                let apiPath = `${locale}/list/${referenceName}?filter=${listParams.filter}&fields=${listParams.fields}&sortDirection=${listParams.sortDirection}&sortField=${listParams.sortField}&take=${listParams.take}&skip=${listParams.skip}`;
                 const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
 
                 return resp.data as ContentList;
@@ -166,4 +168,37 @@ export class ContentMethods{
                 throw new Exception(`Unable retreive the content details for reference name: ${referenceName}`, err);
             }
         }
+
+    async getContentList(referenceName: string, guid: string, locale: string, listParams: ListParams, filterObject:ContentListFilterModel = null){
+            try{
+                let apiPath = `${locale}/list/${referenceName}?fields=${listParams.fields}&sortDirection=${listParams.sortDirection}&sortField=${listParams.sortField}&take=${listParams.take}&skip=${listParams.skip}&showDeleted=${listParams.showDeleted}`
+                const resp = await this._clientInstance.executePost(apiPath, guid, this._options.token, filterObject)
+
+                return resp.data as ContentList;
+            } catch(err){
+                throw new Exception(`Unable retreive the content details for list with reference name: ${referenceName}`, err);
+            }
+    }
+    
+    async getContentHistory(locale: string, guid: string, contentID: number, take: number = 50, skip: number = 0){
+        try{
+            let apiPath = `${locale}/item/${contentID}/history?take=${take}&skip=${skip}`;
+            const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
+
+            return resp.data as ContentItemHistory;
+        } catch(err){
+            throw new Exception(`Unable to retrieve history for contentID: ${contentID}`)
+        }
+    }
+
+    async getContentComments(locale: string, guid: string, contentID: number, take: number = 50, skip: number = 0){
+        try{
+            let apiPath = `${locale}/item/${contentID}/comments?take=${take}&skip=${skip}`;
+            const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
+
+            return resp.data as ItemComments;
+        } catch(err){
+            throw new Exception(`Unable to retrieve comments for contentID: ${contentID}`)
+        }
+    }
 }
