@@ -167,4 +167,22 @@ export class AssetMethods{
             throw new Exception('Unable to create folder.', err);
         }
     }
+
+    async deleteFolder(originKey: string, guid: string, mediaID: number = 0){
+        try{
+            let apiPath = `asset/folder/delete?originKey=${originKey}&mediaID=${mediaID}`;
+            await this._clientInstance.executePost(apiPath, guid, this._options.token, null);
+        } catch(err){
+            throw new Exception('Unable to delete folder.', err);
+        }
+    }
+
+    async renameFolder(folderName: string, newFolderName: string, guid: string, mediaID: number = 0){
+        try{
+            let apiPath = `asset/folder/rename?folderName=${folderName}&newFolderName=${newFolderName}&mediaID=${mediaID}`;
+            await this._clientInstance.executePost(apiPath, guid, this._options.token, null);
+        } catch(err){
+            throw new Exception('Unable to rename folder.', err);
+        }
+    }
 }
