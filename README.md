@@ -59,6 +59,21 @@ Returns: A collection of ```Media``` class Object.
 
 Returns: A collection of ```Media``` class Object.
 
+### deleteFolder
+| Parameter | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `originKey` | `string` | The origin key of the requested folder.  |
+| `guid` | `string` | Current website guid.|
+| `mediaID` | `number` | The mediaID of the folder that needs to be deleted.|
+
+### renameFolder
+| Parameter | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `folderName` | `string` | The original folder name.  |
+| `newFolderName` | `string` | The new folder name.  |
+| `guid` | `string` | Current website guid.|
+| `mediaID` | `number` | The mediaID of the folder that needs to be renamed.|
+
 ### deleteFile
 | Parameter | Type     | Description                |
 | :-------- | :------- | :------------------------- |
