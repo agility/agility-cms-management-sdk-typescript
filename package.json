@@ -1,6 +1,6 @@
 {
   "name": "@agility/management-sdk",
-  "version": "0.1.18",
+  "version": "0.1.19",
   "description": "Agility CMS Tyescript SDK for Management API.",
   "repository": {
     "type": "git",
@@ -28,7 +28,8 @@
   "contributors": [
     "Joel Varty",
     "Mohit Vashishtha",
-    "Kevin Tran"
+    "Kevin Tran",
+    "Aaron Taylor"
   ],
   "license": "MIT",
   "dependencies": {
