@@ -8,6 +8,7 @@ import { PageMethods } from "./apiMethods/pageMethods";
 import { Options } from "./models/options";
 import { ServerUserMethods } from "./apiMethods/serverUserMethods";
 import { WebhookMethods } from "./apiMethods/webhookMethods";
+import { InstanceMethods } from "./apiMethods/instanceMethods";
 
 export class ApiClient {
     _options!: Options;
@@ -16,6 +17,7 @@ export class ApiClient {
     batchMethods!: BatchMethods
     containerMethods!: ContainerMethods 
     instanceUserMethods!: InstanceUserMethods
+    instanceMethods!: InstanceMethods
     modelMethods!: ModelMethods
     pageMethods!: PageMethods
     serverUserMethods!: ServerUserMethods
@@ -27,6 +29,7 @@ export class ApiClient {
         this.batchMethods = new BatchMethods(this._options);
         this.containerMethods = new ContainerMethods(this._options);
         this.instanceUserMethods = new InstanceUserMethods(this._options);
+        this.instanceMethods = new InstanceMethods(this._options);
         this.modelMethods = new ModelMethods(this._options);
         this.pageMethods = new PageMethods(this._options);
         this.serverUserMethods = new ServerUserMethods(this._options);
