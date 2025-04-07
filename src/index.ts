@@ -5,6 +5,7 @@ export * from "./models/container";
 export * from "./models/contentItem";
 export * from "./models/contentViewColumn";
 export * from "./models/instanceRole";
+export * from "./models/locales";
 export * from "./models/instanceUser";
 export * from "./models/media";
 export * from "./models/model";
