@@ -12,8 +12,82 @@
 ### Prerequisites
 1. Clone the repository agility-cms-management-sdk-typescript.
 2. Import the index file to make use of the Options class.
-3. Create an object of the Options class to provide values of -
-	- token -> Bearer token to authenticate a Rest Request to perform an operation.
+3. You will need valid Agility CMS credentials to authenticate and obtain an access token.
+
+### Authentication
+Before using the SDK, you must authenticate against the Agility Management API to obtain a valid access token. This token is required for all subsequent API requests.
+
+The authentication process uses OAuth 2.0 and requires multiple steps:
+
+1. First, initiate the authorization flow by making a GET request to the authorization endpoint:
+```javascript
+const authUrl = 'https://mgmt.aglty.io/oauth/authorize';
+const params = new URLSearchParams({
+  response_type: 'code',
+  redirect_uri: 'YOUR_REDIRECT_URI',
+  state: 'YOUR_STATE',
+  scope: 'openid profile email offline_access'
+});
+
+// Redirect the user to the authorization URL
+window.location.href = `${authUrl}?${params.toString()}`;
+```
+
+2. After successful authentication, you'll receive an authorization code at your redirect URI. Use this code to obtain an access token:
+```javascript
+const response = await fetch('https://mgmt.aglty.io/oauth/token', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/x-www-form-urlencoded'
+  },
+  body: new URLSearchParams({
+    code: 'YOUR_AUTHORIZATION_CODE'
+  })
+});
+
+const { access_token, refresh_token, expires_in } = await response.json();
+```
+
+3. Use the obtained token to initialize the SDK:
+```javascript
+import * as mgmtApi from "./index";
+
+// Initialize the Options Class with your authentication token
+let options = new mgmtApi.Options();
+options.token = access_token; // Use the token obtained from authentication
+
+// Initialize the APIClient Class
+let apiClient = new mgmtApi.ApiClient(options);
+
+let guid = "<<Provide the Guid of the Website>>";
+let locale = "<<Provide the locale of the Website>>"; // Example: en-us
+
+// Now you can make authenticated requests
+var contentItem = await apiClient.contentMethods.getContentItem(22, guid, locale);
+console.log(JSON.stringify(contentItem));
+```
+
+4. When the access token expires, use the refresh token to obtain a new access token:
+```javascript
+const response = await fetch('https://mgmt.aglty.io/oauth/refresh', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    refresh_token: 'YOUR_REFRESH_TOKEN'
+  })
+});
+
+const { access_token, refresh_token, expires_in } = await response.json();
+```
+
+Note: 
+- The access token has a limited lifetime (typically 1 hour)
+- The refresh token can be used to obtain new access tokens
+- Store refresh tokens securely and never expose them in client-side code
+- Implement proper error handling for authentication failures
+
 4. Create an object of Method class(es), which can be used to create and perform operations. Following is the description of Classes and their respective methods -
 
 ### Making a Request
@@ -662,6 +736,14 @@ Returns: An object with the requested Webhook.
 | `guid` | `string` | Current website guid.|
 | `webhookID` | `string` | The webhookID of the requested webhook.|
 
+## Class Instance
+
+### getLocales
+| Parameter | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `guid` | `string` | Current website guid.|
+
+Returns: An array of locales. ex. ['en-us','fr-ca']
 
 ## Running the SDK Locally
 
