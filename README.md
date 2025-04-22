@@ -736,6 +736,14 @@ Returns: An object with the requested Webhook.
 | `guid` | `string` | Current website guid.|
 | `webhookID` | `string` | The webhookID of the requested webhook.|
 
+## Class Instance
+
+### getLocales
+| Parameter | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `guid` | `string` | Current website guid.|
+
+Returns: An array of locales. ex. ['en-us','fr-ca']
 
 ## Running the SDK Locally
 
