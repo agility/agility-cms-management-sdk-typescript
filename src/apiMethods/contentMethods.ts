@@ -126,16 +126,19 @@ export class ContentMethods{
         }
     }
 
-    async saveContentItem(contentItem: ContentItem, guid: string, locale: string, fullBatchResponse?: boolean){
+    async saveContentItem(contentItem: ContentItem, guid: string, locale: string){
         try{
             let apiPath = `${locale}/item`;
             const resp = await this._clientInstance.executePost(apiPath, guid, this._options.token, contentItem);
 
             let batchID = resp.data as number;
             var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID, guid));
-            if(fullBatchResponse !== undefined && fullBatchResponse){
+            
+            // Aaaron May 1 2025 - if the batch has error data, return the batch not just the -1 contentID
+            if(batch.errorData){
                 return batch;
             }
+
             let contentIDs: number[]= [];
             batch.items.forEach(element => contentIDs.push(element.itemID));
             return contentIDs;
