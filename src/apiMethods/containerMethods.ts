@@ -79,9 +79,9 @@ export class ContainerMethods{
         }
     }
 
-    async saveContainer(container: Container, guid: string, forceReferenceName: boolean = false){
+    async saveContainer(container: Container, guid: string, forceReferenceName?: boolean){
         try{
-            let apiPath = forceReferenceName ? `container?forceReferenceName=${forceReferenceName}` : `container`;
+            let apiPath = `container${forceReferenceName !== undefined ? `?forceReferenceName=${forceReferenceName}` : ''}`;
             const resp = await this._clientInstance.executePost(apiPath, guid, this._options.token, container);
 
             return resp.data as Container;
