@@ -126,14 +126,14 @@ export class ContentMethods{
         }
     }
 
-    async saveContentItem(contentItem: ContentItem, guid: string, locale: string, fullBatchResponse: boolean = false){
+    async saveContentItem(contentItem: ContentItem, guid: string, locale: string, fullBatchResponse?: boolean){
         try{
             let apiPath = `${locale}/item`;
             const resp = await this._clientInstance.executePost(apiPath, guid, this._options.token, contentItem);
 
             let batchID = resp.data as number;
             var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID, guid));
-            if(fullBatchResponse){
+            if(fullBatchResponse !== undefined && fullBatchResponse){
                 return batch;
             }
             let contentIDs: number[]= [];
@@ -144,14 +144,14 @@ export class ContentMethods{
         }
     }
 
-    async saveContentItems(contentItems: ContentItem[], guid: string, locale: string, fullBatchResponse: boolean = false){
+    async saveContentItems(contentItems: ContentItem[], guid: string, locale: string, fullBatchResponse?: boolean){
         try{
             let apiPath = `${locale}/item/multi`;
             const resp = await this._clientInstance.executePost(apiPath, guid, this._options.token, contentItems);
 
             let batchID = resp.data as number;
             var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID, guid));
-            if(fullBatchResponse){
+            if(fullBatchResponse !== undefined && fullBatchResponse){
                 return batch;
             }
             let contentIDs: number[]= [];
