@@ -213,7 +213,14 @@ export class PageMethods{
 
               let batchID = resp.data as number;
               var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID, guid));
+
               let pageIDs: number[]= [];
+
+
+              // Aaaron May 1 2025 - if the batch has error data, return the batch not just the -1 pageID
+              if(batch.errorData){
+                return batch;
+              }
   
               batch.items.forEach(element => pageIDs.push(element.itemID));
               return pageIDs;
