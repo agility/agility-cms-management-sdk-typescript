@@ -133,8 +133,13 @@ export class ContentMethods{
 
             let batchID = resp.data as number;
             var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID, guid));
-            let contentIDs: number[]= [];
+            
+            // Aaaron May 1 2025 - if the batch has error data, return the batch not just the -1 contentID
+            if(batch.errorData){
+                return batch;
+            }
 
+            let contentIDs: number[]= [];
             batch.items.forEach(element => contentIDs.push(element.itemID));
             return contentIDs;
         } catch(err){
@@ -149,6 +154,12 @@ export class ContentMethods{
 
             let batchID = resp.data as number;
             var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID, guid));
+            
+            // Aaaron May 1 2025 - if the batch has error data, return the batch not just the -1 contentID
+            if(batch.errorData){
+                return batch;
+            }
+            
             let contentIDs: number[]= [];
 
             batch.items.forEach(element => contentIDs.push(element.itemID));
