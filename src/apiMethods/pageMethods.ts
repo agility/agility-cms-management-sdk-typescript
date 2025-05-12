@@ -1,13 +1,13 @@
-import { Options } from "../models/options";
+import { Options } from "../types/options";
 import { ClientInstance } from "./clientInstance";
-import { PageItem } from "../models/pageItem";
-import { Sitemap } from "../models/sitemap";
+import { PageItem } from "../types/pageItem";
+import { Sitemap } from "../types/sitemap";
 import { BatchMethods } from "./batchMethods";
-import { Exception } from "../models/exception";
-import { PageModel } from "../models/pageModel";
-import { ContentSectionDefinition } from "../models/contentSectionDefinition";
-import { PageHistory } from "../models/pageHistory";
-import { ItemComments } from "../models/itemComments";
+import { Exception } from "../errors/exception";
+import { PageModel } from "../types/pageModel";
+import { ContentSectionDefinition } from "../types/contentSectionDefinition";
+import { PageHistory } from "../types/pageHistory";
+import { ItemComments } from "../types/itemComments";
 
 export class PageMethods{
     _options!: Options;
@@ -25,7 +25,7 @@ export class PageMethods{
             let apiPath = `${locale}/sitemap`;
             const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
 
-            return resp.data as Sitemap[];
+            return resp as Sitemap[];
         } catch(err: any){
             throw new Exception(`Unable to retreive sitemap.`, err as Error);
         }
@@ -37,7 +37,7 @@ export class PageMethods{
             let apiPath = `${locale}/page/templates?includeModuleZones=${includeModuleZones}&searchFilter=${searchFilter}`;
             const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
 
-            return resp.data as PageModel[];
+            return resp as PageModel[];
         } catch(err: any){
             throw new Exception(`Unable to retreive Page Templates.`, err as Error);
         }
@@ -48,7 +48,7 @@ export class PageMethods{
             let apiPath = `${locale}/page/template/${pageTemplateId}`;
             const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
 
-            return resp.data as PageModel;
+            return resp as PageModel;
         } catch(err: any){
             throw new Exception(`Unable to retreive Page Template.`, err as Error);
         }
@@ -59,7 +59,7 @@ export class PageMethods{
             let apiPath = `${locale}/page/template/${templateName}`;
             const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
 
-            return resp.data as PageModel;
+            return resp as PageModel;
         } catch(err: any){
             throw new Exception(`Unable to retreive Page Template.`, err as Error);
         }
@@ -71,7 +71,7 @@ export class PageMethods{
 
             const resp = await this._clientInstance.executeDelete(apiPath, guid, this._options.token);
 
-            return resp.data as string;
+            return await resp.text() as string;
         } catch(err: any){
             throw new Exception(`Unable to delete Page Template.`, err as Error);
         }
@@ -117,10 +117,7 @@ export class PageMethods{
 
             let batchID = resp.data as number;
             var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID, guid));
-            let pageIDs: number[]= [];
-  
-            batch.items.forEach(element => pageIDs.push(element.itemID));
-            return pageIDs;
+            return batch;
         } catch(err: any){
             throw new Exception(`Unable to publish the page for id: ${pageID}`, err as Error);
         }
@@ -133,10 +130,7 @@ export class PageMethods{
 
             let batchID = resp.data as number;
             var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID, guid));
-            let pageIDs: number[]= [];
-  
-            batch.items.forEach(element => pageIDs.push(element.itemID));
-            return pageIDs;
+            return batch;
         } catch(err: any){
             throw new Exception(`Unable to un-publish the page for id: ${pageID}`, err as Error);
         }
@@ -149,10 +143,7 @@ export class PageMethods{
 
             let batchID = resp.data as number;
             var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID, guid));
-            let pageIDs: number[]= [];
-  
-            batch.items.forEach(element => pageIDs.push(element.itemID));
-            return pageIDs;
+            return batch;
         } catch(err: any){
             throw new Exception(`Unable to request approval the page for id: ${pageID}`, err as Error);
         }
@@ -165,10 +156,7 @@ export class PageMethods{
 
             let batchID = resp.data as number;
             var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID, guid));
-            let pageIDs: number[]= [];
-  
-            batch.items.forEach(element => pageIDs.push(element.itemID));
-            return pageIDs;
+            return batch;
         } catch(err: any){
             throw new Exception(`Unable to approve the page for id: ${pageID}`, err as Error);
         }
@@ -181,10 +169,7 @@ export class PageMethods{
 
             let batchID = resp.data as number;
             var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID, guid));
-            let pageIDs: number[]= [];
-  
-            batch.items.forEach(element => pageIDs.push(element.itemID));
-            return pageIDs;
+            return batch;
         } catch(err: any){
             throw new Exception(`Unable to decline the page for id: ${pageID}`, err as Error);
         }
@@ -195,12 +180,11 @@ export class PageMethods{
             let apiPath = `${locale}/page/${pageID}?comments=${comments}`;
             const resp = await this._clientInstance.executeDelete(apiPath, guid, this._options.token);
 
-              let batchID = resp.data as number;
+              const batchIDStr = await resp.text();
+              let batchID = parseInt(batchIDStr, 10);
+
               var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID, guid));
-              let pageIDs: number[]= [];
-  
-              batch.items.forEach(element => pageIDs.push(element.itemID));
-              return pageIDs;
+              return batch;
         } catch(err: any){
             throw new Exception(`Unable to delete the page for id: ${pageID}`, err as Error);
         }
@@ -214,14 +198,7 @@ export class PageMethods{
               let batchID = resp.data as number;
               var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID, guid));
              
-              // Aaaron May 1 2025 - if the batch has error data, return the batch not just the -1 pageID
-              if(batch.errorData){
-                return batch;
-              }
-
-              let pageIDs: number[]= [];  
-              batch.items.forEach(element => pageIDs.push(element.itemID));
-              return pageIDs;
+              return batch;
         } catch(err: any){
             throw new Exception(`Unable to create page. ${err}`, err as Error);
         }

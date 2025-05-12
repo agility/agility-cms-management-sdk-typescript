@@ -1,8 +1,8 @@
-import { Options } from "../models/options";
+import { Options } from "../types/options";
 import { ClientInstance } from "./clientInstance";
-import { Container } from "../models/container";
-import { Notification } from "../models/notification";
-import { Exception } from "../models/exception";
+import { Container } from "../types/container";
+import { Notification } from "../types/notification";
+import { Exception } from "../errors/exception";
 
 export class ContainerMethods{
     _options!: Options;
@@ -18,7 +18,7 @@ export class ContainerMethods{
             let apiPath = `container/${id}`;
             const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
 
-            return resp.data as Container;
+            return resp as Container;
         } catch(err: any){
             throw new Exception(`Unable to retreive the contianer for id: ${id}`, err as Error);
         }
@@ -29,7 +29,7 @@ export class ContainerMethods{
             let apiPath = `container/model/${modelId}`;
             const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
 
-            return resp.data as Container[];
+            return resp as Container[];
         } catch(err: any){
             throw new Exception(`Unable to retreive the containers for id: ${modelId}`, err as Error);
         }
@@ -40,7 +40,7 @@ export class ContainerMethods{
             let apiPath = `container/${referenceName}`;
             const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
 
-            return resp.data as Container;
+            return resp as Container;
         } catch(err: any){
             throw new Exception(`Unable to retreive the contianer for referenceName: ${referenceName}`, err as Error);
         }
@@ -51,7 +51,7 @@ export class ContainerMethods{
             let apiPath = `container/${id}/security`;
             const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
 
-            return resp.data as Container;
+            return resp as Container;
         } catch(err: any){
             throw new Exception(`Unable to retreive the contianer for id: ${id}`, err as Error);
         }
@@ -62,7 +62,7 @@ export class ContainerMethods{
             let apiPath = `container/list`;
             const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
 
-            return resp.data as Container[];
+            return resp as Container[];
         } catch(err: any){
             throw new Exception(`Unable to retreive the contianer list`, err as Error);
         }
@@ -73,7 +73,7 @@ export class ContainerMethods{
             let apiPath = `container/${id}/notifications`;
             const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
 
-            return resp.data as Notification[];
+            return resp as Notification[];
         } catch(err: any){
             throw new Exception(`Unable to retreive the notifications for contianer id: ${id}`, err as Error);
         }
@@ -84,7 +84,7 @@ export class ContainerMethods{
             let apiPath = `container${forceReferenceName ? '?forceReferenceName=true' : ''}`;
             const resp = await this._clientInstance.executePost(apiPath, guid, this._options.token, container);
 
-            return resp.data as Container;
+            return resp as Container;
         } catch(err: any){
             throw new Exception(`Unable to save the contianer`, err as Error);
         }
@@ -95,7 +95,7 @@ export class ContainerMethods{
             let apiPath = `container/${id}`;
             const resp = await this._clientInstance.executeDelete(apiPath, guid, this._options.token);
 
-            return resp.data as string;
+            return await resp.text() as string;
         } catch(err: any){
             throw new Exception(`Unable to delete the contianer for id: ${id}`, err as Error);
         }

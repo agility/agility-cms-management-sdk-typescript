@@ -1,4 +1,4 @@
-import { Options } from '../models/options';
+import { Options } from '../types/options';
 
 export const getTestOptions = (): Options => {
   return {

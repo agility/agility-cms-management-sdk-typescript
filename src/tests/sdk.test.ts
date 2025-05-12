@@ -1,5 +1,5 @@
 import { ApiClient } from '../apiClient';
-import { Options } from '../models/options';
+import { Options } from '../types/options';
 
 describe('SDK', () => {
   let sdk: ApiClient;

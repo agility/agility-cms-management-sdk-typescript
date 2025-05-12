@@ -1,7 +1,7 @@
-import { Options } from "../models/options";
+import { Options } from "../types/options";
 import { ClientInstance } from "./clientInstance";
-import { Model } from "../models/model";
-import { Exception } from "../models/exception";
+import { Model } from "../types/model";
+import { Exception } from "../errors/exception";
 
 export class ModelMethods{
     _options!: Options;
@@ -19,7 +19,8 @@ export class ModelMethods{
 
             return resp.data as Model;
         } catch(err){
-            throw new Exception(`Unable to retreive model for id: ${id}.`, err);
+            const innerError = err instanceof Error ? err : undefined;
+            throw new Exception(`Unable to retreive model for id: ${id}.`, innerError);
         }
     }
 
@@ -30,7 +31,8 @@ export class ModelMethods{
 
             return resp.data as Model;
         } catch(err){
-            throw new Exception(`Unable to retreive model for referenceName: ${referenceName}.`, err);
+            const innerError = err instanceof Error ? err : undefined;
+            throw new Exception(`Unable to retreive model for referenceName: ${referenceName}.`, innerError);
         }
     }
 
@@ -41,7 +43,8 @@ export class ModelMethods{
 
             return resp.data as Model[];
         } catch(err){
-            throw new Exception(`Unable to retreive content modules.`, err);
+            const innerError = err instanceof Error ? err : undefined;
+            throw new Exception(`Unable to retreive content modules.`, innerError);
         }
     }
 
@@ -52,7 +55,8 @@ export class ModelMethods{
 
             return resp.data as Model[];
         } catch(err){
-            throw new Exception(`Unable to retreive page modules.`, err);
+            const innerError = err instanceof Error ? err : undefined;
+            throw new Exception(`Unable to retreive page modules.`, innerError);
         }
     }
 
@@ -63,7 +67,8 @@ export class ModelMethods{
 
             return resp.data as Model;
         } catch(err){
-            throw new Exception(`Unable to save the model.`, err);
+            const innerError = err instanceof Error ? err : undefined;
+            throw new Exception(`Unable to save the model.`, innerError);
         }
     }
 
@@ -72,9 +77,15 @@ export class ModelMethods{
             let apiPath = `model/${id}`;
             const resp = await this._clientInstance.executeDelete(apiPath, guid, this._options.token);
 
-            return resp.data as string;
+            if (!resp.ok) {
+                const errorText = await resp.text();
+                throw new Error(`API error! status: ${resp.status}, message: ${errorText}`);
+            }
+
+            return await resp.text();
         } catch(err){
-            throw new Exception(`Unable to delete the model`, err);
+            const innerError = err instanceof Error ? err : undefined;
+            throw new Exception(`Unable to delete the model with id: ${id}`, innerError);
         }
     }
 }

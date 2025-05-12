@@ -1,6 +1,6 @@
-import { Exception } from "../models/exception";
-import { Options } from "../models/options";
-import { ServerUser } from "../models/serverUser";
+import { Exception } from "../errors/exception";
+import { Options } from "../types/options";
+import { ServerUser } from "../types/serverUser";
 import { ClientInstance } from "./clientInstance";
 
 export class ServerUserMethods{
