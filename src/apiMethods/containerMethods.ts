@@ -19,8 +19,8 @@ export class ContainerMethods{
             const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
 
             return resp.data as Container;
-        } catch(err){
-            throw new Exception(`Unable to retreive the contianer for id: ${id}`, err);
+        } catch(err: any){
+            throw new Exception(`Unable to retreive the contianer for id: ${id}`, err as Error);
         }
     }
 
@@ -30,8 +30,8 @@ export class ContainerMethods{
             const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
 
             return resp.data as Container[];
-        } catch(err){
-            throw new Exception(`Unable to retreive the containers for id: ${modelId}`, err);
+        } catch(err: any){
+            throw new Exception(`Unable to retreive the containers for id: ${modelId}`, err as Error);
         }
     }
 
@@ -41,8 +41,8 @@ export class ContainerMethods{
             const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
 
             return resp.data as Container;
-        } catch(err){
-            throw new Exception(`Unable to retreive the contianer for referenceName: ${referenceName}`, err);
+        } catch(err: any){
+            throw new Exception(`Unable to retreive the contianer for referenceName: ${referenceName}`, err as Error);
         }
     }
 
@@ -52,8 +52,8 @@ export class ContainerMethods{
             const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
 
             return resp.data as Container;
-        } catch(err){
-            throw new Exception(`Unable to retreive the contianer for id: ${id}`, err);
+        } catch(err: any){
+            throw new Exception(`Unable to retreive the contianer for id: ${id}`, err as Error);
         }
     }
 
@@ -63,8 +63,8 @@ export class ContainerMethods{
             const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
 
             return resp.data as Container[];
-        } catch(err){
-            throw new Exception(`Unable to retreive the contianer list`, err);
+        } catch(err: any){
+            throw new Exception(`Unable to retreive the contianer list`, err as Error);
         }
     }
 
@@ -74,8 +74,8 @@ export class ContainerMethods{
             const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
 
             return resp.data as Notification[];
-        } catch(err){
-            throw new Exception(`Unable to retreive the notifications for contianer id: ${id}`, err);
+        } catch(err: any){
+            throw new Exception(`Unable to retreive the notifications for contianer id: ${id}`, err as Error);
         }
     }
 
@@ -85,8 +85,8 @@ export class ContainerMethods{
             const resp = await this._clientInstance.executePost(apiPath, guid, this._options.token, container);
 
             return resp.data as Container;
-        } catch(err){
-            throw new Exception(`Unable to save the contianer`, err);
+        } catch(err: any){
+            throw new Exception(`Unable to save the contianer`, err as Error);
         }
     }
 
@@ -96,8 +96,8 @@ export class ContainerMethods{
             const resp = await this._clientInstance.executeDelete(apiPath, guid, this._options.token);
 
             return resp.data as string;
-        } catch(err){
-            throw new Exception(`Unable to delete the contianer for id: ${id}`, err);
+        } catch(err: any){
+            throw new Exception(`Unable to delete the contianer for id: ${id}`, err as Error);
         }
     }
 }
