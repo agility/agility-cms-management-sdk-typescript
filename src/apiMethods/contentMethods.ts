@@ -25,12 +25,12 @@ export class ContentMethods{
             const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
 
             return resp.data as ContentItem;
-        } catch(err){
-            throw new Exception(`Unable to retreive the content for id: ${contentID}`, err);
+        } catch(err: any){
+            throw new Exception(`Unable to retreive the content for id: ${contentID}`, err as Error);
         }
     }
 
-     async publishContent (contentID: number, guid: string, locale: string, comments: string = null ){
+     async publishContent (contentID: number, guid: string, locale: string, comments?: string){
         try{
             let apiPath = `${locale}/item/${contentID}/publish?comments=${comments}`;
             const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
@@ -41,12 +41,12 @@ export class ContentMethods{
 
             batch.items.forEach(element => contentIDs.push(element.itemID));
             return contentIDs;
-        } catch(err){
-            throw new Exception(`Unable to publish the content for id: ${contentID}`, err);
+        } catch(err: any){
+            throw new Exception(`Unable to publish the content for id: ${contentID}`, err as Error);
         }
     }
 
-    async unPublishContent (contentID: number, guid: string, locale: string,comments: string = null ){
+    async unPublishContent (contentID: number, guid: string, locale: string, comments?: string){
         try{
             let apiPath = `${locale}/item/${contentID}/unpublish?comments=${comments}`;
             const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
@@ -57,12 +57,12 @@ export class ContentMethods{
 
             batch.items.forEach(element => contentIDs.push(element.itemID));
             return contentIDs;
-        } catch(err){
-            throw new Exception(`Unable to un-publish the content for id: ${contentID}`, err);
+        } catch(err: any){
+            throw new Exception(`Unable to un-publish the content for id: ${contentID}`, err as Error);
         }
     }
 
-    async contentRequestApproval (contentID: number, guid: string, locale: string ,comments: string = null  ){
+    async contentRequestApproval (contentID: number, guid: string, locale: string, comments?: string){
         try{
             let apiPath = `${locale}/item/${contentID}/request-approval?comments=${comments}`;
             const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
@@ -73,12 +73,12 @@ export class ContentMethods{
 
             batch.items.forEach(element => contentIDs.push(element.itemID));
             return contentIDs;
-        } catch(err){
-            throw new Exception(`Unable to request approval the content for id: ${contentID}`, err);
+        } catch(err: any){
+            throw new Exception(`Unable to request approval the content for id: ${contentID}`, err as Error);
         }
     }
 
-    async approveContent (contentID: number, guid: string, locale: string,comments: string = null ){
+    async approveContent (contentID: number, guid: string, locale: string, comments?: string){
         try{
             let apiPath = `${locale}/item/${contentID}/approve?comments=${comments}`;
             const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
@@ -89,12 +89,12 @@ export class ContentMethods{
 
             batch.items.forEach(element => contentIDs.push(element.itemID));
             return contentIDs;
-        } catch(err){
-            throw new Exception(`Unable to approve the content for id: ${contentID}`, err);
+        } catch(err: any){
+            throw new Exception(`Unable to approve the content for id: ${contentID}`, err as Error);
         }
     }
 
-    async declineContent (contentID: number, guid: string, locale: string,comments: string = null ){
+    async declineContent (contentID: number, guid: string, locale: string, comments?: string){
         try{
             let apiPath = `${locale}/item/${contentID}/decline?comments=${comments}`;
             const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
@@ -105,12 +105,12 @@ export class ContentMethods{
 
             batch.items.forEach(element => contentIDs.push(element.itemID));
             return contentIDs;
-        } catch(err){
-            throw new Exception(`Unable to decline the content for id: ${contentID}`, err);
+        } catch(err: any){
+            throw new Exception(`Unable to decline the content for id: ${contentID}`, err as Error);
         }
     }
 
-    async deleteContent (contentID: number, guid: string, locale: string,comments: string = null ){
+    async deleteContent (contentID: number, guid: string, locale: string, comments?: string){
         try{
             let apiPath = `${locale}/item/${contentID}?comments=${comments}`;
             const resp = await this._clientInstance.executeDelete(apiPath, guid, this._options.token);
@@ -121,8 +121,8 @@ export class ContentMethods{
 
             batch.items.forEach(element => contentIDs.push(element.itemID));
             return contentIDs;
-        } catch(err){
-            throw new Exception(`Unable to delete the content for id: ${contentID}`, err);
+        } catch(err: any){
+            throw new Exception(`Unable to delete the content for id: ${contentID}`, err as Error);
         }
     }
 
@@ -142,8 +142,8 @@ export class ContentMethods{
             let contentIDs: number[]= [];
             batch.items.forEach(element => contentIDs.push(element.itemID));
             return contentIDs;
-        } catch(err){
-            throw new Exception('Unable to create content.', err);
+        } catch(err: any){
+            throw new Exception('Unable to create content.', err as Error);
         }
     }
 
@@ -164,8 +164,8 @@ export class ContentMethods{
 
             batch.items.forEach(element => contentIDs.push(element.itemID));
             return contentIDs;
-        } catch(err){
-            throw new Exception('Unable to create contents.', err);
+        } catch(err: any){
+            throw new Exception('Unable to create contents.', err as Error);
         }
     }
 
@@ -175,19 +175,19 @@ export class ContentMethods{
                 const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
 
                 return resp.data as ContentList;
-            } catch(err) {
-                throw new Exception(`Unable retreive the content details for reference name: ${referenceName}`, err);
+            } catch(err: any) {
+                throw new Exception(`Unable retreive the content details for reference name: ${referenceName}`, err as Error);
             }
         }
 
-    async getContentList(referenceName: string, guid: string, locale: string, listParams: ListParams, filterObject:ContentListFilterModel = null){
+    async getContentList(referenceName: string, guid: string, locale: string, listParams: ListParams, filterObject?: ContentListFilterModel){
             try{
                 let apiPath = `${locale}/list/${referenceName}?fields=${listParams.fields}&sortDirection=${listParams.sortDirection}&sortField=${listParams.sortField}&take=${listParams.take}&skip=${listParams.skip}&showDeleted=${listParams.showDeleted}`
                 const resp = await this._clientInstance.executePost(apiPath, guid, this._options.token, filterObject)
 
                 return resp.data as ContentList;
-            } catch(err){
-                throw new Exception(`Unable retreive the content details for list with reference name: ${referenceName}`, err);
+            } catch(err: any){
+                throw new Exception(`Unable retreive the content details for list with reference name: ${referenceName}`, err as Error);
             }
     }
     
@@ -197,8 +197,8 @@ export class ContentMethods{
             const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
 
             return resp.data as ContentItemHistory;
-        } catch(err){
-            throw new Exception(`Unable to retrieve history for contentID: ${contentID}`)
+        } catch(err: any){
+            throw new Exception(`Unable to retrieve history for contentID: ${contentID}`, err as Error)
         }
     }
 
@@ -208,8 +208,8 @@ export class ContentMethods{
             const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
 
             return resp.data as ItemComments;
-        } catch(err){
-            throw new Exception(`Unable to retrieve comments for contentID: ${contentID}`)
+        } catch(err: any){
+            throw new Exception(`Unable to retrieve comments for contentID: ${contentID}`, err as Error)
         }
     }
 }

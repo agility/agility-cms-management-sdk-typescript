@@ -1,0 +1,12 @@
+# Agility CMS Test Environment Variables
+# Copy this file to .env and fill in your actual values.
+
+# Required for API calls
+AGILITY_GUID=
+
+# Required for Authentication via Azure Table Storage Refresh Token Flow
+STORAGE_ACCOUNT=
+STORAGE_ACCOUNT_KEY=
+STORAGE_ACCOUNT_TABLE=
+AGILITY_MANAGEMENT_API_BASE_URL= # e.g., https://mgmt.aglty.io or https://mgmt-dev.aglty.io
+TEST_ENV=prod # Optional: set to 'dev' if using dev refresh token rowKey, otherwise defaults to 'prod' rowKey 
