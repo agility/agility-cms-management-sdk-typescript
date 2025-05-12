@@ -1,10 +1,9 @@
-import { Options } from "../models/options";
+import { Options } from "../types/options";
 import { ClientInstance } from "./clientInstance";
-import { InstanceUser } from "../models/instanceUser";
-import { WebsiteUser } from "../models/websiteUser";
-import { InstanceRole } from "../models/instanceRole";
-import { Exception } from "../models/exception";
-import { ServerUser } from "../models/serverUser";
+import { InstanceUser } from "../types/instanceUser";
+import { WebsiteUser } from "../types/websiteUser";
+import { InstanceRole } from "../types/instanceRole";
+import { Exception } from "../errors/exception";
 
 export class InstanceUserMethods{
     _options!: Options;
@@ -22,18 +21,20 @@ export class InstanceUserMethods{
 
             return resp.data as WebsiteUser;
         } catch(err){
-            throw new Exception(`Unable to retreive users.`, err);
+            const innerError = err instanceof Error ? err : undefined;
+            throw new Exception(`Unable to retreive users.`, innerError);
         }
     }
 
-    async saveUser(emailAddress: string, roles: InstanceRole[], guid: string, firstName: string = null, lastName: string = null){
+    async saveUser(emailAddress: string, roles: InstanceRole[], guid: string, firstName: string | null = null, lastName: string | null = null){
         try{
-            let apiPath = `user/save?emailAddress=${emailAddress}&firstName=${firstName}&lastName=${lastName}`;
+            let apiPath = `user/save?emailAddress=${emailAddress}&firstName=${firstName ?? ''}&lastName=${lastName ?? ''}`;
             const resp = await this._clientInstance.executePost(apiPath, guid, this._options.token, roles);
 
             return resp.data as InstanceUser;
         } catch(err){
-            throw new Exception(`Unable to retreive users.`, err);
+            const innerError = err instanceof Error ? err : undefined;
+            throw new Exception(`Unable to save user.`, innerError);
         }
     }
 
@@ -41,10 +42,14 @@ export class InstanceUserMethods{
         try{
             let apiPath = `user/delete/${userId}`;
             const resp = await this._clientInstance.executeDelete(apiPath, guid, this._options.token);
-
-            return resp.data as string;
+            if (!resp.ok) {
+                const errorText = await resp.text();
+                throw new Error(`API error deleting user! status: ${resp.status}, message: ${errorText}`);
+            }
+            return await resp.text();
         } catch(err){
-            throw new Exception(`Unable to delete the user for id: ${userId}`, err);
+            const innerError = err instanceof Error ? err : undefined;
+            throw new Exception(`Unable to delete the user for id: ${userId}`, innerError);
         }
     }
 

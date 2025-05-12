@@ -1,8 +1,8 @@
-import { Options } from "../models/options";
+import { Options } from "../types/options";
 import { ClientInstance } from "./clientInstance";
-import { Batch } from "../models/batch";
-import { BatchState } from "../enums/batchState.";
-import { Exception } from "../models/exception";
+import { Batch } from "../types/batch";
+import { BatchState } from "../enums/batchState";
+import { Exception } from "../errors/exception";
 
 export class BatchMethods{
     _options!: Options;
@@ -20,24 +20,27 @@ export class BatchMethods{
 
             return resp.data as Batch;
         } catch(err){
-            throw new Exception(`Unable to retreive the batch for id: ${batchID}`, err);
+            const innerError = err instanceof Error ? err : undefined;
+            throw new Exception("Unable to get batch status.", innerError);
         }
     }
 
       async Retry(method: Function) {
-        let retryCount = this._options.retryCount;
-        let duration = this._options.duration;
+        let retryCount = this._options.retryCount ?? 500;
+        let duration = this._options.duration ?? 3000;
         if(retryCount <= 0)
             throw new Error('Number of retries has been exhausted.');
         while(true){
             try{
                 let batch = await method() as Batch;
-                if(batch.batchState === BatchState.Processed){
+                if(batch.batchState === BatchState.Processed ||
+                   batch.batchState === BatchState.Deleted ||
+                   retryCount <= 0){
                     return batch;
                 }
                 else{
                     --retryCount;
-                    if(--retryCount <= 0){
+                    if(retryCount <= 0){
                         throw new Error('Timeout exceeded but operation still in progress. Please check the Batches page in the Agility Content Manager app.');
                     }
                     await this.delay(duration);

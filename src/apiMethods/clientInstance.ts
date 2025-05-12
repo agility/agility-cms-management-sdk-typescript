@@ -1,5 +1,4 @@
-import axios, { AxiosInstance } from 'axios';
-import { Options } from "../models/options";
+import { Options } from "../types/options";
 
 export class ClientInstance {
 
@@ -42,88 +41,125 @@ export class ClientInstance {
         return "https://mgmt.aglty.io";
     }
 
-    getInstance(guid: string): AxiosInstance {
+    private getBaseUrlForInstance(guid: string): string {
         let baseUrl = this.determineBaseUrl(guid);
-        let instance = axios.create({
-            baseURL: `${baseUrl}/api/v1/instance/${guid}`,
-            maxContentLength: Infinity,
-            maxBodyLength: Infinity
-        })
-        return instance;
+        return `${baseUrl}/api/v1/instance/${guid}`;
     }
 
-    getAxiosInstance(guid: string): AxiosInstance{
+    private getBaseUrlForAxios(guid: string): string {
         let baseUrl = this.determineBaseUrl(guid);
-        let instance = axios.create({
-            baseURL: `${baseUrl}/api/v1`,
-            maxContentLength: Infinity,
-            maxBodyLength: Infinity
-        })
-        return instance;
+        return `${baseUrl}/api/v1`;
     }
+
 
     async executeServerGet(apiPath: string, guid: string, token: string){
-        let instance = this.getAxiosInstance(guid);
+        const baseUrl = this.getBaseUrlForAxios(guid);
+        const url = `${baseUrl}${apiPath.startsWith('/') ? '' : '/'}${apiPath}`;
+
         try {
-            const resp = await instance.get(apiPath, {
+            const resp = await fetch(url, {
+                method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${token}`,
-                    'Cache-Control': 'no-cache'
+                    'Cache-Control': 'no-cache',
+                    'Content-Type': 'application/json' // Assuming JSON response, adjust if needed
                 }
-            })
-            return resp;
+            });
+
+            if (!resp.ok) {
+                // Throw an error or handle non-OK responses appropriately
+                const errorData = await resp.text(); // or resp.json() if error is JSON
+                throw new Error(`HTTP error! status: ${resp.status}, message: ${errorData}`);
+            }
+            // Assuming JSON response, adjust based on actual API response type
+             return await resp.json();
         }
         catch (err) {
-            throw err;
+            // Rethrow or handle fetch-specific errors (e.g., network issues)
+             console.error("Fetch error:", err);
+             throw err;
         }
     }
 
     async executeGet(apiPath: string, guid: string, token: string) {
-        let instance = this.getInstance(guid);
+        const baseUrl = this.getBaseUrlForInstance(guid);
+        const url = `${baseUrl}${apiPath.startsWith('/') ? '' : '/'}${apiPath}`;
+
         try {
-            const resp = await instance.get(apiPath, {
+            const resp = await fetch(url, {
+                method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${token}`,
-                    'Cache-Control': 'no-cache'
+                    'Cache-Control': 'no-cache',
+                    'Content-Type': 'application/json'
                 }
-            })
-            return resp;
+            });
+
+            if (!resp.ok) {
+                const errorData = await resp.text();
+                throw new Error(`HTTP error! status: ${resp.status}, message: ${errorData}`);
+            }
+             return await resp.json();
         }
         catch (err) {
-            throw err;
+             console.error("Fetch error:", err);
+             throw err;
         }
 
     }
 
     async executeDelete(apiPath: string, guid: string, token: string) {
-        let instance = this.getInstance(guid);
+        const baseUrl = this.getBaseUrlForInstance(guid);
+        const url = `${baseUrl}${apiPath.startsWith('/') ? '' : '/'}${apiPath}`;
+
         try {
-            const resp = await instance.delete(apiPath, {
+            const resp = await fetch(url, {
+                method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Cache-Control': 'no-cache'
                 }
-            })
-            return resp;
+            });
+
+             if (!resp.ok) {
+                 const errorData = await resp.text();
+                 throw new Error(`HTTP error! status: ${resp.status}, message: ${errorData}`);
+             }
+             // DELETE might return no content or some confirmation
+             // If no content is expected, you might return resp.ok or resp.status
+             // If JSON confirmation is expected: return await resp.json();
+             return resp; // Or process response as needed
         }
         catch (err) {
-            throw err;
+             console.error("Fetch error:", err);
+             throw err;
         }
     }
 
     async executePost(apiPath: string, guid: string, token: string, data: any) {
-        let instance = this.getInstance(guid);
+        const baseUrl = this.getBaseUrlForInstance(guid);
+        const url = `${baseUrl}${apiPath.startsWith('/') ? '' : '/'}${apiPath}`;
+
         try {
-            const resp = await instance.post(apiPath, data, {
+            const resp = await fetch(url, {
+                method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
-                    'Cache-Control': 'no-cache'
-                }
-            })
-            return resp;
+                    'Cache-Control': 'no-cache',
+                    'Content-Type': 'application/json' // Assuming JSON data is sent
+                },
+                body: JSON.stringify(data) // Stringify the data for the body
+            });
+
+            if (!resp.ok) {
+                const errorData = await resp.text();
+                throw new Error(`HTTP error! status: ${resp.status}, message: ${errorData}`);
+            }
+             return await resp.json(); // Assuming JSON response
         }
         catch (err) {
-            throw err;
+             console.error("Fetch error:", err);
+             throw err;
         }
     }
 }

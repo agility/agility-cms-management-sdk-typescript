@@ -5,7 +5,7 @@ import { ContainerMethods } from "./apiMethods/containerMethods";
 import { InstanceUserMethods } from "./apiMethods/instanceUserMethods";
 import { ModelMethods } from "./apiMethods/modelMethods";
 import { PageMethods } from "./apiMethods/pageMethods";
-import { Options } from "./models/options";
+import { Options } from "./types/options";
 import { ServerUserMethods } from "./apiMethods/serverUserMethods";
 import { WebhookMethods } from "./apiMethods/webhookMethods";
 import { InstanceMethods } from "./apiMethods/instanceMethods";

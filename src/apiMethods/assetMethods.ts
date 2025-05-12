@@ -1,10 +1,10 @@
-import { Options } from "../models/options";
+import { Options } from "../types/options";
 import { ClientInstance } from "./clientInstance";
-import { AssetMediaList, Media } from "../models/media";
-import { Exception } from "../models/exception";
-import { assetGalleries } from "../models/assetGalleries";
-import { assetMediaGrouping } from "../models/assetMediaGrouping";
-import { assetContainer } from "../models/assetContainer";
+import { AssetMediaList, Media } from "../types/media";
+import { Exception } from "../errors/exception";
+import { assetGalleries } from "../types/assetGalleries";
+import { assetMediaGrouping } from "../types/assetMediaGrouping";
+import { assetContainer } from "../types/assetContainer";
 
 export class AssetMethods{
     _options!: Options;
@@ -18,10 +18,15 @@ export class AssetMethods{
     async deleteFile(mediaID: number, guid: string){
         try{
           let apiPath = `asset/delete/${mediaID}`;
-          const resp = await this._clientInstance.executeDelete(apiPath, guid, this._options.token);;
-          return resp.data as string;
+          const resp = await this._clientInstance.executeDelete(apiPath, guid, this._options.token);
+          if (!resp.ok) {
+              const errorText = await resp.text();
+              throw new Error(`API error deleting file! status: ${resp.status}, message: ${errorText}`);
+          }
+          return await resp.text(); // Assuming success returns text confirmation
         } catch(err){
-            throw new Exception(`Unable to delete the media for mediaID: ${mediaID}`, err);
+            const innerError = err instanceof Error ? err : undefined;
+            throw new Exception(`Unable to delete the media for mediaID: ${mediaID}`, innerError);
         }
     }
 
@@ -33,7 +38,8 @@ export class AssetMethods{
           const resp = await this._clientInstance.executePost(apiPath, guid, this._options.token, null);
           return resp.data as Media;
         } catch(err){
-            throw new Exception(`Unable to move the media for mediaID: ${mediaID}`, err);
+            const innerError = err instanceof Error ? err : undefined;
+            throw new Exception(`Unable to move the media for mediaID: ${mediaID}`, innerError);
         }
     }
 
@@ -44,18 +50,25 @@ export class AssetMethods{
             const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
             return resp.data as AssetMediaList;
         } catch(err){
-            throw new Exception(`Unable to retrieve assets for the website.`, err);
+            const innerError = err instanceof Error ? err : undefined;
+            throw new Exception(`Unable to retrieve assets for the website.`, innerError);
         }
     }
 
-    async getGalleries(guid: string, search: string = null, pageSize: number = null, rowIndex: number = null){
+    async getGalleries(guid: string, search: string | null = null, pageSize: number | null = null, rowIndex: number | null = null){
         try{
-            let apiPath = `asset/galleries?search=${search}&pageSize=${pageSize}&rowIndex=${rowIndex}`;
+            // Ensure nulls are handled correctly in query string
+            const queryParams = new URLSearchParams();
+            if (search) queryParams.set('search', search);
+            if (pageSize !== null) queryParams.set('pageSize', pageSize.toString());
+            if (rowIndex !== null) queryParams.set('rowIndex', rowIndex.toString());
+            let apiPath = `asset/galleries?${queryParams.toString()}`;
 
             const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
             return resp.data as assetGalleries;
         } catch(err){
-            throw new Exception(`Unable to retrieve galleries for the website.`, err);
+            const innerError = err instanceof Error ? err : undefined;
+            throw new Exception(`Unable to retrieve galleries for the website.`, innerError);
         }
     }
 
@@ -66,7 +79,8 @@ export class AssetMethods{
             const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
             return resp.data as assetMediaGrouping
         } catch(err){
-            throw new Exception(`Unable to retrieve gallery for id ${id}`, err);
+            const innerError = err instanceof Error ? err : undefined;
+            throw new Exception(`Unable to retrieve gallery for id ${id}`, innerError);
         }
     }
 
@@ -77,7 +91,8 @@ export class AssetMethods{
             const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
             return resp.data as assetMediaGrouping
         } catch(err){
-            throw new Exception(`Unable to retrieve gallery for name ${galleryName}`, err);
+            const innerError = err instanceof Error ? err : undefined;
+            throw new Exception(`Unable to retrieve gallery for name ${galleryName}`, innerError);
         }
     }
 
@@ -88,7 +103,8 @@ export class AssetMethods{
             const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
             return resp.data as assetContainer;
         } catch(err){
-            throw new Exception(`Unable to retrieve container for guid ${guid}`, err);
+            const innerError = err instanceof Error ? err : undefined;
+            throw new Exception(`Unable to retrieve container for guid ${guid}`, innerError);
         }
     }
 
@@ -99,7 +115,8 @@ export class AssetMethods{
             const resp = await this._clientInstance.executePost(apiPath, guid, this._options.token, gallery);
             return resp.data as assetMediaGrouping;
         } catch(err){
-            throw new Exception(`Unable to save gallery`, err);
+            const innerError = err instanceof Error ? err : undefined;
+            throw new Exception(`Unable to save gallery`, innerError);
         }
     }
 
@@ -108,9 +125,14 @@ export class AssetMethods{
             let apiPath = `/asset/gallery/${id}`
 
             const resp = await this._clientInstance.executeDelete(apiPath, guid, this._options.token);
-            return resp.data as string;
+            if (!resp.ok) {
+                const errorText = await resp.text();
+                throw new Error(`API error deleting gallery! status: ${resp.status}, message: ${errorText}`);
+            }
+            return await resp.text(); // Assuming success returns text confirmation
         } catch(err){
-            throw new Exception(`Unable to delete gallery for id ${id}`, err);
+            const innerError = err instanceof Error ? err : undefined;
+            throw new Exception(`Unable to delete gallery for id ${id}`, innerError);
         }
     }
 
@@ -121,7 +143,8 @@ export class AssetMethods{
 
           return resp.data as Media;
         } catch(err){
-            throw new Exception(`Unable to retrieve asset for mediaID ${mediaID}`, err);
+            const innerError = err instanceof Error ? err : undefined;
+            throw new Exception(`Unable to retrieve asset for mediaID ${mediaID}`, innerError);
         }
     }
 
@@ -132,7 +155,8 @@ export class AssetMethods{
 
             return resp.data as Media;
         } catch(err){
-            throw new Exception(`Unable to retrieve asset for url ${url}`, err);
+            const innerError = err instanceof Error ? err : undefined;
+            throw new Exception(`Unable to retrieve asset for url ${url}`, innerError);
         }
     }
 
@@ -153,7 +177,8 @@ export class AssetMethods{
 
             return resp.data as Media[];
         } catch(err){
-            throw new Exception(`Unable to upload media.`, err);
+            const innerError = err instanceof Error ? err : undefined;
+            throw new Exception(`Unable to upload media.`, innerError);
         }
     }
 
@@ -164,7 +189,8 @@ export class AssetMethods{
 
             return resp.data as Media;
         } catch(err){
-            throw new Exception('Unable to create folder.', err);
+            const innerError = err instanceof Error ? err : undefined;
+            throw new Exception('Unable to create folder.', innerError);
         }
     }
 
@@ -172,8 +198,10 @@ export class AssetMethods{
         try{
             let apiPath = `asset/folder/delete?originKey=${originKey}&mediaID=${mediaID}`;
             await this._clientInstance.executePost(apiPath, guid, this._options.token, null);
+            // Assuming no return value needed for successful delete via POST
         } catch(err){
-            throw new Exception('Unable to delete folder.', err);
+            const innerError = err instanceof Error ? err : undefined;
+            throw new Exception('Unable to delete folder.', innerError);
         }
     }
 
@@ -181,8 +209,10 @@ export class AssetMethods{
         try{
             let apiPath = `asset/folder/rename?folderName=${folderName}&newFolderName=${newFolderName}&mediaID=${mediaID}`;
             await this._clientInstance.executePost(apiPath, guid, this._options.token, null);
+            // Assuming no return value needed for successful rename via POST
         } catch(err){
-            throw new Exception('Unable to rename folder.', err);
+            const innerError = err instanceof Error ? err : undefined;
+            throw new Exception('Unable to rename folder.', innerError);
         }
     }
 }
