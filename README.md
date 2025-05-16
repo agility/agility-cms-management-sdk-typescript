@@ -69,14 +69,13 @@ console.log(JSON.stringify(contentItem));
 
 4. When the access token expires, use the refresh token to obtain a new access token:
 ```javascript
-const response = await fetch('https://mgmt.aglty.io/oauth/refresh', {
+const refreshToken = 'YOUR_REFRESH_TOKEN';
+
+const response = await fetch(`https://mgmt.aglty.io/oauth/refresh?refresh_token=${encodeURIComponent(refreshToken)}`, {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json'
-  },
-  body: JSON.stringify({
-    refresh_token: 'YOUR_REFRESH_TOKEN'
-  })
+  }
 });
 
 const { access_token, refresh_token, expires_in } = await response.json();
