@@ -124,7 +124,7 @@ describe('ModelMethods', () => {
             wasUnpublished: null
         };
 
-        it.skip('should save a new model and then delete it', async () => {
+        it('should save a new model and then delete it', async () => {
             // Save
             const savedModel = await modelMethods.saveModel(testModelData, guid);
             expect(savedModel).toBeDefined();

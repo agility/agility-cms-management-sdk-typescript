@@ -7,6 +7,7 @@ import { ContentListFilterModel } from "../types/contentListFilterModel";
 import { ContentItemHistory } from "../types/contentItemHistory";
 import { ItemComments } from "../types/itemComments";
 import { ListParams } from "../types/listParams";
+import { Batch } from "../types/batch";
 
 export class ContentMethods{
     _options!: Options;
@@ -19,30 +20,54 @@ export class ContentMethods{
         this._batchMethods = new BatchMethods(this._options);
     }
 
-   async getContentItem(contentID: number, guid: string, locale: string){
+    /**
+     * Retrieves a specific content item by its ID.
+     * @param contentID The numeric ID of the content item.
+     * @param guid The instance GUID.
+     * @param locale The locale code.
+     * @returns A promise resolving to the ContentItem object.
+     */
+    async getContentItem(contentID: number, guid: string, locale: string): Promise<ContentItem> {
         try{
             let apiPath = `${locale}/item/${contentID}`;
             const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
 
+            if (!resp?.contentID) { throw new Error('Invalid API response structure for ContentItem'); }
             return resp as ContentItem;
         } catch(err: any){
-            throw new Exception(`Unable to retreive the content for id: ${contentID}`, err as Error);
+            const error = err instanceof Error ? err : new Error(String(err));
+            throw new Exception(`Unable to retrieve the content for id: ${contentID}`, error);
         }
     }
 
-     async publishContent (contentID: number, guid: string, locale: string, comments?: string){
+    /**
+     * Publishes a content item. This is a batch operation.
+     * @param contentID The ID of the content item to publish.
+     * @param guid The instance GUID.
+     * @param locale The locale code.
+     * @param comments Optional comments for the operation.
+     * @returns A promise resolving to the final Batch object after the operation completes.
+     */
+    async publishContent(contentID: number, guid: string, locale: string, comments?: string): Promise<Batch> {
         try{
-            let apiPath = `${locale}/item/${contentID}/publish?comments=${comments}`;
+            const commentsParam = comments ? `?comments=${encodeURIComponent(comments)}` : '';
+            let apiPath = `${locale}/item/${contentID}/publish${commentsParam}`;
             const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
 
+            if (typeof resp !== 'number') {
+                throw new Error(`Publish content for id ${contentID} did not return a valid batch ID number.`);
+            }
             let batchID = resp as number;
-            var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID, guid));
-            return batch;
+            return await this._batchMethods.Retry(async () => this._batchMethods.getBatch(batchID, guid));
         } catch(err: any){
-            throw new Exception(`Unable to publish the content for id: ${contentID}`, err as Error);
+            const error = err instanceof Error ? err : new Error(String(err));
+            throw new Exception(`Unable to publish the content for id: ${contentID}`, error);
         }
     }
 
+    /**
+     * Un-publishes a content item. This is a batch operation.
+     * @param contentID The ID of the content item to un-publish.
     async unPublishContent (contentID: number, guid: string, locale: string, comments?: string){
         try{
             let apiPath = `${locale}/item/${contentID}/unpublish?comments=${comments}`;
@@ -138,30 +163,56 @@ export class ContentMethods{
         }
     }
 
-    async getContentItems(referenceName: string, guid: string, locale: string, listParams: ListParams){
-            try{
-                let apiPath = `${locale}/list/${referenceName}?filter=${listParams.filter}&fields=${listParams.fields}&sortDirection=${listParams.sortDirection}&sortField=${listParams.sortField}&take=${listParams.take}&skip=${listParams.skip}`;
-                const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
+    /**
+     * Retrieves a list of content items based on filter parameters (using GET).
+     * @param referenceName The reference name of the content list/model.
+     * @param guid The instance GUID.
+     * @param locale The locale code.
+     * @param listParams Parameters for filtering, sorting, pagination.
+     * @returns A promise resolving to a ContentList object.
+     */
+    async getContentItems(referenceName: string, guid: string, locale: string, listParams: ListParams): Promise<ContentList> {
+        try {
+            let apiPath = `${locale}/list/${referenceName}?filter=${listParams.filter}&fields=${listParams.fields}&sortDirection=${listParams.sortDirection}&sortField=${listParams.sortField}&take=${listParams.take}&skip=${listParams.skip}`;
+            const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
 
-                return resp as ContentList;
-            } catch(err: any) {
-                throw new Exception(`Unable retreive the content details for reference name: ${referenceName}`, err as Error);
-            }
+            return resp as ContentList;
+        } catch(err: any) {
+            throw new Exception(`Unable retreive the content details for reference name: ${referenceName}`, err as Error);
         }
+    }
 
-    async getContentList(referenceName: string, guid: string, locale: string, listParams: ListParams, filterObject?: ContentListFilterModel){
-            try{
-                let apiPath = `${locale}/list/${referenceName}?fields=${listParams.fields}&sortDirection=${listParams.sortDirection}&sortField=${listParams.sortField}&take=${listParams.take}&skip=${listParams.skip}&showDeleted=${listParams.showDeleted}`
-                const resp = await this._clientInstance.executePost(apiPath, guid, this._options.token, filterObject)
+    /**
+     * Retrieves a list of content items based on filter parameters (using POST for complex filters).
+     * @param referenceName The reference name of the content list/model.
+     * @param guid The instance GUID.
+     * @param locale The locale code.
+     * @param listParams Parameters for sorting, pagination.
+     * @param filterObject Optional complex filter criteria object.
+     * @returns A promise resolving to a ContentList object.
+     */
+    async getContentList(referenceName: string, guid: string, locale: string, listParams: ListParams, filterObject?: ContentListFilterModel): Promise<ContentList> {
+        try {
+            let apiPath = `${locale}/list/${referenceName}?fields=${listParams.fields}&sortDirection=${listParams.sortDirection}&sortField=${listParams.sortField}&take=${listParams.take}&skip=${listParams.skip}&showDeleted=${listParams.showDeleted}`
+            const resp = await this._clientInstance.executePost(apiPath, guid, this._options.token, filterObject)
 
-                return resp as ContentList;
-            } catch(err: any){
-                throw new Exception(`Unable retreive the content details for list with reference name: ${referenceName}`, err as Error);
-            }
+            return resp as ContentList;
+        } catch(err: any){
+            throw new Exception(`Unable retreive the content details for list with reference name: ${referenceName}`, err as Error);
+        }
     }
     
-    async getContentHistory(locale: string, guid: string, contentID: number, take: number = 50, skip: number = 0){
-        try{
+    /**
+     * Retrieves the history of changes for a specific content item.
+     * @param locale The locale code.
+     * @param guid The instance GUID.
+     * @param contentID The ID of the content item.
+     * @param take Max number of history records (default 50).
+     * @param skip Number of records to skip (default 0).
+     * @returns A promise resolving to a ContentItemHistory object.
+     */
+    async getContentHistory(locale: string, guid: string, contentID: number, take: number = 50, skip: number = 0): Promise<ContentItemHistory> {
+        try {
             let apiPath = `${locale}/item/${contentID}/history?take=${take}&skip=${skip}`;
             const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
 
@@ -171,8 +222,17 @@ export class ContentMethods{
         }
     }
 
-    async getContentComments(locale: string, guid: string, contentID: number, take: number = 50, skip: number = 0){
-        try{
+    /**
+     * Retrieves the comments for a specific content item.
+     * @param locale The locale code.
+     * @param guid The instance GUID.
+     * @param contentID The ID of the content item.
+     * @param take Max number of comments (default 50).
+     * @param skip Number of comments to skip (default 0).
+     * @returns A promise resolving to an ItemComments object.
+     */
+    async getContentComments(locale: string, guid: string, contentID: number, take: number = 50, skip: number = 0): Promise<ItemComments> {
+        try {
             let apiPath = `${locale}/item/${contentID}/comments?take=${take}&skip=${skip}`;
             const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
 

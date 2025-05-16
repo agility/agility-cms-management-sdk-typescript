@@ -4,54 +4,82 @@ import { Batch } from "../types/batch";
 import { BatchState } from "../enums/batchState";
 import { Exception } from "../errors/exception";
 
-export class BatchMethods{
+export class BatchMethods {
     _options!: Options;
     _clientInstance!: ClientInstance;
 
-    constructor(options: Options){
+    constructor(options: Options) {
         this._options = options;
         this._clientInstance = new ClientInstance(this._options);
     }
 
-    async getBatch(batchID: number, guid: string){
-        try{
+    /**
+     * Retrieves the status and details of a specific batch operation.
+     * @param batchID The numeric ID of the batch.
+     * @param guid The instance GUID.
+     * @returns A promise that resolves to the Batch object.
+     * @throws {Exception} Throws an exception if the batch cannot be retrieved.
+     */
+    async getBatch(batchID: number, guid: string): Promise<Batch> {
+        try {
             let apiPath = `batch/${batchID}`;
             const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
+            
+            // Add basic validation if needed, e.g., check if resp.data exists and has expected properties
+            if (!resp?.data?.batchID) { 
+                throw new Error('Invalid API response for batch');
+            }
 
-            return resp.data as Batch;
-        } catch(err){
-            const innerError = err instanceof Error ? err : undefined;
-            throw new Exception("Unable to get batch status.", innerError);
+            // Return the data directly
+            return resp.data;
+        } catch (err) {
+            const error = err instanceof Error ? err : new Error(String(err));
+            throw new Exception("Unable to get batch status.", error);
         }
     }
 
-      async Retry(method: Function) {
+    /**
+     * Internal helper method to retry an operation that returns a Batch status until it's processed/deleted or timeout occurs.
+     * @param method The async function to retry, which should return a Promise<Batch>.
+     * @returns A promise that resolves to the final Batch object after successful completion or retries are exhausted.
+     * @throws Throws an error if retries are exhausted or an unexpected error occurs during the retry loop.
+     */
+    async Retry(method: () => Promise<Batch>): Promise<Batch> {
         let retryCount = this._options.retryCount ?? 500;
         let duration = this._options.duration ?? 3000;
-        if(retryCount <= 0)
-            throw new Error('Number of retries has been exhausted.');
-        while(true){
-            try{
-                let batch = await method() as Batch;
-                if(batch.batchState === BatchState.Processed ||
-                   batch.batchState === BatchState.Deleted ||
-                   retryCount <= 0){
+        if (retryCount <= 0) {
+            throw new Error('Initial retry count must be positive.');
+        }
+        
+        while (true) {
+            try {
+                let batch = await method();
+                
+                if (batch.batchState === BatchState.Processed ||
+                    batch.batchState === BatchState.Deleted) {
                     return batch;
                 }
-                else{
-                    --retryCount;
-                    if(retryCount <= 0){
-                        throw new Error('Timeout exceeded but operation still in progress. Please check the Batches page in the Agility Content Manager app.');
-                    }
-                    await this.delay(duration);
+
+                --retryCount;
+                if (retryCount <= 0) {
+                    throw new Error(`Timeout exceeded after ${this._options.retryCount ?? 500} retries. Operation (BatchID: ${batch.batchID}) still in state: ${batch.batchState}. Please check the Batches page in Agility.`);
                 }
-            } catch(err){
-                throw new Error('Timeout exceeded but operation still in progress. Please check the Batches page in the Agility Content Manager app.');
+                
+                await this.delay(duration);
+
+            } catch (err) {
+                console.error("Error during Retry loop:", err);
+                throw new Error(`Retry mechanism failed. Last error: ${err instanceof Error ? err.message : String(err)}`);
             }
         }
-      }
+    }
 
-     async delay(ms: number) {
-        return new Promise( resolve => setTimeout(resolve, ms) );
+    /**
+     * Internal helper to pause execution.
+     * @param ms Milliseconds to delay.
+     * @returns A promise that resolves after the specified delay.
+     */
+    private async delay(ms: number): Promise<void> {
+        return new Promise(resolve => setTimeout(resolve, ms));
     }
 }

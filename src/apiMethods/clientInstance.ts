@@ -76,8 +76,10 @@ export class ClientInstance {
         }
         catch (err) {
             // Rethrow or handle fetch-specific errors (e.g., network issues)
-             console.error("Fetch error:", err);
-             throw err;
+             const errorMessage = err instanceof Error ? err.message : String(err);
+             console.error("Fetch error in executeServerGet:", errorMessage);
+             // Throw a new, simple error object
+             throw new Error(`Fetch failed: ${errorMessage}`);
         }
     }
 
@@ -102,8 +104,10 @@ export class ClientInstance {
              return await resp.json();
         }
         catch (err) {
-             console.error("Fetch error:", err);
-             throw err;
+             const errorMessage = err instanceof Error ? err.message : String(err);
+             console.error("Fetch error in executeGet:", errorMessage);
+             // Throw a new, simple error object
+             throw new Error(`Fetch failed: ${errorMessage}`);
         }
 
     }
@@ -123,16 +127,33 @@ export class ClientInstance {
 
              if (!resp.ok) {
                  const errorData = await resp.text();
-                 throw new Error(`HTTP error! status: ${resp.status}, message: ${errorData}`);
+                 // Try to parse as JSON for more detailed error, fallback to text
+                 let detail = errorData;
+                 try {
+                    const errJson = JSON.parse(errorData);
+                    detail = errJson.message || errJson.title || JSON.stringify(errJson);
+                 } catch (e) { /* ignore parsing error */ }
+                 throw new Error(`HTTP error! status: ${resp.status}, message: ${detail}`);
              }
-             // DELETE might return no content or some confirmation
-             // If no content is expected, you might return resp.ok or resp.status
-             // If JSON confirmation is expected: return await resp.json();
-             return resp; // Or process response as needed
+             
+             // If response is 204 No Content, body might be empty
+             if (resp.status === 204) {
+                return { message: "Operation successful (No Content)" }; // Or an empty object / status
+             }
+
+             // For other success statuses (e.g. 200 OK, 202 Accepted), try to parse JSON
+             try {
+                return await resp.json(); 
+             } catch (e) {
+                // If JSON parsing fails but status is OK, could be plain text or unexpected
+                return { message: "Operation successful, but response was not JSON." };
+             }
         }
         catch (err) {
-             console.error("Fetch error:", err);
-             throw err;
+             const errorMessage = err instanceof Error ? err.message : String(err);
+             console.error("Fetch error in executeDelete:", errorMessage);
+             // Throw a new, simple error object
+             throw new Error(`Fetch failed: ${errorMessage}`);
         }
     }
 
@@ -141,14 +162,24 @@ export class ClientInstance {
         const url = `${baseUrl}${apiPath.startsWith('/') ? '' : '/'}${apiPath}`;
 
         try {
+            let headers: HeadersInit = {
+                'Authorization': `Bearer ${token}`,
+                'Cache-Control': 'no-cache',
+            };
+            let body: BodyInit;
+
+            if (data instanceof FormData) {
+                // Don't set Content-Type for FormData, fetch/browser will do it with correct boundary
+                body = data;
+            } else {
+                headers['Content-Type'] = 'application/json';
+                body = JSON.stringify(data);
+            }
+
             const resp = await fetch(url, {
                 method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Cache-Control': 'no-cache',
-                    'Content-Type': 'application/json' // Assuming JSON data is sent
-                },
-                body: JSON.stringify(data) // Stringify the data for the body
+                headers: headers,
+                body: body
             });
 
             if (!resp.ok) {
@@ -158,8 +189,10 @@ export class ClientInstance {
              return await resp.json(); // Assuming JSON response
         }
         catch (err) {
-             console.error("Fetch error:", err);
-             throw err;
+             const errorMessage = err instanceof Error ? err.message : String(err);
+             console.error("Fetch error in executePost:", errorMessage);
+             // Throw a new, simple error object
+             throw new Error(`Fetch failed: ${errorMessage}`);
         }
     }
 }

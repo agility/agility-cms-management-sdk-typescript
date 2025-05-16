@@ -20,16 +20,40 @@ describe('ContainerMethods', () => {
         };
         containerMethods = new ContainerMethods(options);
 
-        // Fetch a list of containers to get a valid ID and reference name for testing
+        // Fetch a list of containers and try to find a verifiable one for testing
         try {
             const containers = await containerMethods.getContainerList(guid);
             if (containers && containers.length > 0) {
-                testContainer = containers[0];
+                for (const potentialContainer of containers) {
+                    if (potentialContainer.contentViewID && potentialContainer.referenceName) {
+                        try {
+
+                            console.log('potentialContainer');
+
+                            console.log(potentialContainer.contentViewID);
+                            // Attempt to fetch the container by its ID to verify it's retrievable
+                            const fetchedContainer = await containerMethods.getContainerByID(Number(potentialContainer.contentViewID), guid);
+                            
+                            // If successfully fetched and properties seem valid, use this container
+                            if (fetchedContainer && fetchedContainer.contentViewID === potentialContainer.contentViewID) {
+                                testContainer = fetchedContainer; // Use the container that was successfully fetched
+                                console.log(`Using container ID: ${testContainer.contentViewID}, Name: ${testContainer.referenceName} for tests.`);
+                                break; // Found a suitable container
+                            }
+                        } catch (e) {
+                            // This container couldn't be verified, log and try next
+                            console.warn(`Could not verify container ID: ${potentialContainer.contentViewID} (${potentialContainer.referenceName}). Trying next.`);
+                        }
+                    }
+                }
+                if (!testContainer) {
+                    console.warn("Failed to find a verifiable test container from the list. Some tests may be skipped or fail.");
+                }
             }
         } catch (error) {
             console.error("Failed to fetch initial container list in beforeAll:", error);
         }
-    });
+    }, 30000); // Increased timeout to 30 seconds
 
     describe('getContainerList', () => {
         it('should retrieve a list of containers', async () => {
@@ -95,4 +119,35 @@ describe('ContainerMethods', () => {
 
     // Add describe blocks and tests for other methods like:
     // getContainersByModel, getContainerSecurity, getNotificationList, saveContainer, deleteContainer
+
+    describe('getContainersByModel', () => {
+        it.todo('should retrieve containers for a given model ID');
+        it.todo('should return an empty array if no containers exist for a model ID');
+        it.todo('should throw an error for an invalid model ID');
+    });
+
+    describe('getContainerSecurity', () => {
+        it.todo('should retrieve security information for a container');
+        it.todo('should throw an error if the container ID does not exist');
+    });
+
+    describe('getNotificationList', () => {
+        it.todo('should retrieve the list of notifications for a container');
+        it.todo('should return an empty array if there are no notifications');
+        it.todo('should throw an error if the container ID does not exist');
+    });
+
+    describe('saveContainer', () => {
+        it.todo('should create a new container when one does not exist (forceReferenceName: false)');
+        it.todo('should create a new container when one does not exist (forceReferenceName: true)');
+        it.todo('should update an existing container (forceReferenceName: false)');
+        it.todo('should update an existing container (forceReferenceName: true)');
+        it.todo('should throw an error if the container data is invalid');
+    });
+
+    describe('deleteContainer', () => {
+        it.todo('should delete an existing container');
+        it.todo('should throw an error if the container ID does not exist');
+        it.todo('should confirm the batch operation for deletion');
+    });
 }); 

@@ -23,33 +23,23 @@ describe('BatchMethods', () => {
     });
 
     describe('getBatch', () => {
-        // Note: Finding a valid batchID might require setup steps to create a batch first.
-        it.skip('should retrieve a specific batch by ID', async () => {
-            const batchID = 1; // Replace with a valid, existing batch ID for testing
-            
-            try {
-                const batch = await batchMethods.getBatch(batchID, guid);
-                
-                expect(batch).toBeDefined();
-                expect(batch).toHaveProperty('batchID', batchID);
-                expect(batch).toHaveProperty('batchState');
-                expect(batch).toHaveProperty('items');
-                expect(Array.isArray(batch.items)).toBe(true);
-            } catch (error) {
-                // If the batch ID doesn't exist, the API might throw an error.
-                // Depending on expected behavior, you might adjust the test.
-                console.error(`Test failed for batchID ${batchID}:`, error);
-                // Rethrow or handle as appropriate for your test case
-                throw error; 
-            }
-        });
-
+        
         it('should throw an error for a non-existent batch ID', async () => {
             const nonExistentBatchID = -99999; // Use an ID that is guaranteed not to exist
             
+            // disable for console errors output
+            const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
             await expect(batchMethods.getBatch(nonExistentBatchID, guid))
                 .rejects
                 .toThrow(); // Or expect a specific error type/message if applicable
+            
+            // Restore the original console.error implementation
+            consoleErrorSpy.mockRestore();
         });
+
+        // there's a ton of implicity to other tests like content, pages, etc.
+        // so we'll revisit these tests cases once we have more tests in other methods
+        test.todo('should retrieve a specific batch by ID');
     });
 }); 

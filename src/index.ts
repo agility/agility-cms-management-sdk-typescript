@@ -22,4 +22,5 @@ export * from "./types/contentSectionDefinition";
 export * from "./types/sharedModule";
 export * from "./types/pageModel";
 export * from "./types/listParams";
+export * from "./types/apiResponse";
 export * from "./apiClient";
