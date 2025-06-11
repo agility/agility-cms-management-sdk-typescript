@@ -35,7 +35,14 @@ export class ContainerMethods {
         }
     }
 
-    async getContainerByReferenceName(referenceName: string, guid: string) {
+    /**
+     * Retrieves a container by its reference name.
+     * Returns the container if found, or null if the container does not exist (404 error).
+     * @param referenceName - The reference name of the container.
+     * @param guid - The GUID for authentication.
+     * @returns The container or null if not found.
+     */
+    async getContainerByReferenceName(referenceName: string, guid: string): Promise<Container | null> {
         try {
             let apiPath = `container/${referenceName}`;
             const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
