@@ -42,6 +42,9 @@ export class ContainerMethods {
 
             return resp.data as Container;
         } catch (err) {
+            if (err.response?.status === 404) {
+                return null; // If the container is not found, return null
+            }
             throw new Exception(`Unable to retrieve the container for referenceName: ${referenceName}`, err);
         }
     }
