@@ -4,51 +4,51 @@ import { Batch } from "../models/batch";
 import { BatchState } from "../enums/batchState.";
 import { Exception } from "../models/exception";
 
-export class BatchMethods{
+export class BatchMethods {
     _options!: Options;
     _clientInstance!: ClientInstance;
 
-    constructor(options: Options){
+    constructor(options: Options) {
         this._options = options;
         this._clientInstance = new ClientInstance(this._options);
     }
 
-    async getBatch(batchID: number, guid: string){
-        try{
+    async getBatch(batchID: number, guid: string) {
+        try {
             let apiPath = `batch/${batchID}`;
             const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
 
             return resp.data as Batch;
-        } catch(err){
-            throw new Exception(`Unable to retreive the batch for id: ${batchID}`, err);
+        } catch (err) {
+            throw new Exception(`Unable to retrieve the batch for id: ${batchID}`, err);
         }
     }
 
-      async Retry(method: Function) {
+    async Retry(method: Function) {
         let retryCount = this._options.retryCount;
         let duration = this._options.duration;
-        if(retryCount <= 0)
+        if (retryCount <= 0)
             throw new Error('Number of retries has been exhausted.');
-        while(true){
-            try{
+        while (true) {
+            try {
                 let batch = await method() as Batch;
-                if(batch.batchState === BatchState.Processed){
+                if (batch.batchState === BatchState.Processed) {
                     return batch;
                 }
-                else{
+                else {
                     --retryCount;
-                    if(--retryCount <= 0){
+                    if (--retryCount <= 0) {
                         throw new Error('Timeout exceeded but operation still in progress. Please check the Batches page in the Agility Content Manager app.');
                     }
                     await this.delay(duration);
                 }
-            } catch(err){
+            } catch (err) {
                 throw new Error('Timeout exceeded but operation still in progress. Please check the Batches page in the Agility Content Manager app.');
             }
         }
-      }
+    }
 
-     async delay(ms: number) {
-        return new Promise( resolve => setTimeout(resolve, ms) );
+    async delay(ms: number) {
+        return new Promise(resolve => setTimeout(resolve, ms));
     }
 }
