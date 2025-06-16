@@ -7,6 +7,7 @@ import { ContentListFilterModel } from "../models/contentListFilterModel";
 import { ContentItemHistory } from "../models/contentItemHistory";
 import { ItemComments } from "../models/itemComments";
 import { ListParams } from "../models/listParams";
+import { Batch } from "../models/batch";
 
 export class ContentMethods {
     _options!: Options;
@@ -30,103 +31,91 @@ export class ContentMethods {
         }
     }
 
-    async publishContent(contentID: number, guid: string, locale: string, comments: string = null) {
+    async publishContent(contentID: number, guid: string, locale: string, comments: string = null): Promise<Batch> {
         try {
             let apiPath = `${locale}/item/${contentID}/publish?comments=${comments}`;
             const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
 
             let batchID = resp.data as number;
             var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID, guid));
-            let contentIDs: number[] = [];
-
-            batch.items.forEach(element => contentIDs.push(element.itemID));
-            return contentIDs;
+            
+            return batch;
         } catch (err) {
             throw new Exception(`Unable to publish the content for id: ${contentID}`, err);
         }
     }
 
-    async unPublishContent(contentID: number, guid: string, locale: string, comments: string = null) {
+    async unPublishContent(contentID: number, guid: string, locale: string, comments: string = null): Promise<Batch> {
         try {
             let apiPath = `${locale}/item/${contentID}/unpublish?comments=${comments}`;
             const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
 
             let batchID = resp.data as number;
             var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID, guid));
-            let contentIDs: number[] = [];
-
-            batch.items.forEach(element => contentIDs.push(element.itemID));
-            return contentIDs;
+            
+            return batch;
         } catch (err) {
             throw new Exception(`Unable to un-publish the content for id: ${contentID}`, err);
         }
     }
 
-    async contentRequestApproval(contentID: number, guid: string, locale: string, comments: string = null) {
+    async contentRequestApproval(contentID: number, guid: string, locale: string, comments: string = null): Promise<Batch> {
         try {
             let apiPath = `${locale}/item/${contentID}/request-approval?comments=${comments}`;
             const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
 
             let batchID = resp.data as number;
             var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID, guid));
-            let contentIDs: number[] = [];
-
-            batch.items.forEach(element => contentIDs.push(element.itemID));
-            return contentIDs;
+            
+            return batch;
         } catch (err) {
             throw new Exception(`Unable to request approval the content for id: ${contentID}`, err);
         }
     }
 
-    async approveContent(contentID: number, guid: string, locale: string, comments: string = null) {
+    async approveContent(contentID: number, guid: string, locale: string, comments: string = null): Promise<Batch> {
         try {
             let apiPath = `${locale}/item/${contentID}/approve?comments=${comments}`;
             const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
 
             let batchID = resp.data as number;
             var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID, guid));
-            let contentIDs: number[] = [];
-
-            batch.items.forEach(element => contentIDs.push(element.itemID));
-            return contentIDs;
+            
+            return batch;
         } catch (err) {
             throw new Exception(`Unable to approve the content for id: ${contentID}`, err);
         }
     }
 
-    async declineContent(contentID: number, guid: string, locale: string, comments: string = null) {
+    async declineContent(contentID: number, guid: string, locale: string, comments: string = null): Promise<Batch> {
         try {
             let apiPath = `${locale}/item/${contentID}/decline?comments=${comments}`;
             const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
 
             let batchID = resp.data as number;
             var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID, guid));
-            let contentIDs: number[] = [];
-
-            batch.items.forEach(element => contentIDs.push(element.itemID));
-            return contentIDs;
+            
+            return batch;
         } catch (err) {
             throw new Exception(`Unable to decline the content for id: ${contentID}`, err);
         }
     }
 
-    async deleteContent(contentID: number, guid: string, locale: string, comments: string = null) {
+    async deleteContent(contentID: number, guid: string, locale: string, comments: string = null): Promise<Batch> {
         try {
             let apiPath = `${locale}/item/${contentID}?comments=${comments}`;
             const resp = await this._clientInstance.executeDelete(apiPath, guid, this._options.token);
 
             let batchID = resp.data as number;
             var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID, guid));
-            let contentIDs: number[] = [];
-
-            batch.items.forEach(element => contentIDs.push(element.itemID));
-            return contentIDs;
+            
+            return batch;
         } catch (err) {
             throw new Exception(`Unable to delete the content for id: ${contentID}`, err);
         }
     }
 
-    async saveContentItem(contentItem: ContentItem, guid: string, locale: string) {
+    async saveContentItem(contentItem: ContentItem, guid: string, locale: string): Promise<Batch> {
         try {
             let apiPath = `${locale}/item`;
             const resp = await this._clientInstance.executePost(apiPath, guid, this._options.token, contentItem);
@@ -134,20 +123,13 @@ export class ContentMethods {
             let batchID = resp.data as number;
             var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID, guid));
 
-            // Aaaron May 1 2025 - if the batch has error data, return the batch not just the -1 contentID
-            if (batch.errorData) {
-                return batch;
-            }
-
-            let contentIDs: number[] = [];
-            batch.items.forEach(element => contentIDs.push(element.itemID));
-            return contentIDs;
+            return batch;
         } catch (err) {
             throw new Exception('Unable to create content.', err);
         }
     }
 
-    async saveContentItems(contentItems: ContentItem[], guid: string, locale: string) {
+    async saveContentItems(contentItems: ContentItem[], guid: string, locale: string): Promise<Batch> {
         try {
             let apiPath = `${locale}/item/multi`;
             const resp = await this._clientInstance.executePost(apiPath, guid, this._options.token, contentItems);
@@ -155,15 +137,7 @@ export class ContentMethods {
             let batchID = resp.data as number;
             var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID, guid));
 
-            // Aaaron May 1 2025 - if the batch has error data, return the batch not just the -1 contentID
-            if (batch.errorData) {
-                return batch;
-            }
-
-            let contentIDs: number[] = [];
-
-            batch.items.forEach(element => contentIDs.push(element.itemID));
-            return contentIDs;
+            return batch;
         } catch (err) {
             throw new Exception('Unable to create contents.', err);
         }

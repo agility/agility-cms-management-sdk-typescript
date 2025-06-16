@@ -8,6 +8,7 @@ import { PageModel } from "../models/pageModel";
 import { ContentSectionDefinition } from "../models/contentSectionDefinition";
 import { PageHistory } from "../models/pageHistory";
 import { ItemComments } from "../models/itemComments";
+import { Batch } from "../models/batch";
 
 export class PageMethods {
     _options!: Options;
@@ -110,103 +111,91 @@ export class PageMethods {
         }
     }
 
-    async publishPage(pageID: number, guid: string, locale: string, comments: string = null) {
+    async publishPage(pageID: number, guid: string, locale: string, comments: string = null): Promise<Batch> {
         try {
             let apiPath = `${locale}/page/${pageID}/publish?comments=${comments}`;
             const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
 
             let batchID = resp.data as number;
             var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID, guid));
-            let pageIDs: number[] = [];
-
-            batch.items.forEach(element => pageIDs.push(element.itemID));
-            return pageIDs;
+            
+            return batch;
         } catch (err) {
             throw new Exception(`Unable to publish the page for id: ${pageID}`, err);
         }
     }
 
-    async unPublishPage(pageID: number, guid: string, locale: string, comments: string = null) {
+    async unPublishPage(pageID: number, guid: string, locale: string, comments: string = null): Promise<Batch> {
         try {
             let apiPath = `${locale}/page/${pageID}/unpublish?comments=${comments}`;
             const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
 
             let batchID = resp.data as number;
             var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID, guid));
-            let pageIDs: number[] = [];
-
-            batch.items.forEach(element => pageIDs.push(element.itemID));
-            return pageIDs;
+            
+            return batch;
         } catch (err) {
             throw new Exception(`Unable to un-publish the page for id: ${pageID}`, err);
         }
     }
 
-    async pageRequestApproval(pageID: number, guid: string, locale: string, comments: string = null) {
+    async pageRequestApproval(pageID: number, guid: string, locale: string, comments: string = null): Promise<Batch> {
         try {
             let apiPath = `${locale}/page/${pageID}/request-approval?comments=${comments}`;
             const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
 
             let batchID = resp.data as number;
             var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID, guid));
-            let pageIDs: number[] = [];
-
-            batch.items.forEach(element => pageIDs.push(element.itemID));
-            return pageIDs;
+            
+            return batch;
         } catch (err) {
             throw new Exception(`Unable to request approval the page for id: ${pageID}`, err);
         }
     }
 
-    async approvePage(pageID: number, guid: string, locale: string, comments: string = null) {
+    async approvePage(pageID: number, guid: string, locale: string, comments: string = null): Promise<Batch> {
         try {
             let apiPath = `${locale}/page/${pageID}/approve?comments=${comments}`;
             const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
 
             let batchID = resp.data as number;
             var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID, guid));
-            let pageIDs: number[] = [];
-
-            batch.items.forEach(element => pageIDs.push(element.itemID));
-            return pageIDs;
+            
+            return batch;
         } catch (err) {
             throw new Exception(`Unable to approve the page for id: ${pageID}`, err);
         }
     }
 
-    async declinePage(pageID: number, guid: string, locale: string, comments: string = null) {
+    async declinePage(pageID: number, guid: string, locale: string, comments: string = null): Promise<Batch> {
         try {
             let apiPath = `${locale}/page/${pageID}/decline?comments=${comments}`;
             const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
 
             let batchID = resp.data as number;
             var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID, guid));
-            let pageIDs: number[] = [];
-
-            batch.items.forEach(element => pageIDs.push(element.itemID));
-            return pageIDs;
+            
+            return batch;
         } catch (err) {
             throw new Exception(`Unable to decline the page for id: ${pageID}`, err);
         }
     }
 
-    async deletePage(pageID: number, guid: string, locale: string, comments: string = null) {
+    async deletePage(pageID: number, guid: string, locale: string, comments: string = null): Promise<Batch> {
         try {
             let apiPath = `${locale}/page/${pageID}?comments=${comments}`;
             const resp = await this._clientInstance.executeDelete(apiPath, guid, this._options.token);
 
             let batchID = resp.data as number;
             var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID, guid));
-            let pageIDs: number[] = [];
-
-            batch.items.forEach(element => pageIDs.push(element.itemID));
-            return pageIDs;
+            
+            return batch;
         } catch (err) {
             throw new Exception(`Unable to delete the page for id: ${pageID}`, err);
         }
     }
 
-    async savePage(pageItem: PageItem, guid: string, locale: string, parentPageID: number = -1, placeBeforePageItemID: number = -1) {
+    async savePage(pageItem: PageItem, guid: string, locale: string, parentPageID: number = -1, placeBeforePageItemID: number = -1): Promise<Batch> {
         try {
             let apiPath = `${locale}/page?parentPageID=${parentPageID}&placeBeforePageItemID=${placeBeforePageItemID}`;
             const resp = await this._clientInstance.executePost(apiPath, guid, this._options.token, pageItem);
@@ -214,14 +203,7 @@ export class PageMethods {
             let batchID = resp.data as number;
             var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID, guid));
 
-            // Aaaron May 1 2025 - if the batch has error data, return the batch not just the -1 pageID
-            if (batch.errorData) {
-                return batch;
-            }
-
-            let pageIDs: number[] = [];
-            batch.items.forEach(element => pageIDs.push(element.itemID));
-            return pageIDs;
+            return batch;
         } catch (err) {
             throw new Exception(`Unable to create page. ${err}`, err);
         }
