@@ -133,7 +133,7 @@ export class PageMethods {
         }
     }
 
-    async unPublishPage(pageID: number, guid: string, locale: string, comments: string = null, returnBatchId: boolean = false): Promise<number[] | number> {
+    async unPublishPage(pageID: number, guid: string, locale: string, comments: string = null, returnBatchId: boolean = false): Promise<number[]> {
         try {
             let apiPath = `${locale}/page/${pageID}/unpublish?comments=${comments}`;
             const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
