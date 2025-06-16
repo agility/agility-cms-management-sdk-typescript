@@ -110,12 +110,19 @@ export class PageMethods {
         }
     }
 
-    async publishPage(pageID: number, guid: string, locale: string, comments: string = null) {
+    async publishPage(pageID: number, guid: string, locale: string, comments: string = null, returnBatchId: boolean = false): Promise<number[]> {
         try {
             let apiPath = `${locale}/page/${pageID}/publish?comments=${comments}`;
             const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
 
             let batchID = resp.data as number;
+            
+            // If user wants batchID immediately, return it for custom polling
+            if (returnBatchId) {
+                return [batchID];
+            }
+
+            // Default behavior: wait for completion and return IDs
             var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID, guid));
             let pageIDs: number[] = [];
 
@@ -126,12 +133,19 @@ export class PageMethods {
         }
     }
 
-    async unPublishPage(pageID: number, guid: string, locale: string, comments: string = null) {
+    async unPublishPage(pageID: number, guid: string, locale: string, comments: string = null, returnBatchId: boolean = false): Promise<number[] | number> {
         try {
             let apiPath = `${locale}/page/${pageID}/unpublish?comments=${comments}`;
             const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
 
             let batchID = resp.data as number;
+            
+            // If user wants batchID immediately, return it for custom polling
+            if (returnBatchId) {
+                return batchID;
+            }
+
+            // Default behavior: wait for completion and return IDs
             var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID, guid));
             let pageIDs: number[] = [];
 
@@ -142,12 +156,19 @@ export class PageMethods {
         }
     }
 
-    async pageRequestApproval(pageID: number, guid: string, locale: string, comments: string = null) {
+    async pageRequestApproval(pageID: number, guid: string, locale: string, comments: string = null, returnBatchId: boolean = false): Promise<number[]> {
         try {
             let apiPath = `${locale}/page/${pageID}/request-approval?comments=${comments}`;
             const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
 
             let batchID = resp.data as number;
+            
+            // If user wants batchID immediately, return it for custom polling
+            if (returnBatchId) {
+                return [batchID];
+            }
+
+            // Default behavior: wait for completion and return IDs
             var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID, guid));
             let pageIDs: number[] = [];
 
@@ -158,12 +179,19 @@ export class PageMethods {
         }
     }
 
-    async approvePage(pageID: number, guid: string, locale: string, comments: string = null) {
+    async approvePage(pageID: number, guid: string, locale: string, comments: string = null, returnBatchId: boolean = false): Promise<number[]> {
         try {
             let apiPath = `${locale}/page/${pageID}/approve?comments=${comments}`;
             const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
 
             let batchID = resp.data as number;
+            
+            // If user wants batchID immediately, return it for custom polling
+            if (returnBatchId) {
+                return [batchID];
+            }
+
+            // Default behavior: wait for completion and return IDs
             var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID, guid));
             let pageIDs: number[] = [];
 
@@ -174,12 +202,19 @@ export class PageMethods {
         }
     }
 
-    async declinePage(pageID: number, guid: string, locale: string, comments: string = null) {
+    async declinePage(pageID: number, guid: string, locale: string, comments: string = null, returnBatchId: boolean = false): Promise<number[]> {
         try {
             let apiPath = `${locale}/page/${pageID}/decline?comments=${comments}`;
             const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
 
             let batchID = resp.data as number;
+            
+            // If user wants batchID immediately, return it for custom polling
+            if (returnBatchId) {
+                return [batchID];
+            }
+
+            // Default behavior: wait for completion and return IDs
             var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID, guid));
             let pageIDs: number[] = [];
 
@@ -190,12 +225,19 @@ export class PageMethods {
         }
     }
 
-    async deletePage(pageID: number, guid: string, locale: string, comments: string = null) {
+    async deletePage(pageID: number, guid: string, locale: string, comments: string = null, returnBatchId: boolean = false): Promise<number[]> {
         try {
             let apiPath = `${locale}/page/${pageID}?comments=${comments}`;
             const resp = await this._clientInstance.executeDelete(apiPath, guid, this._options.token);
 
             let batchID = resp.data as number;
+            
+            // If user wants batchID immediately, return it for custom polling
+            if (returnBatchId) {
+                return [batchID];
+            }
+
+            // Default behavior: wait for completion and return IDs
             var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID, guid));
             let pageIDs: number[] = [];
 
@@ -206,19 +248,20 @@ export class PageMethods {
         }
     }
 
-    async savePage(pageItem: PageItem, guid: string, locale: string, parentPageID: number = -1, placeBeforePageItemID: number = -1) {
+    async savePage(pageItem: PageItem, guid: string, locale: string, parentPageID: number = -1, placeBeforePageItemID: number = -1, returnBatchId: boolean = false): Promise<number[]> {
         try {
             let apiPath = `${locale}/page?parentPageID=${parentPageID}&placeBeforePageItemID=${placeBeforePageItemID}`;
             const resp = await this._clientInstance.executePost(apiPath, guid, this._options.token, pageItem);
 
             let batchID = resp.data as number;
-            var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID, guid));
-
-            // Aaaron May 1 2025 - if the batch has error data, return the batch not just the -1 pageID
-            if (batch.errorData) {
-                return batch;
+            
+            // If user wants batchID immediately, return it for custom polling
+            if (returnBatchId) {
+                return [batchID];
             }
 
+            // Default behavior: wait for completion and return IDs
+            var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID, guid));
             let pageIDs: number[] = [];
             batch.items.forEach(element => pageIDs.push(element.itemID));
             return pageIDs;
