@@ -30,12 +30,19 @@ export class ContentMethods {
         }
     }
 
-    async publishContent(contentID: number, guid: string, locale: string, comments: string = null) {
+    async publishContent(contentID: number, guid: string, locale: string, comments: string = null, returnBatchId: boolean = false): Promise<number[]> {
         try {
             let apiPath = `${locale}/item/${contentID}/publish?comments=${comments}`;
             const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
 
             let batchID = resp.data as number;
+            
+            // If user wants batchID immediately, return it for custom polling
+            if (returnBatchId) {
+                return [batchID];
+            }
+
+            // Default behavior: wait for completion and return IDs
             var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID, guid));
             let contentIDs: number[] = [];
 
@@ -46,12 +53,19 @@ export class ContentMethods {
         }
     }
 
-    async unPublishContent(contentID: number, guid: string, locale: string, comments: string = null) {
+    async unPublishContent(contentID: number, guid: string, locale: string, comments: string = null, returnBatchId: boolean = false): Promise<number[]> {
         try {
             let apiPath = `${locale}/item/${contentID}/unpublish?comments=${comments}`;
             const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
 
             let batchID = resp.data as number;
+            
+            // If user wants batchID immediately, return it for custom polling
+            if (returnBatchId) {
+                return [batchID];
+            }
+
+            // Default behavior: wait for completion and return IDs
             var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID, guid));
             let contentIDs: number[] = [];
 
@@ -62,12 +76,19 @@ export class ContentMethods {
         }
     }
 
-    async contentRequestApproval(contentID: number, guid: string, locale: string, comments: string = null) {
+    async contentRequestApproval(contentID: number, guid: string, locale: string, comments: string = null, returnBatchId: boolean = false): Promise<number[]> {
         try {
             let apiPath = `${locale}/item/${contentID}/request-approval?comments=${comments}`;
             const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
 
             let batchID = resp.data as number;
+            
+            // If user wants batchID immediately, return it for custom polling
+            if (returnBatchId) {
+                return [batchID];
+            }
+
+            // Default behavior: wait for completion and return IDs
             var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID, guid));
             let contentIDs: number[] = [];
 
@@ -78,12 +99,19 @@ export class ContentMethods {
         }
     }
 
-    async approveContent(contentID: number, guid: string, locale: string, comments: string = null) {
+    async approveContent(contentID: number, guid: string, locale: string, comments: string = null, returnBatchId: boolean = false): Promise<number[]> {
         try {
             let apiPath = `${locale}/item/${contentID}/approve?comments=${comments}`;
             const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
 
             let batchID = resp.data as number;
+            
+            // If user wants batchID immediately, return it for custom polling
+            if (returnBatchId) {
+                return [batchID];
+            }
+
+            // Default behavior: wait for completion and return IDs
             var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID, guid));
             let contentIDs: number[] = [];
 
@@ -94,12 +122,19 @@ export class ContentMethods {
         }
     }
 
-    async declineContent(contentID: number, guid: string, locale: string, comments: string = null) {
+    async declineContent(contentID: number, guid: string, locale: string, comments: string = null, returnBatchId: boolean = false): Promise<number[]> {
         try {
             let apiPath = `${locale}/item/${contentID}/decline?comments=${comments}`;
             const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
 
             let batchID = resp.data as number;
+            
+            // If user wants batchID immediately, return it for custom polling
+            if (returnBatchId) {
+                return [batchID];
+            }
+
+            // Default behavior: wait for completion and return IDs
             var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID, guid));
             let contentIDs: number[] = [];
 
@@ -110,12 +145,19 @@ export class ContentMethods {
         }
     }
 
-    async deleteContent(contentID: number, guid: string, locale: string, comments: string = null) {
+    async deleteContent(contentID: number, guid: string, locale: string, comments: string = null, returnBatchId: boolean = false): Promise<number[]> {
         try {
             let apiPath = `${locale}/item/${contentID}?comments=${comments}`;
             const resp = await this._clientInstance.executeDelete(apiPath, guid, this._options.token);
 
             let batchID = resp.data as number;
+            
+            // If user wants batchID immediately, return it for custom polling
+            if (returnBatchId) {
+                return [batchID];
+            }
+
+            // Default behavior: wait for completion and return IDs
             var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID, guid));
             let contentIDs: number[] = [];
 
@@ -126,19 +168,20 @@ export class ContentMethods {
         }
     }
 
-    async saveContentItem(contentItem: ContentItem, guid: string, locale: string) {
+    async saveContentItem(contentItem: ContentItem, guid: string, locale: string, returnBatchId: boolean = false): Promise<number[]> {
         try {
             let apiPath = `${locale}/item`;
             const resp = await this._clientInstance.executePost(apiPath, guid, this._options.token, contentItem);
 
             let batchID = resp.data as number;
-            var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID, guid));
-
-            // Aaaron May 1 2025 - if the batch has error data, return the batch not just the -1 contentID
-            if (batch.errorData) {
-                return batch;
+            
+            // If user wants batchID immediately, return it for custom polling
+            if (returnBatchId) {
+                return [batchID];
             }
 
+            // Default behavior: wait for completion and return IDs
+            var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID, guid));
             let contentIDs: number[] = [];
             batch.items.forEach(element => contentIDs.push(element.itemID));
             return contentIDs;
@@ -147,19 +190,20 @@ export class ContentMethods {
         }
     }
 
-    async saveContentItems(contentItems: ContentItem[], guid: string, locale: string) {
+    async saveContentItems(contentItems: ContentItem[], guid: string, locale: string, returnBatchId: boolean = false): Promise<number[]> {
         try {
             let apiPath = `${locale}/item/multi`;
             const resp = await this._clientInstance.executePost(apiPath, guid, this._options.token, contentItems);
 
             let batchID = resp.data as number;
-            var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID, guid));
-
-            // Aaaron May 1 2025 - if the batch has error data, return the batch not just the -1 contentID
-            if (batch.errorData) {
-                return batch;
+            
+            // If user wants batchID immediately, return it for custom polling
+            if (returnBatchId) {
+                return [batchID];
             }
 
+            // Default behavior: wait for completion and return IDs
+            var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID, guid));
             let contentIDs: number[] = [];
 
             batch.items.forEach(element => contentIDs.push(element.itemID));
