@@ -142,7 +142,7 @@ export class PageMethods {
             
             // If user wants batchID immediately, return it for custom polling
             if (returnBatchId) {
-                return batchID;
+                return [batchID];
             }
 
             // Default behavior: wait for completion and return IDs
