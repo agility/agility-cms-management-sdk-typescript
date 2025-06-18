@@ -22,6 +22,10 @@ The authentication process uses OAuth 2.0 and requires multiple steps:
 1. First, initiate the authorization flow by making a GET request to the authorization endpoint:
 ```javascript
 const authUrl = 'https://mgmt.aglty.io/oauth/authorize';
+
+//if you wish to implement offline access using refresh tokens, use this URL (enables refresh tokens)
+//const authUrl = 'https://mgmt.aglty.io/oauth/authorize?scope=offline-access '; 
+
 const params = new URLSearchParams({
   response_type: 'code',
   redirect_uri: 'YOUR_REDIRECT_URI',
