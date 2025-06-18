@@ -88,7 +88,6 @@ Note:
 - Store refresh tokens securely and never expose them in client-side code
 - Implement proper error handling for authentication failures
 
-## Create an object of Method class(es), which can be used to create and perform operations. Following is the description of Classes and their respective methods -
 
 ### Making a Request
 ```Javascript
