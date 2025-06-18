@@ -50,7 +50,7 @@ const { access_token, refresh_token, expires_in } = await response.json();
 
 3. Use the obtained token to initialize the SDK:
 ```javascript
-import * as mgmtApi from "./index";
+import * as mgmtApi from "@agility/management-sdk";
 
 // Initialize the Options Class with your authentication token
 let options = new mgmtApi.Options();
@@ -92,7 +92,7 @@ Note:
 
 ### Making a Request
 ```Javascript
-import * as mgmtApi from "./index";
+import * as mgmtApi from "@agility/management-sdk";
 
 //initialize the Options Class
 let options = new mgmtApi.Options();
