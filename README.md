@@ -5,7 +5,9 @@
 - Provides a facility to developers to use the new Agility Management API more effectively.
 - Provides methods to perform operations on Assets, Batches, Containers, Content, Models, Pages, and Users.
 - Supports the creation of Pages and Content in batches.
+- **Full batch workflow management** - Create, manage, and process batches with publish, unpublish, approve, decline, and request approval operations.
 - Ability to generate Content in bulk for a Website.
+- **Strongly typed TypeScript interfaces** for all batch operations with comprehensive error handling.
 
 ## Getting Started
 
@@ -240,15 +242,253 @@ Returns: An object of ```Media``` class with the information of the asset.
 Returns: An object of ```Media``` class with the information of the asset.
 
 ## Class BatchMethods
-This class is used to perform operations related to Batches. The following are the methods: -
+This class is used to perform operations related to Batches. Batches allow you to group multiple content operations (publish, unpublish, approve, etc.) and execute them together. The following are the methods:
 
 ### getBatch
 | Parameter | Type     | Description                |
 | :-------- | :------- | :------------------------- |
-| `id` | `number` | The batchID of the requested batch.|
+| `batchID` | `number` | The batchID of the requested batch.|
+| `guid` | `string` | Current website guid.|
+| `expandItems` | `boolean` | *(Optional)* Whether to include item-level information. Default: `true`|
+
+Returns: An object of ```Batch``` class.
+
+```javascript
+// Get batch with full item details (default)
+const batch = await apiClient.batchMethods.getBatch(123, guid);
+
+// Get basic batch information only (performance optimization)
+const batchBasic = await apiClient.batchMethods.getBatch(123, guid, false);
+```
+
+### publishBatch
+Publishes all items in an existing batch.
+
+| Parameter | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `batchID` | `number` | The batchID of the batch to publish.|
+| `guid` | `string` | Current website guid.|
+| `returnBatchId` | `boolean` | *(Optional)* If `true`, returns batch ID immediately. If `false` (default), waits for completion.|
+
+Returns: A ```number``` representing the batch ID.
+
+```javascript
+// Publish batch and wait for completion
+const batchId = await apiClient.batchMethods.publishBatch(123, guid);
+
+// Publish batch and return immediately for custom polling
+const batchId = await apiClient.batchMethods.publishBatch(123, guid, true);
+```
+
+### unpublishBatch
+Unpublishes all items in an existing batch.
+
+| Parameter | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `batchID` | `number` | The batchID of the batch to unpublish.|
+| `guid` | `string` | Current website guid.|
+| `returnBatchId` | `boolean` | *(Optional)* If `true`, returns batch ID immediately. If `false` (default), waits for completion.|
+
+Returns: A ```number``` representing the batch ID.
+
+### approveBatch
+Approves all items in an existing batch.
+
+| Parameter | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `batchID` | `number` | The batchID of the batch to approve.|
+| `guid` | `string` | Current website guid.|
+| `returnBatchId` | `boolean` | *(Optional)* If `true`, returns batch ID immediately. If `false` (default), waits for completion.|
+
+Returns: A ```number``` representing the batch ID.
+
+### declineBatch
+Declines all items in an existing batch.
+
+| Parameter | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `batchID` | `number` | The batchID of the batch to decline.|
+| `guid` | `string` | Current website guid.|
+| `returnBatchId` | `boolean` | *(Optional)* If `true`, returns batch ID immediately. If `false` (default), waits for completion.|
+
+Returns: A ```number``` representing the batch ID.
+
+### requestApprovalBatch
+Requests approval for all items in an existing batch.
+
+| Parameter | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `batchID` | `number` | The batchID of the batch to request approval for.|
+| `guid` | `string` | Current website guid.|
+| `returnBatchId` | `boolean` | *(Optional)* If `true`, returns batch ID immediately. If `false` (default), waits for completion.|
+
+Returns: A ```number``` representing the batch ID.
+
+### createBatch
+Creates a new empty batch with custom settings.
+
+| Parameter | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `request` | `CreateBatchRequest` | Configuration object for the new batch.|
 | `guid` | `string` | Current website guid.|
 
-Returns: A object of ```Batch``` class.
+Returns: A ```number``` representing the newly created batch ID.
+
+**CreateBatchRequest Interface:**
+```typescript
+interface CreateBatchRequest {
+    batchName?: string;           // Custom name for the batch
+    operationType?: BatchOperationType; // Default operation type
+    isPrivate?: boolean;          // Whether batch is private (default: true)
+    comments?: string;            // Optional comments
+}
+```
+
+```javascript
+// Create a custom batch
+const batchId = await apiClient.batchMethods.createBatch({
+    batchName: "Content Update Batch",
+    operationType: BatchOperationType.Publish,
+    isPrivate: true,
+    comments: "Publishing Q4 content updates"
+}, guid);
+```
+
+### addItemToBatch
+Adds an item to an existing batch.
+
+| Parameter | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `batchID` | `number` | The batchID to add the item to.|
+| `request` | `AddBatchItemRequest` | The item details to add.|
+| `guid` | `string` | Current website guid.|
+
+Returns: A ```number``` representing the batch ID.
+
+**AddBatchItemRequest Interface:**
+```typescript
+interface AddBatchItemRequest {
+    itemType: BatchItemType;      // Type of item (Page, ContentItem, etc.)
+    itemID: number;              // ID of the item to add
+    languageCode: string;        // Language code (e.g., "en-us")
+    itemTitle?: string;          // Optional title for the item
+}
+```
+
+```javascript
+// Add a content item to batch
+await apiClient.batchMethods.addItemToBatch(123, {
+    itemType: BatchItemType.ContentItem,
+    itemID: 456,
+    languageCode: "en-us",
+    itemTitle: "My Content Item"
+}, guid);
+```
+
+### removeItemFromBatch
+Removes an item from an existing batch.
+
+| Parameter | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `batchID` | `number` | The batchID to remove the item from.|
+| `itemId` | `number` | The batchItemID to remove.|
+| `guid` | `string` | Current website guid.|
+
+Returns: A ```number``` representing the batch ID.
+
+### processBatch
+Processes a batch with a specified operation type and optional comments.
+
+| Parameter | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `batchID` | `number` | The batchID to process.|
+| `request` | `ProcessBatchRequest` | The processing configuration.|
+| `guid` | `string` | Current website guid.|
+| `returnBatchId` | `boolean` | *(Optional)* If `true`, returns batch ID immediately. If `false` (default), waits for completion.|
+
+Returns: A ```number``` representing the batch ID.
+
+**ProcessBatchRequest Interface:**
+```typescript
+interface ProcessBatchRequest {
+    operationType: BatchOperationType; // The operation to perform
+    comments?: string;                 // Optional comments for audit trail
+}
+```
+
+```javascript
+// Process batch with custom operation type
+await apiClient.batchMethods.processBatch(123, {
+    operationType: BatchOperationType.Approve,
+    comments: "Approved by content manager"
+}, guid);
+```
+
+### Common Batch Workflow Example
+```javascript
+import { BatchOperationType, BatchItemType } from 'agility-cms-management-sdk-typescript';
+
+// 1. Create a new batch
+const batchId = await apiClient.batchMethods.createBatch({
+    batchName: "Weekly Content Update",
+    operationType: BatchOperationType.Publish,
+    isPrivate: false,
+    comments: "Publishing weekly blog posts and updates"
+}, guid);
+
+// 2. Add multiple items to the batch
+await apiClient.batchMethods.addItemToBatch(batchId, {
+    itemType: BatchItemType.ContentItem,
+    itemID: 101,
+    languageCode: "en-us",
+    itemTitle: "Blog Post 1"
+}, guid);
+
+await apiClient.batchMethods.addItemToBatch(batchId, {
+    itemType: BatchItemType.Page,
+    itemID: 202,
+    languageCode: "en-us",
+    itemTitle: "Homepage Update"
+}, guid);
+
+// 3. Publish the entire batch
+await apiClient.batchMethods.publishBatch(batchId, guid);
+
+// 4. Check batch status
+const completedBatch = await apiClient.batchMethods.getBatch(batchId, guid);
+console.log(`Batch ${completedBatch.batchName} completed with ${completedBatch.batchItemCount} items`);
+```
+
+### Available Enums
+```typescript
+// Batch operation types
+enum BatchOperationType {
+    Publish = 1,
+    Unpublish = 2,
+    Approve = 3,
+    Decline = 4,
+    RequestApproval = 5,
+    // ... other operation types
+}
+
+// Batch item types
+enum BatchItemType {
+    Page = 1,
+    ContentItem = 2,
+    ContentList = 3,
+    Tag = 4,
+    ModuleDef = 5
+}
+
+// Batch states
+enum BatchState {
+    None = 0,
+    Pending = 1,
+    InProcess = 2,
+    Processed = 3,
+    Deleted = 4
+}
+```
 
 ## Class ContainerMethods
 This class is used to perform operations related to Containers. The following are the methods: -
