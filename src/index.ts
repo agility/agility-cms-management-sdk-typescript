@@ -2,6 +2,7 @@ export * from "./models/options";
 export * from "./models/batch";
 export * from "./models/batchItem";
 export * from "./models/batchRequests";
+export * from "./models/batchTypes";
 export * from "./models/container";
 export * from "./models/contentDefinitionTypeID";
 export * from "./models/contentItem";
@@ -24,6 +25,13 @@ export * from "./models/contentSectionDefinition";
 export * from "./models/sharedModule";
 export * from "./models/pageModel";
 export * from "./enums/batchOperationType";
+export * from "./enums/workflowOperationType";
 export * from "./enums/batchState.";
 export * from "./enums/batchItemType";
 export * from "./apiClient";
+
+export { 
+    CreateBatchRequest, 
+    AddBatchItemRequest, 
+    ProcessBatchRequest 
+} from "./models/batchRequests";

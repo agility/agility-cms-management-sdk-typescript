@@ -95,14 +95,15 @@ export class ClientInstance {
 
     }
 
-    async executeDelete(apiPath: string, guid: string, token: string) {
+    async executeDelete(apiPath: string, guid: string, token: string, data?: any) {
         let instance = this.getInstance(guid);
         try {
             const resp = await instance.delete(apiPath, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Cache-Control': 'no-cache'
-                }
+                },
+                data: data
             })
             return resp;
         }

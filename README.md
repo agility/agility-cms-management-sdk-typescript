@@ -4,7 +4,7 @@
 
 - Provides a facility to developers to use the new Agility Management API more effectively.
 - Provides methods to perform operations on Assets, Batches, Containers, Content, Models, Pages, and Users.
-- Supports the creation of Pages and Content in batches.
+- **Content and Page Creation** - Create individual or multiple content items and pages (which automatically get added to batches).
 - **Full batch workflow management** - Create, manage, and process batches with publish, unpublish, approve, decline, and request approval operations.
 - Ability to generate Content in bulk for a Website.
 - **Strongly typed TypeScript interfaces** for all batch operations with comprehensive error handling.
@@ -114,6 +114,24 @@ var contentItem = await apiClient.contentMethods.getContentItem(22,guid, locale)
 //To log the response of the contentItem object in console.
 console.log(JSON.stringify(contentItem));
 ```
+
+## Understanding Agility CMS Batch Architecture
+
+Agility CMS has two distinct patterns for working with content and batches:
+
+### Pattern 1: Creating New Content/Pages (Handled by Respective Controllers)
+- **contentMethods.saveContentItem()** - Creates a single new content item and adds it to a batch
+- **contentMethods.saveContentItems()** - Creates multiple new content items and adds them to a batch  
+- **pageMethods.savePage()** - Creates a new page and adds it to a batch
+- These methods create the content AND automatically handle batch creation/management
+
+### Pattern 2: Workflow Operations on Existing Items (Handled by Batch Controller)
+- **batchMethods.addItemToBatch()** - Adds references to existing content/pages for workflow operations
+- **batchMethods.publishBatch()** - Publishes all items in a batch
+- **batchMethods.unpublishBatch()** - Unpublishes all items in a batch
+- **batchMethods.approveBatch()** - Approves all items in a batch
+- These methods work with existing content for workflow management
+
 ## Class AssetMethods
 This class is used to perform operations related to Assets. The following are the methods: -
 
@@ -242,14 +260,16 @@ Returns: An object of ```Media``` class with the information of the asset.
 Returns: An object of ```Media``` class with the information of the asset.
 
 ## Class BatchMethods
-This class is used to perform operations related to Batches. Batches allow you to group multiple content operations (publish, unpublish, approve, etc.) and execute them together. The following are the methods:
+This class is used to perform **workflow operations** on existing content and pages through batches. 
+
+**Important**: To CREATE new content or pages, use `contentMethods.saveContentItem(s)` or `pageMethods.savePage()` instead. These batch methods are for managing workflow operations (publish, unpublish, approve, etc.) on existing items.
 
 ### getBatch
 | Parameter | Type     | Description                |
 | :-------- | :------- | :------------------------- |
 | `batchID` | `number` | The batchID of the requested batch.|
 | `guid` | `string` | Current website guid.|
-| `expandItems` | `boolean` | *(Optional)* Whether to include item-level information. Default: `true`|
+| `expandItems` | `boolean` | *(Optional)* Whether to include full item details. Default: `true`|
 
 Returns: An object of ```Batch``` class.
 
@@ -325,694 +345,400 @@ Requests approval for all items in an existing batch.
 Returns: A ```number``` representing the batch ID.
 
 ### createBatch
-Creates a new empty batch with custom settings.
+Creates a new empty batch that you can add existing items to for workflow operations.
 
 | Parameter | Type     | Description                |
 | :-------- | :------- | :------------------------- |
-| `request` | `CreateBatchRequest` | Configuration object for the new batch.|
+| `request` | `CreateBatchRequest` | The batch creation details.|
 | `guid` | `string` | Current website guid.|
 
-Returns: A ```number``` representing the newly created batch ID.
-
-**CreateBatchRequest Interface:**
-```typescript
-interface CreateBatchRequest {
-    batchName?: string;           // Custom name for the batch
-    operationType?: BatchOperationType; // Default operation type
-    isPrivate?: boolean;          // Whether batch is private (default: true)
-    comments?: string;            // Optional comments
-}
-```
+Returns: A ```number``` representing the new batch ID.
 
 ```javascript
-// Create a custom batch
-const batchId = await apiClient.batchMethods.createBatch({
-    batchName: "Content Update Batch",
+const batchID = await apiClient.batchMethods.createBatch({
+    batchName: 'Q4 Content Updates',
     operationType: BatchOperationType.Publish,
     isPrivate: true,
-    comments: "Publishing Q4 content updates"
+    comments: 'Publishing Q4 marketing content'
 }, guid);
 ```
 
 ### addItemToBatch
-Adds an item to an existing batch.
+Adds a **reference to an existing** content item or page to a batch for workflow operations.
+
+**Important**: This method only works with existing content/pages. To create new content, use `contentMethods.saveContentItem(s)` or `pageMethods.savePage()`.
 
 | Parameter | Type     | Description                |
 | :-------- | :------- | :------------------------- |
 | `batchID` | `number` | The batchID to add the item to.|
-| `request` | `AddBatchItemRequest` | The item details to add.|
+| `itemType` | `BatchItemType` | The type of item to add to the batch.|
+| `itemID` | `number` | The ID of the existing item to add to the batch.|
+| `languageCode` | `string` | The language code for the item (e.g., "en-us", "fr-ca", "es-mx").|
+| `itemTitle` | `string \| undefined` | Optional display title for the item in the batch for identification purposes.|
 | `guid` | `string` | Current website guid.|
 
 Returns: A ```number``` representing the batch ID.
 
-**AddBatchItemRequest Interface:**
-```typescript
-interface AddBatchItemRequest {
-    itemType: BatchItemType;      // Type of item (Page, ContentItem, etc.)
-    itemID: number;              // ID of the item to add
-    languageCode: string;        // Language code (e.g., "en-us")
-    itemTitle?: string;          // Optional title for the item
-}
+```javascript
+// Add reference to existing content item
+await apiClient.batchMethods.addItemToBatch(
+    123,                          // batchID
+    BatchItemType.ContentItem,    // itemType (dropdown in Swagger)
+    12345,                        // itemID (input box)
+    'en-us',                      // languageCode (input box)
+    'My Blog Post',               // itemTitle (input box)
+    guid
+);
+
+// Add reference to existing page
+await apiClient.batchMethods.addItemToBatch(
+    123,                          // batchID
+    BatchItemType.Page,           // itemType (dropdown in Swagger)
+    98765,                        // itemID (input box)
+    'en-us',                      // languageCode (input box)
+    'About Us Page',              // itemTitle (input box)
+    guid
+);
 ```
 
+### addItemsToBatch ⭐ **NEW!**
+Adds **multiple references to existing** content items and pages to a batch in a single API call.
+
+**Benefits**: Bulk operations, atomic success/failure, reduced API calls, mixed item types supported.
+
+| Parameter | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `batchID` | `number` | The batchID to add the items to.|
+| `request` | `AddBatchItemsRequest` | The items array to add.|
+| `guid` | `string` | Current website guid.|
+
+Returns: A ```number``` representing the batch ID.
+
 ```javascript
-// Add a content item to batch
-await apiClient.batchMethods.addItemToBatch(123, {
-    itemType: BatchItemType.ContentItem,
-    itemID: 456,
-    languageCode: "en-us",
-    itemTitle: "My Content Item"
+// Add multiple items at once
+await apiClient.batchMethods.addItemsToBatch(123, {
+    items: [
+        {
+            itemType: BatchItemType.ContentItem,
+            itemID: 12345,
+            languageCode: 'en-us',
+            itemTitle: 'Blog Post 1'
+        },
+        {
+            itemType: BatchItemType.Page,
+            itemID: 98765,
+            languageCode: 'en-us',
+            itemTitle: 'About Us Page'
+        },
+        {
+            itemType: BatchItemType.ContentItem,
+            itemID: 54321,
+            languageCode: 'fr-ca',
+            itemTitle: 'Article de Blog'
+        }
+    ]
 }, guid);
 ```
 
 ### removeItemFromBatch
-Removes an item from an existing batch.
+Removes an item from a batch using clean REST path with type and ID in URL.
 
 | Parameter | Type     | Description                |
 | :-------- | :------- | :------------------------- |
 | `batchID` | `number` | The batchID to remove the item from.|
-| `itemId` | `number` | The batchItemID to remove.|
+| `itemType` | `BatchItemType` | The type of item to remove.|
+| `itemID` | `number` | The ID of the item to remove.|
+| `languageCode` | `string` | The language code of the item.|
 | `guid` | `string` | Current website guid.|
 
 Returns: A ```number``` representing the batch ID.
 
+```javascript
+await apiClient.batchMethods.removeItemFromBatch(
+    123,      // batchID
+    BatchItemType.ContentItem,  // itemType in path - shows as "ContentItem" in API
+    12345,    // itemID in path
+    'en-us',  // languageCode as query param
+    guid
+);
+```
+
 ### processBatch
-Processes a batch with a specified operation type and optional comments.
+Processes a batch with operation type in path and optional comments in request body.
 
 | Parameter | Type     | Description                |
 | :-------- | :------- | :------------------------- |
 | `batchID` | `number` | The batchID to process.|
-| `request` | `ProcessBatchRequest` | The processing configuration.|
+| `operationType` | `WorkflowOperationType` | The workflow operation to perform (only workflow operations: Publish, Unpublish, Approve, Decline, RequestApproval).|
 | `guid` | `string` | Current website guid.|
+| `request` | `ProcessBatchRequest` | *(Optional)* Request object with comments.|
 | `returnBatchId` | `boolean` | *(Optional)* If `true`, returns batch ID immediately. If `false` (default), waits for completion.|
 
 Returns: A ```number``` representing the batch ID.
 
-**ProcessBatchRequest Interface:**
+```javascript
+// Simple processing without comments
+await apiClient.batchMethods.processBatch(
+    123, 
+    WorkflowOperationType.Publish, 
+    guid
+);
+
+// With comments in request body
+await apiClient.batchMethods.processBatch(
+    123, 
+    WorkflowOperationType.Publish, 
+    guid,
+    { comments: 'Publishing approved content after review' }
+);
+```
+
+### getBatchTypes ⭐ **NEW!**
+Retrieves all batch-related enum types for developer discovery and dynamic UI population.
+
+| Parameter | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `guid` | `string` | Current website guid.|
+
+Returns: A ```BatchTypesResponse``` object containing all enum types.
+
+```javascript
+// Get all batch types for dynamic UI population
+const types = await apiClient.batchMethods.getBatchTypes(guid);
+
+// Create dropdown options for item types
+const itemTypeOptions = types.itemTypes.map(type => ({
+    label: type.name,
+    value: type.value
+}));
+
+// Validate operation type
+const isValidWorkflowOperation = (value) => 
+    types.workflowOperations.some(op => op.value === value);
+
+// Access specific enum data
+console.log('Available item types:', types.itemTypes);
+console.log('Available workflow operations:', types.workflowOperations);  
+console.log('Available batch states:', types.states);
+console.log('All operation types:', types.operationTypes);
+```
+
+**Response Structure:**
 ```typescript
-interface ProcessBatchRequest {
-    operationType: BatchOperationType; // The operation to perform
-    comments?: string;                 // Optional comments for audit trail
+interface BatchTypesResponse {
+    itemTypes: EnumInfo[];         // Page, ContentItem, ContentList, Tag, ModuleDef
+    operationTypes: EnumInfo[];    // All 17 operation types 
+    workflowOperations: EnumInfo[]; // Publish, Unpublish, Approve, Decline, RequestApproval
+    states: EnumInfo[];            // None, Pending, InProcess, Processed, Deleted
+}
+
+interface EnumInfo {
+    value: number;      // Numeric enum value
+    name: string;       // String name (e.g., "Publish")
+    description: string; // Human-readable description
 }
 ```
 
-```javascript
-// Process batch with custom operation type
-await apiClient.batchMethods.processBatch(123, {
-    operationType: BatchOperationType.Approve,
-    comments: "Approved by content manager"
-}, guid);
-```
+**Benefits:**
+- 🎨 **Dynamic UI Population** - Frontend dropdowns populate automatically
+- ✅ **Client Validation** - Validate inputs against live API data
+- 🔍 **API Discovery** - Explore options without reading docs
+- 🚀 **Future-Proof** - New enum values appear automatically
 
-### Common Batch Workflow Example
-```javascript
-import { BatchOperationType, BatchItemType } from 'agility-cms-management-sdk-typescript';
+## Complete Workflow Example
 
-// 1. Create a new batch
-const batchId = await apiClient.batchMethods.createBatch({
-    batchName: "Weekly Content Update",
+Here's a complete example showing both patterns:
+
+```typescript
+import { ApiClient, WorkflowOperationType, BatchItemType } from '@agility/management-sdk';
+
+const client = new ApiClient({ token: 'your-token' });
+const guid = 'your-instance-guid';
+const locale = 'en-us';
+
+// NEW: Get batch types for dynamic UI and validation
+const batchTypes = await client.batchMethods.getBatchTypes(guid);
+console.log('Available batch types loaded:', batchTypes);
+
+// Pattern 1: Create NEW content items (handled by content controller)
+const newContentBatchID = await client.contentMethods.saveContentItem(locale, {
+    properties: {
+        referenceName: 'blog-post',
+        definitionName: 'BlogPost',
+        state: 2
+    },
+    fields: {
+        title: 'My New Blog Post',
+        content: 'This is the blog post content...'
+    }
+});
+
+// Pattern 1: Create NEW page (handled by page controller)  
+const newPageBatchID = await client.pageMethods.savePage(locale, {
+    name: 'new-product-page',
+    title: 'New Product Page',
+    menuText: 'New Product',
+    pageType: 'static',
+    templateName: 'Product Template',
+    parentPageID: -1
+});
+
+// Pattern 2: Create batch for workflow operations on EXISTING items
+const workflowBatchID = await client.batchMethods.createBatch({
+    batchName: 'Existing Content Workflow',
     operationType: BatchOperationType.Publish,
-    isPrivate: false,
-    comments: "Publishing weekly blog posts and updates"
+    isPrivate: true
 }, guid);
 
-// 2. Add multiple items to the batch
-await apiClient.batchMethods.addItemToBatch(batchId, {
-    itemType: BatchItemType.ContentItem,
-    itemID: 101,
-    languageCode: "en-us",
-    itemTitle: "Blog Post 1"
+// Pattern 2: Add references to existing items for workflow operations
+await client.batchMethods.addItemToBatch(workflowBatchID, {
+    itemType: BatchItemType.ContentItem, // Shows as "ContentItem" in API
+    itemID: 12345, // Existing content item
+    languageCode: locale,
+    itemTitle: 'Existing Blog Post'
 }, guid);
 
-await apiClient.batchMethods.addItemToBatch(batchId, {
-    itemType: BatchItemType.Page,
-    itemID: 202,
-    languageCode: "en-us",
-    itemTitle: "Homepage Update"
+await client.batchMethods.addItemToBatch(workflowBatchID, {
+    itemType: BatchItemType.Page, // Shows as "Page" in API
+    itemID: 98765, // Existing page
+    languageCode: locale,
+    itemTitle: 'Existing About Page'
 }, guid);
 
-// 3. Publish the entire batch
-await apiClient.batchMethods.publishBatch(batchId, guid);
+// Pattern 2: Publish the existing items (simplified - no request body needed)
+await client.batchMethods.publishBatch(workflowBatchID, guid);
 
-// 4. Check batch status
-const completedBatch = await apiClient.batchMethods.getBatch(batchId, guid);
-console.log(`Batch ${completedBatch.batchName} completed with ${completedBatch.batchItemCount} items`);
+// OR use the generic processBatch with operation type in path
+await client.batchMethods.processBatch(
+    workflowBatchID, 
+    WorkflowOperationType.Publish, // Shows as "Publish" in API 
+    guid,
+    { comments: 'Publishing reviewed content' }  // optional comments in body
+);
+
+console.log('All operations completed successfully!');
 ```
 
-### Available Enums
+## Summary: Complete BatchMethods API
+
+The `BatchMethods` class provides **13 powerful methods** for comprehensive batch management:
+
+### **Core Operations (7 methods)**
+- `getBatch()` - Retrieve batch details and status
+- `createBatch()` - Create new empty batches  
+- `addItemToBatch()` - Add single existing item to batches
+- `addItemsToBatch()` ⭐ **NEW!** - Add multiple existing items to batches (bulk)
+- `removeItemFromBatch()` - Remove items from batches
+- `processBatch()` - Generic workflow processing with operation types
+- `getBatchTypes()` ⭐ **NEW!** - Get all enum types for dynamic UIs
+
+### **Workflow Shortcuts (5 methods)**
+- `publishBatch()` - Quick publish shortcut
+- `unpublishBatch()` - Quick unpublish shortcut
+- `approveBatch()` - Quick approve shortcut
+- `declineBatch()` - Quick decline shortcut
+- `requestApprovalBatch()` - Quick approval request shortcut
+
+**Developer Experience Features:**
+- 🎯 **Flexible API Design** - Use shortcuts OR generic `processBatch()`
+- 🎨 **Dynamic UI Support** - `getBatchTypes()` populates dropdowns automatically
+- ✅ **Strong Typing** - Full TypeScript support with intellisense
+- 🔄 **Auto-Retry Logic** - Built-in polling for operation completion
+- 📚 **Self-Documenting** - Enum discovery eliminates hard-coded values
+
+## TypeScript Interfaces
+
+### Batch Request Interfaces
+
 ```typescript
-// Batch operation types
-enum BatchOperationType {
-    Publish = 1,
-    Unpublish = 2,
-    Approve = 3,
-    Decline = 4,
-    RequestApproval = 5,
-    // ... other operation types
+interface CreateBatchRequest {
+    batchName?: string;
+    operationType?: BatchOperationType;
+    isPrivate?: boolean;
+    comments?: string;
 }
 
-// Batch item types
-enum BatchItemType {
-    Page = 1,
-    ContentItem = 2,
-    ContentList = 3,
-    Tag = 4,
-    ModuleDef = 5
+interface AddBatchItemRequest {
+    itemType: BatchItemType;
+    itemID: number;           // ID of existing item
+    languageCode: string;
+    itemTitle?: string;
 }
 
-// Batch states
-enum BatchState {
-    None = 0,
-    Pending = 1,
-    InProcess = 2,
-    Processed = 3,
-    Deleted = 4
+interface ProcessBatchRequest {
+    comments?: string;        // Optional comments for audit trail
+}
+
+
+
+
+```
+
+## Available Enums
+
+### WorkflowOperationType (for batch processing)
+> **Note**: In the API documentation (Swagger UI), these operations appear as descriptive dropdown options (Publish, Unpublish, Approve, Decline, RequestApproval) instead of numbers.
+
+- `Publish = 1`
+- `Unpublish = 2` 
+- `Approve = 3`
+- `Decline = 4`
+- `RequestApproval = 5`
+
+### BatchOperationType (full enum - includes all 17 operation types)
+> **Note**: In the API documentation (Swagger UI), these operations appear as descriptive dropdown options with their names instead of numbers.
+
+**Workflow Operations (1-5):**
+- `Publish = 1`
+- `Unpublish = 2` 
+- `Approve = 3`
+- `Decline = 4`
+- `RequestApproval = 5`
+
+**Other Operations (6-17):**
+- `Copy = 6`
+- `ClonePageTemplate = 7`
+- `Sync = 8`
+- `TagExport = 9`
+- `TagImport = 10`
+- `ContentExport = 11`
+- `ContentImport = 12`
+- `InstanctTemplateImport = 13` *(Note: This appears to be a typo in the backend - should be "InstanceTemplateImport")*
+- `InsertContent = 14`
+- `DeleteContent = 15`
+- `SavePage = 16`
+- `DeletePage = 17`
+
+### BatchItemType
+> **Note**: In the API documentation (Swagger UI), these appear as descriptive dropdown options (Page, ContentItem, ContentList, Tag, ModuleDef) instead of numbers.
+
+- `Page = 1`
+- `ContentItem = 2`
+- `ContentList = 3`
+- `Tag = 4`
+- `ModuleDef = 5`
+
+### BatchState
+> **Note**: In the API documentation (Swagger UI), these appear as descriptive names (None, Pending, InProcess, Processed, Deleted) instead of numbers.
+
+- `None = 0` - Batch created but not submitted for processing
+- `Pending = 1` - Batch is pending processing
+- `InProcess = 2` - Batch is currently being processed  
+- `Processed = 3` - Batch has been processed successfully
+- `Deleted = 4` - Batch has been deleted
+
+## Error Handling
+
+All methods throw exceptions on failure:
+
+```typescript
+try {
+    const batch = await client.batchMethods.getBatch(123, 'instance-guid');
+} catch (error) {
+    console.error('Failed to get batch:', error.message);
 }
 ```
 
-## Class ContainerMethods
-This class is used to perform operations related to Containers. The following are the methods: -
+## License
 
-### getContainerByID
-| Parameter | Type     | Description                |
-| :-------- | :------- | :------------------------- |
-| `id` | `number` | The container id of the requested container.|
-| `guid` | `string` | Current website guid.|
-
-Returns: A object of ```Container``` class.
-
-### getContainersByModel
-| Parameter | Type     | Description                |
-| :-------- | :------- | :------------------------- |
-| `modelId` | `number` | The model id of the requested container.|
-| `guid` | `string` | Current website guid.|
-
-Returns: A object of ```Container``` class.
-
-### getContainerByReferenceName
-| Parameter | Type     | Description                |
-| :-------- | :------- | :------------------------- |
-| `referenceName` | `string` | The container reference name of the requested container.|
-| `guid` | `string` | Current website guid.|
-
-Returns: A object of ```Container``` class.
-
-### getContainerSecurity
-| Parameter | Type     | Description                |
-| :-------- | :------- | :------------------------- |
-| `id` | `number` | The container id of the requested container.|
-| `guid` | `string` | Current website guid.|
-
-Returns: A object of ```Container``` class.
-
-### getContainerList
-| Parameter | Type     | Description                |
-| :-------- | :------- | :------------------------- |
-| `guid` | `string` | Current website guid.|
-Returns: A collection object of ```Container``` class.
-
-### getNotificationList
-| Parameter | Type     | Description                |
-| :-------- | :------- | :------------------------- |
-| `id` | `number` | The container id of the requested container.|
-| `guid` | `string` | Current website guid.|
-Returns: A collection object of ```Notification``` class.
-
-### saveContainer
-| Parameter | Type     | Description                |
-| :-------- | :------- | :------------------------- |
-| `container` | `Container` | A Container type object to create or update a container.|
-| `guid` | `string` | Current website guid.|
-
-Returns: An object of ```Container``` class.
-
-### deleteContainer
-| Parameter | Type     | Description                |
-| :-------- | :------- | :------------------------- |
-| `id` | `number` | The container id of the requested container.|
-| `guid` | `string` | Current website guid.|
-Returns: A ```string``` response if a container has been deleted.
-
-## Class ContentMethods
-This class is used to perform operations related to Content. The following are the methods: -
-
-### getContentItem
-| Parameter | Type     | Description                |
-| :-------- | :------- | :------------------------- |
-| `contentID` | `number` | The contentid of the requested content.|
-| `guid` | `string` | Current website guid.|
-| `locale` | `string` | Current website locale.|
-
-Returns: An object of ```ContentItem``` class.
-
-### publishContent
-| Parameter | Type     | Description                |
-| :-------- | :------- | :------------------------- |
-| `contentID` | `number` | The contentid of the requested content.|
-| `guid` | `string` | Current website guid.|
-| `locale` | `string` | Current website locale.|
-| `comments` | `string` | Additional comments for a batch request.|
-
-Returns: An array of ```contentID``` of the requested content.
-
-### unPublishContent
-| Parameter | Type     | Description                |
-| :-------- | :------- | :------------------------- |
-| `contentID` | `number` | The contentid of the requested content.|
-| `guid` | `string` | Current website guid.|
-| `locale` | `string` | Current website locale.|
-| `comments` | `string` | Additional comments for a batch request.|
-
-Returns: An array of ```contentID``` of the requested content.
-
-### contentRequestApproval
-| Parameter | Type     | Description                |
-| :-------- | :------- | :------------------------- |
-| `contentID` | `number` | The contentid of the requested content.|
-| `guid` | `string` | Current website guid.|
-| `locale` | `string` | Current website locale.|
-| `comments` | `string` | Additional comments for a batch request.|
-
-Returns: An array of ```contentID``` of the requested content.
-
-### approveContent
-| Parameter | Type     | Description                |
-| :-------- | :------- | :------------------------- |
-| `contentID` | `number` | The contentid of the requested content.|
-| `guid` | `string` | Current website guid.|
-| `locale` | `string` | Current website locale.|
-| `comments` | `string` | Additional comments for a batch request.|
-
-Returns: An array of ```contentID``` of the requested content.
-
-### declineContent
-| Parameter | Type     | Description                |
-| :-------- | :------- | :------------------------- |
-| `contentID` | `number` | The contentid of the requested content.|
-| `guid` | `string` | Current website guid.|
-| `locale` | `string` | Current website locale.|
-| `comments` | `string` | Additional comments for a batch request.|
-
-Returns: An array of ```contentID``` of the requested content.
-
-### saveContentItem
-| Parameter | Type     | Description                |
-| :-------- | :------- | :------------------------- |
-| `contentItem` | `ContentItem` | A contentItem object to create or update a content.|
-| `guid` | `string` | Current website guid.|
-| `locale` | `string` | Current website locale.|
-
-Returns: An array of ```contentID``` of the requested content.
-
-### saveContentItems
-| Parameter | Type     | Description                |
-| :-------- | :------- | :------------------------- |
-| `contentItems` | `ContentItem[]` | A collection of contentItems object to create or update multiple contents.|
-| `guid` | `string` | Current website guid.|
-| `locale` | `string` | Current website locale.|
-
-Returns: An array of ```contentID``` of the requested content.
-
-### deleteContent
-| Parameter | Type     | Description                |
-| :-------- | :------- | :------------------------- |
-| `contentID` | `number` | The contentid of the requested content.|
-| `guid` | `string` | Current website guid.|
-| `locale` | `string` | Current website locale.|
-| `comments` | `string` | Additional comments for a batch request.|
-
-Returns: An array of ```contentID``` of the requested content.
-
-### getContentItems
-| Parameter | Type     | Description                |
-| :-------- | :------- | :------------------------- |
-| `referenceName` | `string` | The reference name of the container for the requested content.|
-| `guid` | `string` | Current website guid.|
-| `locale` | `string` | Current website locale.|
-| `listParams` | `ListParams` | The parameters list to apply filter on the content list.|
-
-Returns: An object of ```ContentList``` class of the requested content.
-
-### getContentList
-| Parameter | Type     | Description                |
-| :-------- | :------- | :------------------------- |
-| `referenceName` | `string` | The reference name of the container for the requested content.|
-| `guid` | `string` | Current website guid.|
-| `locale` | `string` | Current website locale.|
-| `listParams` | `ListParams` | The parameters list to apply filter on the content list.|
-| `filterObject` | `ContentListFilterModel` | To apply filter at the field level.|
-
-Returns: An object of ```ContentList``` class of the requested content.
-
-### getContentHistory
-| Parameter | Type     | Description                |
-| :-------- | :------- | :------------------------- |
-| `locale` | `string` | Current website locale.|
-| `guid` | `string` | Current website guid.|
-| `contentID` | `number` | The contentID of the requested content.|
-| `take` | `number` | The number of items per record set default value 50.|
-| `skip` | `number` | The skip level on the record set default value 0.|
-
-Returns: An object of ```ContentItemHistory``` class of the requested content history.
-
-### getContentComments
-| Parameter | Type     | Description                |
-| :-------- | :------- | :------------------------- |
-| `locale` | `string` | Current website locale.|
-| `guid` | `string` | Current website guid.|
-| `contentID` | `number` | The contentID of the requested content.|
-| `take` | `number` | The number of items per record set default value 50.|
-| `skip` | `number` | The skip level on the record set default value 0.|
-
-Returns: An object of ```ItemComments``` class of the requested content comments.
-
-## Class InstanceUserMethods
-This class is used to perform operations related to User. The following are the methods: -
-
-### getUsers
-| Parameter | Type     | Description                |
-| :-------- | :------- | :------------------------- |
-| `guid` | `string` | Current website guid.|
-Returns: A collection of ```WebsiteUser``` class of the requested content.
-
-### saveUser
-| Parameter | Type     | Description                |
-| :-------- | :------- | :------------------------- |
-| `emailAddress` | `string` | The email address of the requested user.|
-| `roles` | `InstanceRole[]` | Collection object of InstanceRole class for the requested user.|
-| `guid` | `string` | Current website guid.|
-| `firstName` | `string` | The first name of the requested user.|
-| `lastName` | `string` | The last name of the requested user.|
-
-Returns: An object of the ```InstanceUser``` class.
-
-### deleteUser
-| Parameter | Type     | Description                |
-| :-------- | :------- | :------------------------- |
-| `userID` | `number` | The userID of the requested user.|
-| `guid` | `string` | Current website guid.|
-
-Returns: A ```string``` response if a user has been deleted.
-
-## Class ModelMethods
-This class is used to perform operations related to Models. The following are the methods: -
-
-### getContentModel
-| Parameter | Type     | Description                |
-| :-------- | :------- | :------------------------- |
-| `id` | `number` | The id of the requested model.|
-| `guid` | `string` | Current website guid.|
-
-Returns: An object of ```Model``` class.
-
-### GetModelByReferenceName
-| Parameter | Type     | Description                |
-| :-------- | :------- | :------------------------- |
-| `referenceName` | `string` | The referenceName of the requested model.|
-| `guid` | `string` | The guid of the requested model.|
-
-### getContentModules
-| Parameter | Type     | Description                |
-| :-------- | :------- | :------------------------- |
-| `includeDefaults` | `bool` | Boolean value to include defaults.|
-| `guid` | `string` | Current website guid.|
-| `includeModules` | `bool` | Boolean value to include modules.|
-
-Returns: A collection object of ```Model``` class.
-
-### getPageModules
-| Parameter | Type     | Description                |
-| :-------- | :------- | :------------------------- |
-| `includeDefault` | `bool` | Boolean value to include defaults.|
-| `guid` | `string` | Current website guid.|
-
-Returns: A collection object of ```Model``` class.
-
-### saveModel
-| Parameter | Type     | Description                |
-| :-------- | :------- | :------------------------- |
-| `model` | `Model` | The object of Model to for the requested model.|
-| `guid` | `string` | Current website guid.|
-
-Returns: An object of ```Model``` class.
-
-### deleteModel
-| Parameter | Type     | Description                |
-| :-------- | :------- | :------------------------- |
-| `id` | `number` | The id for the requested model.|
-| `guid` | `string` | Current website guid.|
-
-Returns: A ```string``` response if a model is deleted.
-
-## Class PageMethods
-This class is used to perform operations related to Pages. The following are the methods: -
-
-### getSitemap
-| Parameter | Type     | Description                |
-| :-------- | :------- | :------------------------- |
-| `guid` | `string` | Current website guid.|
-| `locale` | `string` | Current website locale.|
-Returns: A collection object of ```Sitemap``` class.
-
-### getPageTemplates
-| Parameter | Type     | Description                |
-| :-------- | :------- | :------------------------- |
-| `guid` | `string` | Current website guid.|
-| `locale` | `string` | Current website locale.|
-| `includeModuleZones` | `boolean` | To include zones in the result set.|
-| `searchFilter` | `string` | To apply search criteria on the requested page template.|
-Returns: A collection object of ```PageModel``` class.
-
-### getPageTemplate
-| Parameter | Type     | Description                |
-| :-------- | :------- | :------------------------- |
-| `guid` | `string` | Current website guid.|
-| `locale` | `string` | Current website locale.|
-| `pageTemplateId` | `number` | The pageTemplateId of the requested page template.|
-Returns: An object of ```PageModel``` class.
-
-### getPageTemplateName
-| Parameter | Type     | Description                |
-| :-------- | :------- | :------------------------- |
-| `guid` | `string` | Current website guid.|
-| `locale` | `string` | Current website locale.|
-| `templateName` | `string` | The templateName of the requested page template.|
-Returns: An object of ```PageModel``` class.
-
-### deletePageTemplate
-| Parameter | Type     | Description                |
-| :-------- | :------- | :------------------------- |
-| `guid` | `string` | Current website guid.|
-| `locale` | `string` | Current website locale.|
-| `pageTemplateId` | `string` | The pageTemplateId of the requested page template.|
-
-### getPageItemTemplates
-| Parameter | Type     | Description                |
-| :-------- | :------- | :------------------------- |
-| `guid` | `string` | Current website guid.|
-| `locale` | `string` | Current website locale.|
-| `id` | `number` | The id of the requested page template.|
-Returns: A collection of ```ContentSectionDefinition``` class.
-
-### savePageTemplate
-| Parameter | Type     | Description                |
-| :-------- | :------- | :------------------------- |
-| `guid` | `string` | Current website guid.|
-| `locale` | `string` | Current website locale.|
-| `pageModel` | `PageModel` | The pageModel object of the requested page template.|
-Returns: An object of ```PageModel``` class.
-
-### getPage
-| Parameter | Type     | Description                |
-| :-------- | :------- | :------------------------- |
-| `pageID` | `number` | The id of the requested page.|
-| `guid` | `string` | Current website guid.|
-| `locale` | `string` | Current website locale.|
-
-Returns: An object of ```PageItem``` class.
-
-### publishPage
-| Parameter | Type     | Description                |
-| :-------- | :------- | :------------------------- |
-| `pageID` | `number` | The pageID of the requested page.|
-| `guid` | `string` | Current website guid.|
-| `locale` | `string` | Current website locale.|
-| `comments` | `string` | Additional comments for a batch request.|
-
-Returns: An array of ```pageID``` of the requested page.
-
-### unPublishPage
-| Parameter | Type     | Description                |
-| :-------- | :------- | :------------------------- |
-| `pageID` | `number` | The pageID of the requested page.|
-| `guid` | `string` | Current website guid.|
-| `locale` | `string` | Current website locale.|
-| `comments` | `string` | Additional comments for a batch request.|
-
-Returns: An array of ```pageID``` of the requested page.
-
-### deletePage
-| Parameter | Type     | Description                |
-| :-------- | :------- | :------------------------- |
-| `pageID` | `number` | The pageID of the requested page.|
-| `guid` | `string` | Current website guid.|
-| `locale` | `string` | Current website locale.|
-| `comments` | `string` | Additional comments for a batch request.|
-
-Returns: An array of ```pageID``` of the requested page.
-
-### approvePage
-| Parameter | Type     | Description                |
-| :-------- | :------- | :------------------------- |
-| `pageID` | `number` | The pageID of the requested page.|
-| `guid` | `string` | Current website guid.|
-| `locale` | `string` | Current website locale.|
-| `comments` | `string` | Additional comments for a batch request.|
-
-Returns: An array of ```pageID``` of the requested page.
-
-### declinePage
-| Parameter | Type     | Description                |
-| :-------- | :------- | :------------------------- |
-| `pageID` | `number` | The pageID of the requested page.|
-| `guid` | `string` | Current website guid.|
-| `locale` | `string` | Current website locale.|
-| `comments` | `string` | Additional comments for a batch request.|
-
-Returns: An array of ```pageID``` of the requested page.
-
-### pageRequestApproval
-| Parameter | Type     | Description                |
-| :-------- | :------- | :------------------------- |
-| `pageID` | `number` | The pageID of the requested page.|
-| `guid` | `string` | Current website guid.|
-| `locale` | `string` | Current website locale.|
-| `comments` | `string` | Additional comments for a batch request.|
-
-Returns: An array of ```pageID``` of the requested page.
-
-### savePage
-| Parameter | Type     | Description                |
-| :-------- | :------- | :------------------------- |
-| `pageItem` | `PageItem` | The object of PageItem class for the requested Page.|
-| `guid` | `string` | Current website guid.|
-| `locale` | `string` | Current website locale.|
-| `parentPageID` | `number` | The id of the parent page.|
-| `placeBeforePageItemID` | `number` | The id of the page before the page.|
-
-Returns: An array of ```pageID``` of the requested page.
-
-### getPageHistory
-| Parameter | Type     | Description                |
-| :-------- | :------- | :------------------------- |
-| `locale` | `string` | Current website locale.|
-| `guid` | `string` | Current website guid.|
-| `pageID` | `number` | The pageID of the requested page.|
-| `take` | `number` | The number of items per record set default value 50.|
-| `skip` | `number` | The skip level on the record set default value 0.|
-
-Returns: An object of ```PageHistory``` class of the requested page history.
-
-### getPageComments
-| Parameter | Type     | Description                |
-| :-------- | :------- | :------------------------- |
-| `locale` | `string` | Current website locale.|
-| `guid` | `string` | Current website guid.|
-| `pageID` | `number` | The pageID of the requested page.|
-| `take` | `number` | The number of items per record set default value 50.|
-| `skip` | `number` | The skip level on the record set default value 0.|
-
-Returns: An object of ```ItemComments``` class of the requested page comments.
-
-## Class ServerUserMethods
-This class is used to perform operations related to Server User. The following are the methods: -
-
-### me
-| Parameter | Type     | Description                |
-| :-------- | :------- | :------------------------- |
-| `guid` | `string` | Current website guid.|
-
-Returns: An object of ```ServerUser``` class of the requested user.
-
-### you
-| Parameter | Type     | Description                |
-| :-------- | :------- | :------------------------- |
-| `guid` | `string` | Current website guid.|
-| `serverUserID` | `number` | Current website guid.|
-
-Returns: An object of ```ServerUser``` class of the requested user.
-
-## Class WebhookMethods
-This class is used to perform operations related to Webhooks in the agility instance. The following are the methods: -
-
-### webhookList
-| Parameter | Type     | Description                |
-| :-------- | :------- | :------------------------- |
-| `guid` | `string` | Current website guid.|
-| `take` | `number` | The number of items per record set default value 20.|
-| `skip` | `number` | The skip level on the record set default value 0.|
-
-Returns: A list of webhooks configured in the instance.
-
-### saveWebhook
-| Parameter | Type     | Description                |
-| :-------- | :------- | :------------------------- |
-| `guid` | `string` | Current website guid.|
-| `webhook` | `Webhook` | An object of Webhook type with the webhook data.|
-
-Returns: An object with the created Webhook.
-
-### getWebhook
-| Parameter | Type     | Description                |
-| :-------- | :------- | :------------------------- |
-| `guid` | `string` | Current website guid.|
-| `webhookID` | `string` | The webhookID of the requested webhook.|
-
-Returns: An object with the requested Webhook.
-
-### deleteWebhook
-| Parameter | Type     | Description                |
-| :-------- | :------- | :------------------------- |
-| `guid` | `string` | Current website guid.|
-| `webhookID` | `string` | The webhookID of the requested webhook.|
-
-## Class Instance
-
-### getLocales
-| Parameter | Type     | Description                |
-| :-------- | :------- | :------------------------- |
-| `guid` | `string` | Current website guid.|
-
-Returns: An array of locales. ex. ['en-us','fr-ca']
-
-## Running the SDK Locally
-
-- `npm run clean`
-- `npm run prepare`
-- `npm run build`
-
-## How It Works
-
-- [How Pages Work](https://help.agilitycms.com/hc/en-us/articles/4404222849677)
-- [How Page Modules Work](https://help.agilitycms.com/hc/en-us/articles/4404222989453)
-- [How Page Templates Work](https://help.agilitycms.com/hc/en-us/articles/4404229108877)
-
-## Resources
-
-### Agility CMS
-
-- [Official site](https://agilitycms.com)
-- [Documentation](https://help.agilitycms.com/hc/en-us)
-
-### Community
-
-- [Official Slack](https://join.slack.com/t/agilitycommunity/shared_invite/enQtNzI2NDc3MzU4Njc2LWI2OTNjZTI3ZGY1NWRiNTYzNmEyNmI0MGZlZTRkYzI3NmRjNzkxYmI5YTZjNTg2ZTk4NGUzNjg5NzY3OWViZGI)
-- [Blog](https://agilitycms.com/resources/posts)
-- [GitHub](https://github.com/agility)
-- [Forums](https://help.agilitycms.com/hc/en-us/community/topics)
-- [Facebook](https://www.facebook.com/AgilityCMS/)
-- [Twitter](https://twitter.com/AgilityCMS)
-
-## Feedback and Questions
-
-If you have feedback or questions about this starter, please use the [Github Issues](https://github.com/agility/agility-cms-management-sdk-typescript/issues) on this repo, join our [Community Slack Channel](https://join.slack.com/t/agilitycommunity/shared_invite/enQtNzI2NDc3MzU4Njc2LWI2OTNjZTI3ZGY1NWRiNTYzNmEyNmI0MGZlZTRkYzI3NmRjNzkxYmI5YTZjNTg2ZTk4NGUzNjg5NzY3OWViZGI) or create a post on the [Agility Developer Community](https://help.agilitycms.com/hc/en-us/community/topics).
+MIT
