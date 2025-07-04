@@ -3,16 +3,7 @@ import { ClientInstance } from "./clientInstance";
 import { Batch } from "../models/batch";
 import { BatchState } from "../enums/batchState.";
 import { Exception } from "../models/exception";
-import { 
-    CreateBatchRequest, 
-    AddBatchItemRequest,
-    AddBatchItemsRequest,
-    ProcessBatchRequest
-} from "../models/batchRequests";
 import { BatchTypesResponse } from "../models/batchTypes";
-import { BatchItemType } from "../enums/batchItemType";
-import { BatchOperationType } from "../enums/batchOperationType";
-import { WorkflowOperationType } from "../enums/workflowOperationType";
 
 export class BatchMethods {
     _options!: Options;
@@ -131,80 +122,6 @@ export class BatchMethods {
             return resultBatchID;
         } catch (err) {
             throw new Exception(`Unable to request approval for the batch with id: ${batchID}`, err);
-        }
-    }
-
-    async createBatch(request: CreateBatchRequest, guid: string): Promise<number> {
-        try {
-            let apiPath = `batch`;
-            const resp = await this._clientInstance.executePost(apiPath, guid, this._options.token, request);
-
-            return resp.data as number;
-        } catch (err) {
-            throw new Exception(`Unable to create batch`, err);
-        }
-    }
-
-    async addItemToBatch(batchID: number, itemType: BatchItemType, itemID: number, languageCode: string, itemTitle: string | undefined, guid: string): Promise<number> {
-        try {
-            const params = new URLSearchParams({
-                itemType: itemType.toString(),
-                itemID: itemID.toString(),
-                languageCode: languageCode
-            });
-            
-            if (itemTitle) {
-                params.append('itemTitle', itemTitle);
-            }
-            
-            let apiPath = `batch/${batchID}/item?${params.toString()}`;
-            const resp = await this._clientInstance.executePost(apiPath, guid, this._options.token, null);
-
-            return resp.data as number;
-        } catch (err) {
-            throw new Exception(`Unable to add item to batch with id: ${batchID}`, err);
-        }
-    }
-
-    async addItemsToBatch(batchID: number, request: AddBatchItemsRequest, guid: string): Promise<number> {
-        try {
-            let apiPath = `batch/${batchID}/items`;
-            const resp = await this._clientInstance.executePost(apiPath, guid, this._options.token, request);
-
-            return resp.data as number;
-        } catch (err) {
-            throw new Exception(`Unable to add items to batch with id: ${batchID}`, err);
-        }
-    }
-
-    async removeItemFromBatch(batchID: number, itemType: BatchItemType, itemID: number, languageCode: string, guid: string): Promise<number> {
-        try {
-            let apiPath = `batch/${batchID}/items/${itemType}/${itemID}?languageCode=${encodeURIComponent(languageCode)}`;
-            const resp = await this._clientInstance.executeDelete(apiPath, guid, this._options.token);
-
-            return resp.data as number;
-        } catch (err) {
-            throw new Exception(`Unable to remove item from batch with id: ${batchID}`, err);
-        }
-    }
-
-    async processBatch(batchID: number, operationType: WorkflowOperationType, guid: string, request?: ProcessBatchRequest, returnBatchId: boolean = false): Promise<number> {
-        try {
-            let apiPath = `batch/${batchID}/process/${operationType}`;
-            const resp = await this._clientInstance.executePost(apiPath, guid, this._options.token, request || null);
-
-            let resultBatchID = resp.data as number;
-            
-            // If user wants batchID immediately, return it for custom polling
-            if (returnBatchId) {
-                return resultBatchID;
-            }
-
-            // Default behavior: wait for completion and return batch ID
-            await this.Retry(async () => await this.getBatch(resultBatchID, guid));
-            return resultBatchID;
-        } catch (err) {
-            throw new Exception(`Unable to process the batch with id: ${batchID}`, err);
         }
     }
 
