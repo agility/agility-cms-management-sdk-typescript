@@ -10,4 +10,5 @@ export class BatchItem {
     createdOn: string;
     createdBy: number;
     createdByName: string;
+    errorMessage: string | null;
 }

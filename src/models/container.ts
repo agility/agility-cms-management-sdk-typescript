@@ -1,4 +1,5 @@
 import { ContentViewColumn } from "./contentViewColumn";
+import { ContentDefinitionTypeID } from "./contentDefinitionTypeID";
 
 export class Container {
     columns: ContentViewColumn[];
@@ -31,7 +32,7 @@ export class Container {
     enableAPIOutput: boolean | null;
     commentsRecordTypeName: string | null;
     numRowsInListing: number | null;
-    contentDefinitionTypeID: number | null;
+    contentDefinitionTypeID: ContentDefinitionTypeID | null;
     fullSyncModDate: string | null;
     confirmSharingOnPublish: boolean | null;
     contentTemplateName: string | null;
