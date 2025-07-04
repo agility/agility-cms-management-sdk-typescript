@@ -24,6 +24,10 @@ The authentication process uses OAuth 2.0 and requires multiple steps:
 1. First, initiate the authorization flow by making a GET request to the authorization endpoint:
 ```javascript
 const authUrl = 'https://mgmt.aglty.io/oauth/authorize';
+
+//if you wish to implement offline access using refresh tokens, use this URL (enables refresh tokens)
+//const authUrl = 'https://mgmt.aglty.io/oauth/authorize?scope=offline-access '; 
+
 const params = new URLSearchParams({
   response_type: 'code',
   redirect_uri: 'YOUR_REDIRECT_URI',
@@ -52,7 +56,7 @@ const { access_token, refresh_token, expires_in } = await response.json();
 
 3. Use the obtained token to initialize the SDK:
 ```javascript
-import * as mgmtApi from "./index";
+import * as mgmtApi from "@agility/management-sdk";
 
 // Initialize the Options Class with your authentication token
 let options = new mgmtApi.Options();
@@ -90,11 +94,10 @@ Note:
 - Store refresh tokens securely and never expose them in client-side code
 - Implement proper error handling for authentication failures
 
-4. Create an object of Method class(es), which can be used to create and perform operations. Following is the description of Classes and their respective methods -
 
 ### Making a Request
 ```Javascript
-import * as mgmtApi from "./index";
+import * as mgmtApi from "@agility/management-sdk";
 
 //initialize the Options Class
 let options = new mgmtApi.Options();
@@ -538,3 +541,5 @@ try {
 ## License
 
 MIT
+
+If you have feedback or questions about this starter, please use the [Github Issues](https://github.com/agility/agility-cms-management-sdk-typescript/issues) on this repo, join our [Community Slack Channel](https://join.slack.com/t/agilitycommunity/shared_invite/enQtNzI2NDc3MzU4Njc2LWI2OTNjZTI3ZGY1NWRiNTYzNmEyNmI0MGZlZTRkYzI3NmRjNzkxYmI5YTZjNTg2ZTk4NGUzNjg5NzY3OWViZGI) or create a post on the [Agility Developer Community](https://help.agilitycms.com/hc/en-us/community/topics).
