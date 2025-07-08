@@ -230,8 +230,9 @@ interface EnumInfo {
 
 ## Navigation
 - [← Back to Main Documentation](../README.md)
+- [Authentication & Setup](./auth.md)
+- [CI/CD & Automated Environments](./cicd.md)
 - [AssetMethods](./asset-methods.md)
-- **BatchMethods** *(current)*
 - [ContainerMethods](./container-methods.md)
 - [ContentMethods](./content-methods.md)
 - [InstanceMethods](./instance-methods.md)
@@ -239,4 +240,5 @@ interface EnumInfo {
 - [ModelMethods](./model-methods.md)
 - [PageMethods](./page-methods.md)
 - [ServerUserMethods](./server-user-methods.md)
-- [WebhookMethods](./webhook-methods.md) 
+- [WebhookMethods](./webhook-methods.md)
+- [Multi-Instance Operations](./multi-instance-operations.md) 

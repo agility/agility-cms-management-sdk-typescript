@@ -11,26 +11,25 @@ This class provides comprehensive user management operations for Agility CMS ins
 - User management changes may affect website permissions and access
 
 ### Function List
-- [getInstanceUser](#getinstanceuser) - Retrieves a specific instance user by ID
-- [saveInstanceUser](#saveinstanceuser) - Creates or updates an instance user
-- [deleteInstanceUser](#deleteinstanceuser) - Deletes an instance user by ID
+- [getUsers](#getusers) - Retrieves all instance users
+- [saveUser](#saveuser) - Creates or updates an instance user
+- [deleteUser](#deleteuser) - Deletes an instance user by ID
 
 ---
 
-### getInstanceUser
+### getUsers
 
-Retrieves a specific instance user by their unique ID.
+Retrieves all instance users for the current website.
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `userID` | `number` | Yes | The user ID to retrieve |
 | `guid` | `string` | Yes | Current website GUID |
 
-**Returns:** `InstanceUser` - Complete user object with roles and permissions
+**Returns:** `WebsiteUser` - Complete list of users with roles and permissions
 
 **Usage Example:**
 ```typescript
-const user = await apiClient.instanceUserMethods.getInstanceUser(123, guid);
+const users = await apiClient.instanceUserMethods.getUsers(guid);
 console.log(`User: ${user.firstName} ${user.lastName}`);
 console.log(`Email: ${user.emailAddress}`);
 console.log(`Role: ${user.roleName}`);
@@ -69,31 +68,35 @@ The `InstanceUser` object includes:
 - Throws `Exception` when user not found
 - Throws `Exception` when insufficient permissions to view user details
 
-### saveInstanceUser
+### saveUser
 
 Creates a new instance user or updates an existing one.
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `user` | `InstanceUser` | Yes | User object to save |
+| `emailAddress` | `string` | Yes | User's email address |
+| `roles` | `InstanceRole[]` | Yes | Array of roles to assign to user |
 | `guid` | `string` | Yes | Current website GUID |
+| `firstName` | `string` | No | User's first name |
+| `lastName` | `string` | No | User's last name |
 
 **Returns:** `InstanceUser` - Saved user object with updated metadata
 
 **Usage Example:**
 ```typescript
 // Create a new user
-const newUser = {
-    firstName: 'John',
-    lastName: 'Doe',
-    emailAddress: 'john.doe@company.com',
-    roleName: 'Editor',
-    isActive: true,
-    password: 'SecurePassword123!', // Only required for new users
-    permissions: ['content.read', 'content.write']
-};
+const roles = [
+    { roleID: 1, roleName: 'Editor' },
+    { roleID: 2, roleName: 'Contributor' }
+];
 
-const savedUser = await apiClient.instanceUserMethods.saveInstanceUser(newUser, guid);
+const savedUser = await apiClient.instanceUserMethods.saveUser(
+    'john.doe@company.com',
+    roles,
+    guid,
+    'John',
+    'Doe'
+);
 console.log('User created with ID:', savedUser.userID);
 
 // Update existing user
@@ -136,13 +139,13 @@ Common role names include:
 - Throws `Exception` when save operation fails
 - Throws `Exception` when insufficient permissions to create/update users
 
-### deleteInstanceUser
+### deleteUser
 
 Deletes an instance user by their unique ID.
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `userID` | `number` | Yes | The user ID to delete |
+| `userId` | `number` | Yes | The user ID to delete |
 | `guid` | `string` | Yes | Current website GUID |
 
 **Returns:** `string` - Confirmation message of successful deletion
@@ -150,7 +153,7 @@ Deletes an instance user by their unique ID.
 **Usage Example:**
 ```typescript
 try {
-    const result = await apiClient.instanceUserMethods.deleteInstanceUser(123, guid);
+    const result = await apiClient.instanceUserMethods.deleteUser(123, guid);
     console.log(result); // "User deleted successfully"
 } catch (error) {
     if (error.message.includes('owns content')) {
@@ -214,6 +217,8 @@ const deactivateUser = async (userID) => {
 
 ## Navigation
 - [← Back to Main Documentation](../README.md)
+- [Authentication & Setup](./auth.md)
+- [Multi-Instance Operations](./multi-instance-operations.md)
 - [AssetMethods](./asset-methods.md)
 - [BatchMethods](./batch-methods.md)
 - [ContainerMethods](./container-methods.md)

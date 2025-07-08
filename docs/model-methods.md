@@ -12,29 +12,29 @@ This class provides comprehensive content model management operations for Agilit
 - Model reference names must be unique within the instance
 
 ### Function List
-- [getModel](#getmodel) - Retrieves a specific content model by ID
+- [getContentModel](#getcontentmodel) - Retrieves a specific content model by ID
 - [getModelByReferenceName](#getmodelbyreferencename) - Retrieves a model by reference name
-- [getModelList](#getmodellist) - Retrieves list of all content models
-- [getModelFields](#getmodelfields) - Retrieves field definitions for a model
+- [getContentModules](#getcontentmodules) - Retrieves list of all content modules
+- [getPageModules](#getpagemodules) - Retrieves list of all page modules
 - [saveModel](#savemodel) - Creates or updates a content model
 - [deleteModel](#deletemodel) - Deletes a content model by ID
 
 ---
 
-### getModel
+### getContentModel
 
 Retrieves a specific content model by its unique ID.
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `modelID` | `number` | Yes | The model ID to retrieve |
+| `id` | `number` | Yes | The model ID to retrieve |
 | `guid` | `string` | Yes | Current website GUID |
 
 **Returns:** `Model` - Complete model object with field definitions
 
 **Usage Example:**
 ```typescript
-const model = await apiClient.modelMethods.getModel(123, guid);
+const model = await apiClient.modelMethods.getContentModel(123, guid);
 console.log('Model name:', model.displayName);
 console.log('Reference name:', model.referenceName);
 console.log('Description:', model.description);
@@ -102,19 +102,21 @@ if (await validateModelExists('blog-post')) {
 - Returns `null` for 404 errors (model not found)
 - Throws `Exception` for other errors
 
-### getModelList
+### getContentModules
 
-Retrieves a list of all content models in the current website.
+Retrieves a list of all content modules in the current website.
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
+| `includeDefaults` | `boolean` | Yes | Whether to include default modules |
 | `guid` | `string` | Yes | Current website GUID |
+| `includeModules` | `boolean` | No | Whether to include module details (default: false) |
 
-**Returns:** `Model[]` - Array of all content models
+**Returns:** `Model[]` - Array of all content modules
 
 **Usage Example:**
 ```typescript
-const models = await apiClient.modelMethods.getModelList(guid);
+const models = await apiClient.modelMethods.getContentModules(true, guid);
 console.log(`Total models: ${models.length}`);
 
 // Display model summary
@@ -156,20 +158,20 @@ const modelOptions = models.map(model => ({
 **Error Handling:**
 - Throws `Exception` when retrieval fails
 
-### getModelFields
+### getPageModules
 
-Retrieves detailed field definitions for a specific content model.
+Retrieves detailed field definitions for page modules.
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `modelID` | `number` | Yes | The model ID |
+| `includeDefault` | `boolean` | Yes | Whether to include default modules |
 | `guid` | `string` | Yes | Current website GUID |
 
-**Returns:** `ModelField[]` - Array of field definitions
+**Returns:** `Model[]` - Array of page module definitions
 
 **Usage Example:**
 ```typescript
-const fields = await apiClient.modelMethods.getModelFields(123, guid);
+const pageModules = await apiClient.modelMethods.getPageModules(true, guid);
 console.log(`Model has ${fields.length} fields`);
 
 // Display detailed field information
@@ -418,6 +420,8 @@ const cleanupUnusedModels = async () => {
 
 ## Navigation
 - [← Back to Main Documentation](../README.md)
+- [Authentication & Setup](./auth.md)
+- [Multi-Instance Operations](./multi-instance-operations.md)
 - [AssetMethods](./asset-methods.md)
 - [BatchMethods](./batch-methods.md)
 - [ContainerMethods](./container-methods.md)

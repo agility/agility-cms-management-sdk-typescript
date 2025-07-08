@@ -14,7 +14,7 @@ This class provides comprehensive webhook management operations for Agility CMS.
 
 ### Function List
 - [getWebhook](#getwebhook) - Retrieves a specific webhook by ID
-- [getWebhookList](#getwebhooklist) - Retrieves list of all webhooks
+- [webhookList](#webhooklist) - Retrieves list of all webhooks
 - [saveWebhook](#savewebhook) - Creates or updates a webhook
 - [deleteWebhook](#deletewebhook) - Deletes a webhook by ID
 
@@ -84,15 +84,17 @@ The `Webhook` object includes:
 **Error Handling:**
 - Throws `Exception` when webhook not found
 
-### getWebhookList
+### webhookList
 
 Retrieves a list of all webhooks in the current website.
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `guid` | `string` | Yes | Current website GUID |
+| `take` | `number` | No | Number of records to take (default: 20) |
+| `token` | `string` | No | Token parameter (default: null) |
 
-**Returns:** `Webhook[]` - Array of all webhooks
+**Returns:** `any` - Array of all webhooks
 
 **Usage Example:**
 ```typescript
@@ -436,6 +438,7 @@ const cleanupFailingWebhooks = async (maxFailureRate = 50) => {
 
 ## Navigation
 - [← Back to Main Documentation](../README.md)
+- [Authentication & Setup](./auth.md)
 - [AssetMethods](./asset-methods.md)
 - [BatchMethods](./batch-methods.md)
 - [ContainerMethods](./container-methods.md)
@@ -444,5 +447,6 @@ const cleanupFailingWebhooks = async (maxFailureRate = 50) => {
 - [InstanceUserMethods](./instance-user-methods.md)
 - [ModelMethods](./model-methods.md)
 - [PageMethods](./page-methods.md)
+- [ServerUserMethods](./server-user-methods.md)
 - [ServerUserMethods](./server-user-methods.md)
 - **WebhookMethods** *(current)* 

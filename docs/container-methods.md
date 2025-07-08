@@ -254,13 +254,15 @@ try {
 
 ## Navigation
 - [← Back to Main Documentation](../README.md)
+- [Authentication & Setup](./auth.md)
+- [CI/CD & Automated Environments](./cicd.md)
 - [AssetMethods](./asset-methods.md)
 - [BatchMethods](./batch-methods.md)
-- **ContainerMethods** *(current)*
 - [ContentMethods](./content-methods.md)
 - [InstanceMethods](./instance-methods.md)
 - [InstanceUserMethods](./instance-user-methods.md)
 - [ModelMethods](./model-methods.md)
 - [PageMethods](./page-methods.md)
 - [ServerUserMethods](./server-user-methods.md)
-- [WebhookMethods](./webhook-methods.md) 
+- [WebhookMethods](./webhook-methods.md)
+- [Multi-Instance Operations](./multi-instance-operations.md) 

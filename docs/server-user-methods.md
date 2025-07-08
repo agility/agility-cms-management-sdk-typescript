@@ -12,25 +12,24 @@ This class provides server-level user management operations for Agility CMS. The
 - Changes to server users may affect access to multiple instances
 
 ### Function List
-- [getServerUser](#getserveruser) - Retrieves a specific server user by ID
-- [saveServerUser](#saveserveruser) - Creates or updates a server user
+- [me](#me) - Retrieves current server user information
+- [you](#you) - Retrieves specific server user information
 
 ---
 
-### getServerUser
+### me
 
-Retrieves a specific server user by their unique ID.
+Retrieves current authenticated server user information.
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `userID` | `number` | Yes | The server user ID to retrieve |
 | `guid` | `string` | Yes | Current website GUID |
 
 **Returns:** `ServerUser` - Complete server user object with roles and permissions
 
 **Usage Example:**
 ```typescript
-const serverUser = await apiClient.serverUserMethods.getServerUser(123, guid);
+const serverUser = await apiClient.serverUserMethods.me(guid);
 console.log(`Server User: ${serverUser.firstName} ${serverUser.lastName}`);
 console.log(`Email: ${serverUser.emailAddress}`);
 console.log(`Role: ${serverUser.roleName}`);
@@ -88,16 +87,16 @@ Common server-level roles include:
 - Throws `Exception` when server user not found
 - Throws `Exception` when insufficient permissions to view server user details
 
-### saveServerUser
+### you
 
-Creates a new server user or updates an existing one.
+Retrieves specific server user information by server user ID.
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `user` | `ServerUser` | Yes | Server user object to save |
 | `guid` | `string` | Yes | Current website GUID |
+| `serverUserID` | `number` | Yes | The server user ID to retrieve |
 
-**Returns:** `ServerUser` - Saved server user object with updated metadata
+**Returns:** `any` - Server user information and data
 
 **Usage Example:**
 ```typescript
@@ -267,6 +266,8 @@ Common server permissions include:
 
 ## Navigation
 - [← Back to Main Documentation](../README.md)
+- [Authentication & Setup](./auth.md)
+- [Multi-Instance Operations](./multi-instance-operations.md)
 - [AssetMethods](./asset-methods.md)
 - [BatchMethods](./batch-methods.md)
 - [ContainerMethods](./container-methods.md)

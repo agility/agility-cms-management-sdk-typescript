@@ -4,6 +4,7 @@
 
 - [About the Management API SDK](#about-the-management-api-sdk)
 - [Getting Started](#getting-started)
+- [Authentication & Setup](./docs/auth.md)
 - [API Method Classes](#api-method-classes)
 - [Examples](#examples)
 - [TypeScript Interfaces](#typescript-interfaces)
@@ -28,103 +29,43 @@
 3. You will need valid Agility CMS credentials to authenticate and obtain an access token.
 
 ### Authentication
-Before using the SDK, you must authenticate against the Agility Management API to obtain a valid access token. This token is required for all subsequent API requests.
-
-The authentication process uses OAuth 2.0 and requires multiple steps:
-
-1. First, initiate the authorization flow by making a GET request to the authorization endpoint:
-```javascript
-const authUrl = 'https://mgmt.aglty.io/oauth/authorize';
-
-//if you wish to implement offline access using refresh tokens, use this URL (enables refresh tokens)
-//const authUrl = 'https://mgmt.aglty.io/oauth/authorize?scope=offline-access '; 
-
-const params = new URLSearchParams({
-  response_type: 'code',
-  redirect_uri: 'YOUR_REDIRECT_URI',
-  state: 'YOUR_STATE',
-  scope: 'openid profile email offline_access'
-});
-
-// Redirect the user to the authorization URL
-window.location.href = `${authUrl}?${params.toString()}`;
-```
-
-2. After successful authentication, you'll receive an authorization code at your redirect URI. Use this code to obtain an access token:
-```javascript
-const response = await fetch('https://mgmt.aglty.io/oauth/token', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/x-www-form-urlencoded'
-  },
-  body: new URLSearchParams({
-    code: 'YOUR_AUTHORIZATION_CODE'
-  })
-});
-
-const { access_token, refresh_token, expires_in } = await response.json();
-```
-
-3. Use the obtained token to initialize the SDK:
-```javascript
-import * as mgmtApi from "@agility/management-sdk";
-
-// Initialize the Options Class with your authentication token
-let options = new mgmtApi.Options();
-options.token = access_token; // Use the token obtained from authentication
-
-// Initialize the APIClient Class
-let apiClient = new mgmtApi.ApiClient(options);
-
-let guid = "<<Provide the Guid of the Website>>";
-let locale = "<<Provide the locale of the Website>>"; // Example: en-us
-
-// Now you can make authenticated requests
-var contentItem = await apiClient.contentMethods.getContentItem(22, guid, locale);
-console.log(JSON.stringify(contentItem));
-```
-
-4. When the access token expires, use the refresh token to obtain a new access token:
-```javascript
-const response = await fetch('https://mgmt.aglty.io/oauth/refresh', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json'
-  },
-  body: JSON.stringify({
-    refresh_token: 'YOUR_REFRESH_TOKEN'
-  })
-});
-
-const { access_token, refresh_token, expires_in } = await response.json();
-```
-
-Note: 
-- The access token has a limited lifetime (typically 1 hour)
-- The refresh token can be used to obtain new access tokens
-- Store refresh tokens securely and never expose them in client-side code
-- Implement proper error handling for authentication failures
+For detailed authentication instructions, including OAuth 2.0 setup, token management, and security best practices, see the **[Authentication & Setup Guide](./docs/auth.md)**.
 
 ### Making a Request
-```Javascript
+
+#### Simple OAuth Authentication (Recommended)
+```typescript
 import * as mgmtApi from "@agility/management-sdk";
 
-//initialize the Options Class
-let options = new mgmtApi.Options();
+// Simple OAuth authentication - tokens managed automatically
+const apiClient = new mgmtApi.ApiClient();
+await apiClient.auth();
 
-options.token = "<<Provide Auth Token>>"
-//Initialize the APIClient Class
-let apiClient = new mgmtApi.ApiClient(options);
+const guid = "your-website-guid";
+const locale = "en-us";
 
-let guid = "<<Provide the Guid of the Website>>";
-let locale = "<<Provide the locale of the Website>>"; //Example: en-us
-
-//make the request: get a content item with the ID '22'
-var contentItem = await apiClient.contentMethods.getContentItem(22,guid, locale);
-
-//To log the response of the contentItem object in console.
+// Make authenticated request - token refresh handled automatically
+const contentItem = await apiClient.contentMethods.getContentItem(22, guid, locale);
 console.log(JSON.stringify(contentItem));
 ```
+
+#### Manual Token Authentication (For CI/CD)
+```typescript
+import * as mgmtApi from "@agility/management-sdk";
+
+// Token-based approach for CI/CD and automated environments
+const options = new mgmtApi.Options();
+options.token = process.env.AGILITY_API_TOKEN;
+const apiClient = new mgmtApi.ApiClient(options);
+
+const guid = process.env.AGILITY_GUID;
+const locale = "en-us";
+
+const contentItem = await apiClient.contentMethods.getContentItem(22, guid, locale);
+console.log('Content retrieved:', contentItem.fields.title);
+```
+
+> 💡 **Note**: The new OAuth authentication requires `keytar` for secure token storage. See the [Authentication & Setup Guide](./docs/auth.md) for OAuth setup or [CI/CD & Automated Environments](./docs/cicd.md) for token-based authentication.
 
 ## API Method Classes
 
@@ -148,7 +89,7 @@ console.log(JSON.stringify(contentItem));
 
 ### Page Management
 - **[PageMethods](./docs/page-methods.md)** - Page management operations (17 functions)
-  - [getSitemap](./docs/page-methods.md#getsitemap), [getPageTemplates](./docs/page-methods.md#getpagetemplates), [getPageTemplate](./docs/page-methods.md#getpagetemplate), [getPageTemplateName](./docs/page-methods.md#getpagetemplatename), [deletePageTemplate](./docs/page-methods.md#deletepagetemplate), [getPageItemTemplates](./docs/page-methods.md#getpageitemtemplates), [savePageTemplate](./docs/page-methods.md#savepagetemplate), [getPage](./docs/page-methods.md#getpage), [publishPage](./docs/page-methods.md#publishpage), [unPublishPage](./docs/page-methods.md#unpublishpage), [pageRequestApproval](./docs/page-methods.md#pagerequestapproval), [approvePage](./docs/page-methods.md#approvepage), [declinePage](./docs/page-methods.md#declinepage), [deletePage](./docs/page-methods.md#deletepage), [savePage](./docs/page-methods.md#savepage), [getPageHistory](./docs/page-methods.md#getpagehistory), [getPageComments](./docs/page-methods.md#getpagecomments)
+  - [getPage](./docs/page-methods.md#getpage), [getPageByPath](./docs/page-methods.md#getpagebypath), [getPageHistory](./docs/page-methods.md#getpagehistory), [getPageComments](./docs/page-methods.md#getpagecomments), [getPageList](./docs/page-methods.md#getpagelist), [getPageListByPageTemplateID](./docs/page-methods.md#getpagelistbypagetemplateid), [getPageListByPage](./docs/page-methods.md#getpagelistbypage), [getPageListByPageAndPageTemplateID](./docs/page-methods.md#getpagelistbypageandpagetemplateid), [getPageTree](./docs/page-methods.md#getpagetree), [getPageTemplateList](./docs/page-methods.md#getpagetemplatelist), [getPageSecurity](./docs/page-methods.md#getpagesecurity), [getPageItemTemplateList](./docs/page-methods.md#getpageitemtemplatelist), [getPageContentZones](./docs/page-methods.md#getpagecontentzones), [savePage](./docs/page-methods.md#savepage), [savePageSecurity](./docs/page-methods.md#savepagesecurity), [movePageItem](./docs/page-methods.md#movepageitem), [deletePage](./docs/page-methods.md#deletepage)
 
 ### User Management
 - **[InstanceMethods](./docs/instance-methods.md)** - Instance-level operations (1 function)
@@ -162,7 +103,21 @@ console.log(JSON.stringify(contentItem));
 
 ### Integration
 - **[WebhookMethods](./docs/webhook-methods.md)** - Webhook management (4 functions)
-  - [webhookList](./docs/webhook-methods.md#webhooklist), [saveWebhook](./docs/webhook-methods.md#savewebhook), [getWebhook](./docs/webhook-methods.md#getwebhook), [deleteWebhook](./docs/webhook-methods.md#deletewebhook)
+  - [getWebhook](./docs/webhook-methods.md#getwebhook), [webhookList](./docs/webhook-methods.md#webhooklist), [saveWebhook](./docs/webhook-methods.md#savewebhook), [deleteWebhook](./docs/webhook-methods.md#deletewebhook)
+
+### Multi-Instance Operations
+- **[Multi-Instance Operations](./docs/multi-instance-operations.md)** - Advanced workflows for managing content across multiple instances and locales
+  - Configuration-driven content creation across multiple environments
+  - Parallel processing and batch operations
+  - Performance optimization and error handling
+  - Cross-instance synchronization and reporting
+
+### CI/CD & Automation
+- **[CI/CD & Automated Environments](./docs/cicd.md)** - Token-based authentication for automated environments
+  - CI/CD pipeline examples (GitHub Actions, GitLab CI, Jenkins)
+  - Serverless functions (AWS Lambda, Vercel)
+  - Environment configuration and security best practices
+  - Token management and rotation
 
 ## Examples
 
@@ -188,9 +143,12 @@ Agility CMS uses a simple approach for working with content and batches:
 ### Complete Workflow Example
 
 ```typescript
-import { ApiClient } from '@agility/management-sdk';
+import * as mgmtApi from '@agility/management-sdk';
 
-const client = new ApiClient({ token: 'your-token' });
+// Authenticate with simple OAuth flow
+const client = new mgmtApi.ApiClient();
+await client.auth();
+
 const guid = 'your-instance-guid';
 const locale = 'en-us';
 

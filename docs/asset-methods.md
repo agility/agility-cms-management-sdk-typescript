@@ -367,7 +367,8 @@ console.log(result); // "Gallery deleted successfully"
 
 ## Navigation
 - [← Back to Main Documentation](../README.md)
-- **AssetMethods** *(current)*
+- [Authentication & Setup](./auth.md)
+- [CI/CD & Automated Environments](./cicd.md)
 - [BatchMethods](./batch-methods.md)
 - [ContainerMethods](./container-methods.md)
 - [ContentMethods](./content-methods.md)
@@ -376,4 +377,6 @@ console.log(result); // "Gallery deleted successfully"
 - [ModelMethods](./model-methods.md)
 - [PageMethods](./page-methods.md)
 - [ServerUserMethods](./server-user-methods.md)
-- [WebhookMethods](./webhook-methods.md) 
+- [WebhookMethods](./webhook-methods.md)
+- [Multi-Instance Operations](./multi-instance-operations.md)
+ 

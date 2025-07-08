@@ -658,6 +658,7 @@ const safeDeletePage = async (pageID) => {
 
 ## Navigation
 - [← Back to Main Documentation](../README.md)
+- [Authentication & Setup](./auth.md)
 - [AssetMethods](./asset-methods.md)
 - [BatchMethods](./batch-methods.md)
 - [ContainerMethods](./container-methods.md)
@@ -665,6 +666,6 @@ const safeDeletePage = async (pageID) => {
 - [InstanceMethods](./instance-methods.md)
 - [InstanceUserMethods](./instance-user-methods.md)
 - [ModelMethods](./model-methods.md)
-- **PageMethods** *(current)*
 - [ServerUserMethods](./server-user-methods.md)
-- [WebhookMethods](./webhook-methods.md) 
+- [WebhookMethods](./webhook-methods.md)
+- [Multi-Instance Operations](./multi-instance-operations.md) 
