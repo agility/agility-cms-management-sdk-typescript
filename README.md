@@ -1,5 +1,17 @@
 # Agility CMS & Management API TypeScript SDK
 
+## Table of Contents
+
+- [About the Management API SDK](#about-the-management-api-sdk)
+- [Getting Started](#getting-started)
+- [Authentication & Setup](./docs/auth.md)
+- [API Method Classes](#api-method-classes)
+- [Examples](#examples)
+- [TypeScript Interfaces](#typescript-interfaces)
+- [Available Enums](#available-enums)
+
+---
+
 ## About the Management API SDK
 
 - Provides a facility to developers to use the new Agility Management API more effectively.
@@ -17,118 +29,109 @@
 3. You will need valid Agility CMS credentials to authenticate and obtain an access token.
 
 ### Authentication
-Before using the SDK, you must authenticate against the Agility Management API to obtain a valid access token. This token is required for all subsequent API requests.
-
-The authentication process uses OAuth 2.0 and requires multiple steps:
-
-1. First, initiate the authorization flow by making a GET request to the authorization endpoint:
-```javascript
-const authUrl = 'https://mgmt.aglty.io/oauth/authorize';
-
-//if you wish to implement offline access using refresh tokens, use this URL (enables refresh tokens)
-//const authUrl = 'https://mgmt.aglty.io/oauth/authorize?scope=offline-access '; 
-
-const params = new URLSearchParams({
-  response_type: 'code',
-  redirect_uri: 'YOUR_REDIRECT_URI',
-  state: 'YOUR_STATE',
-  scope: 'openid profile email offline_access'
-});
-
-// Redirect the user to the authorization URL
-window.location.href = `${authUrl}?${params.toString()}`;
-```
-
-2. After successful authentication, you'll receive an authorization code at your redirect URI. Use this code to obtain an access token:
-```javascript
-const response = await fetch('https://mgmt.aglty.io/oauth/token', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/x-www-form-urlencoded'
-  },
-  body: new URLSearchParams({
-    code: 'YOUR_AUTHORIZATION_CODE'
-  })
-});
-
-const { access_token, refresh_token, expires_in } = await response.json();
-```
-
-3. Use the obtained token to initialize the SDK:
-```javascript
-import * as mgmtApi from "@agility/management-sdk";
-
-// Initialize the Options Class with your authentication token
-let options = new mgmtApi.Options();
-options.token = access_token; // Use the token obtained from authentication
-
-// Initialize the APIClient Class
-let apiClient = new mgmtApi.ApiClient(options);
-
-let guid = "<<Provide the Guid of the Website>>";
-let locale = "<<Provide the locale of the Website>>"; // Example: en-us
-
-// Now you can make authenticated requests
-var contentItem = await apiClient.contentMethods.getContentItem(22, guid, locale);
-console.log(JSON.stringify(contentItem));
-```
-
-4. When the access token expires, use the refresh token to obtain a new access token:
-```javascript
-const response = await fetch('https://mgmt.aglty.io/oauth/refresh', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json'
-  },
-  body: JSON.stringify({
-    refresh_token: 'YOUR_REFRESH_TOKEN'
-  })
-});
-
-const { access_token, refresh_token, expires_in } = await response.json();
-```
-
-Note: 
-- The access token has a limited lifetime (typically 1 hour)
-- The refresh token can be used to obtain new access tokens
-- Store refresh tokens securely and never expose them in client-side code
-- Implement proper error handling for authentication failures
-
+For detailed authentication instructions, including OAuth 2.0 setup, token management, and security best practices, see the **[Authentication & Setup Guide](./docs/auth.md)**.
 
 ### Making a Request
-```Javascript
+
+#### Simple OAuth Authentication (Recommended)
+```typescript
 import * as mgmtApi from "@agility/management-sdk";
 
-//initialize the Options Class
-let options = new mgmtApi.Options();
+// Simple OAuth authentication - tokens managed automatically
+const apiClient = new mgmtApi.ApiClient();
+await apiClient.auth();
 
-options.token = "<<Provide Auth Token>>"
-//Initialize the APIClient Class
-let apiClient = new mgmtApi.ApiClient(options);
+const guid = "your-website-guid";
+const locale = "en-us";
 
-let guid = "<<Provide the Guid of the Website>>";
-let locale = "<<Provide the locale of the Website>>"; //Example: en-us
-
-
-
-//make the request: get a content item with the ID '22'
-var contentItem = await apiClient.contentMethods.getContentItem(22,guid, locale);
-
-//To log the response of the contentItem object in console.
+// Make authenticated request - token refresh handled automatically
+const contentItem = await apiClient.contentMethods.getContentItem(22, guid, locale);
 console.log(JSON.stringify(contentItem));
 ```
 
-## Understanding Agility CMS Batch Architecture
+#### Manual Token Authentication (For CI/CD)
+```typescript
+import * as mgmtApi from "@agility/management-sdk";
+
+// Token-based approach for CI/CD and automated environments
+const options = new mgmtApi.Options();
+options.token = process.env.AGILITY_API_TOKEN;
+const apiClient = new mgmtApi.ApiClient(options);
+
+const guid = process.env.AGILITY_GUID;
+const locale = "en-us";
+
+const contentItem = await apiClient.contentMethods.getContentItem(22, guid, locale);
+console.log('Content retrieved:', contentItem.fields.title);
+```
+
+> 💡 **Note**: The new OAuth authentication requires `keytar` for secure token storage. See the [Authentication & Setup Guide](./docs/auth.md) for OAuth setup or [CI/CD & Automated Environments](./docs/cicd.md) for token-based authentication.
+
+## API Method Classes
+
+### File and Media Management
+- **[AssetMethods](./docs/asset-methods.md)** - File and media management operations (15 functions)
+  - [deleteFile](./docs/asset-methods.md#deletefile), [moveFile](./docs/asset-methods.md#movefile), [getMediaList](./docs/asset-methods.md#getmedialist), [getGalleries](./docs/asset-methods.md#getgalleries), [getGalleryById](./docs/asset-methods.md#getgallerybyid), [getGalleryByName](./docs/asset-methods.md#getgallerybyname), [getDefaultContainer](./docs/asset-methods.md#getdefaultcontainer), [saveGallery](./docs/asset-methods.md#savegallery), [deleteGallery](./docs/asset-methods.md#deletegallery), [getAssetByID](./docs/asset-methods.md#getassetbyid), [getAssetByUrl](./docs/asset-methods.md#getassetbyurl), [upload](./docs/asset-methods.md#upload), [createFolder](./docs/asset-methods.md#createfolder), [deleteFolder](./docs/asset-methods.md#deletefolder), [renameFolder](./docs/asset-methods.md#renamefolder)
+
+### Workflow Operations
+- **[BatchMethods](./docs/batch-methods.md)** - Batch workflow operations (7 functions)
+  - [getBatch](./docs/batch-methods.md#getbatch), [publishBatch](./docs/batch-methods.md#publishbatch), [unpublishBatch](./docs/batch-methods.md#unpublishbatch), [approveBatch](./docs/batch-methods.md#approvebatch), [declineBatch](./docs/batch-methods.md#declinebatch), [requestApprovalBatch](./docs/batch-methods.md#requestapprovalbatch), [getBatchTypes](./docs/batch-methods.md#getbatchtypes)
+
+### Content Management
+- **[ContainerMethods](./docs/container-methods.md)** - Container management operations (8 functions)
+  - [getContainerByID](./docs/container-methods.md#getcontainerbyid), [getContainersByModel](./docs/container-methods.md#getcontainersbymodel), [getContainerByReferenceName](./docs/container-methods.md#getcontainerbyreferencename), [getContainerSecurity](./docs/container-methods.md#getcontainersecurity), [getContainerList](./docs/container-methods.md#getcontainerlist), [getNotificationList](./docs/container-methods.md#getnotificationlist), [saveContainer](./docs/container-methods.md#savecontainer), [deleteContainer](./docs/container-methods.md#deletecontainer)
+
+- **[ContentMethods](./docs/content-methods.md)** - Content item operations (13 functions)
+  - [getContentItem](./docs/content-methods.md#getcontentitem), [publishContent](./docs/content-methods.md#publishcontent), [unPublishContent](./docs/content-methods.md#unpublishcontent), [contentRequestApproval](./docs/content-methods.md#contentrequestapproval), [approveContent](./docs/content-methods.md#approvecontent), [declineContent](./docs/content-methods.md#declinecontent), [deleteContent](./docs/content-methods.md#deletecontent), [saveContentItem](./docs/content-methods.md#savecontentitem), [saveContentItems](./docs/content-methods.md#savecontentitems), [getContentItems](./docs/content-methods.md#getcontentitems), [getContentList](./docs/content-methods.md#getcontentlist), [getContentHistory](./docs/content-methods.md#getcontenthistory), [getContentComments](./docs/content-methods.md#getcontentcomments)
+
+- **[ModelMethods](./docs/model-methods.md)** - Content model operations (6 functions)
+  - [getContentModel](./docs/model-methods.md#getcontentmodel), [getModelByReferenceName](./docs/model-methods.md#getmodelbyreferencename), [getContentModules](./docs/model-methods.md#getcontentmodules), [getPageModules](./docs/model-methods.md#getpagemodules), [saveModel](./docs/model-methods.md#savemodel), [deleteModel](./docs/model-methods.md#deletemodel)
+
+### Page Management
+- **[PageMethods](./docs/page-methods.md)** - Page management operations (17 functions)
+  - [getPage](./docs/page-methods.md#getpage), [getPageByPath](./docs/page-methods.md#getpagebypath), [getPageHistory](./docs/page-methods.md#getpagehistory), [getPageComments](./docs/page-methods.md#getpagecomments), [getPageList](./docs/page-methods.md#getpagelist), [getPageListByPageTemplateID](./docs/page-methods.md#getpagelistbypagetemplateid), [getPageListByPage](./docs/page-methods.md#getpagelistbypage), [getPageListByPageAndPageTemplateID](./docs/page-methods.md#getpagelistbypageandpagetemplateid), [getPageTree](./docs/page-methods.md#getpagetree), [getPageTemplateList](./docs/page-methods.md#getpagetemplatelist), [getPageSecurity](./docs/page-methods.md#getpagesecurity), [getPageItemTemplateList](./docs/page-methods.md#getpageitemtemplatelist), [getPageContentZones](./docs/page-methods.md#getpagecontentzones), [savePage](./docs/page-methods.md#savepage), [savePageSecurity](./docs/page-methods.md#savepagesecurity), [movePageItem](./docs/page-methods.md#movepageitem), [deletePage](./docs/page-methods.md#deletepage)
+
+### User Management
+- **[InstanceMethods](./docs/instance-methods.md)** - Instance-level operations (1 function)
+  - [getLocales](./docs/instance-methods.md#getlocales)
+
+- **[InstanceUserMethods](./docs/instance-user-methods.md)** - Instance user management (3 functions)
+  - [getUsers](./docs/instance-user-methods.md#getusers), [saveUser](./docs/instance-user-methods.md#saveuser), [deleteUser](./docs/instance-user-methods.md#deleteuser)
+
+- **[ServerUserMethods](./docs/server-user-methods.md)** - Server user operations (2 functions)
+  - [me](./docs/server-user-methods.md#me), [you](./docs/server-user-methods.md#you)
+
+### Integration
+- **[WebhookMethods](./docs/webhook-methods.md)** - Webhook management (4 functions)
+  - [getWebhook](./docs/webhook-methods.md#getwebhook), [webhookList](./docs/webhook-methods.md#webhooklist), [saveWebhook](./docs/webhook-methods.md#savewebhook), [deleteWebhook](./docs/webhook-methods.md#deletewebhook)
+
+### Multi-Instance Operations
+- **[Multi-Instance Operations](./docs/multi-instance-operations.md)** - Advanced workflows for managing content across multiple instances and locales
+  - Configuration-driven content creation across multiple environments
+  - Parallel processing and batch operations
+  - Performance optimization and error handling
+  - Cross-instance synchronization and reporting
+
+### CI/CD & Automation
+- **[CI/CD & Automated Environments](./docs/cicd.md)** - Token-based authentication for automated environments
+  - CI/CD pipeline examples (GitHub Actions, GitLab CI, Jenkins)
+  - Serverless functions (AWS Lambda, Vercel)
+  - Environment configuration and security best practices
+  - Token management and rotation
+
+## Examples
+
+### Understanding Agility CMS Batch Architecture
 
 Agility CMS uses a simple approach for working with content and batches:
 
-### Content/Page Creation (Handled by Respective Controllers)
+#### Content/Page Creation (Handled by Respective Controllers)
 - **contentMethods.saveContentItem()** - Creates a single new content item and adds it to a batch
 - **contentMethods.saveContentItems()** - Creates multiple new content items and adds them to a batch  
 - **pageMethods.savePage()** - Creates a new page and adds it to a batch
 - These methods create the content AND automatically handle batch creation/management
 
-### Batch Workflow Operations (Handled by Batch Controller)
+#### Batch Workflow Operations (Handled by Batch Controller)
 - **batchMethods.publishBatch()** - Publishes all items in an existing batch
 - **batchMethods.unpublishBatch()** - Unpublishes all items in an existing batch
 - **batchMethods.approveBatch()** - Approves all items in an existing batch
@@ -137,280 +140,15 @@ Agility CMS uses a simple approach for working with content and batches:
 - **batchMethods.getBatch()** - Retrieves details of an existing batch
 - **batchMethods.getBatchTypes()** - Retrieves all batch-related enum types for developer discovery
 
-## Class AssetMethods
-This class is used to perform operations related to Assets. The following are the methods: -
-
-### upload
-| Parameter | Type     | Description                |
-| :-------- | :------- | :------------------------- |
-| `formData` | `FormData` | This is an object of type FormData where files can be posted eg : `const file = fs.readFileSync(<<Local File>>, null);const form = new FormData(); form.append('files',file,'<<File Name>>');`|
-| `agilityFolderPath` | `string` | Path of the folder in Agility where the file(s) needs to be uploaded.|
-| `guid` | `string` | Current website guid.|
-| `groupingID` | `number` | Path of the folder in Agility where the file(s) needs to be uploaded.|
-
-Returns: A collection of ```Media``` class Object.
-
-### createFolder
-| Parameter | Type     | Description                |
-| :-------- | :------- | :------------------------- |
-| `originKey` | `string` | The origin key of the requested folder.  |
-| `guid` | `string` | Current website guid.|
-
-Returns: A collection of ```Media``` class Object.
-
-### deleteFolder
-| Parameter | Type     | Description                |
-| :-------- | :------- | :------------------------- |
-| `originKey` | `string` | The origin key of the requested folder.  |
-| `guid` | `string` | Current website guid.|
-| `mediaID` | `number` | The mediaID of the folder that needs to be deleted.|
-
-### renameFolder
-| Parameter | Type     | Description                |
-| :-------- | :------- | :------------------------- |
-| `folderName` | `string` | The original folder name.  |
-| `newFolderName` | `string` | The new folder name.  |
-| `guid` | `string` | Current website guid.|
-| `mediaID` | `number` | The mediaID of the folder that needs to be renamed.|
-
-### deleteFile
-| Parameter | Type     | Description                |
-| :-------- | :------- | :------------------------- |
-| `mediaID` | `number` | The mediaID of the asset which needs to be deleted.|
-| `guid` | `string` | Current website guid.|
-Returns
-A ```string``` response if a file has been deleted.
-
-### moveFile
-| Parameter | Type     | Description                |
-| :-------- | :------- | :------------------------- |
-| `mediaID` | `number` | The mediaID of the file that needs to be moved.|
-| `newFolder` | `string` | The new location (in Agility) where the file needs to be moved.|
-| `guid` | `string` | Current website guid.|
-
-Returns: An object of ```Media``` class with the new location of the file.
-
-### getMediaList
-| Parameter | Type     | Description                |
-| :-------- | :------- | :------------------------- |
-| `pageSize` | `number` | The page size on which the assets needs to selected.|
-| `recordOffset` | `number` | The record offset value to skip search results.|
-| `guid` | `string` | Current website guid.|
-
-Returns: An object of ```AssetMediaList``` class.
-
-### getGalleryById
-| Parameter | Type     | Description                |
-| :-------- | :------- | :------------------------- |
-| `guid` | `string` | Current website guid.|
-| `id` | `number` | The ID of the requested gallery.|
-
-Returns: An object of ```assetMediaGrouping``` class.
-
-### getGalleryByName
-| Parameter | Type     | Description                |
-| :-------- | :------- | :------------------------- |
-| `guid` | `string` | Current website guid.|
-| `galleryName` | `string` | The name of the requested gallery.|
-
-Returns: An object of ```assetMediaGrouping``` class.
-
-### getDefaultContainer
-| Parameter | Type     | Description                |
-| :-------- | :------- | :------------------------- |
-| `guid` | `string` | Current website guid.|
-
-Returns: An object of ```assetContainer``` class.
-
-### getGalleries
-| Parameter | Type     | Description                |
-| :-------- | :------- | :------------------------- |
-| `guid` | `string` | Current website guid.|
-| `search` | `string` | String to search a specific gallery item.|
-| `pageSize` | `number` | The pageSize on which the galleries needs to be selected.|
-| `rowIndex` | `number` | The rowIndex value for the resultant record set.|
-
-Returns: An object of ```assetGalleries``` class.
-
-### saveGallery
-| Parameter | Type     | Description                |
-| :-------- | :------- | :------------------------- |
-| `guid` | `string` | Current website guid.|
-| `gallery` | `assetMediaGrouping` | Object of AssetMediaGrouping class.|
-
-Returns: An object of ```assetMediaGrouping``` class.
-
-### deleteGallery
-| Parameter | Type     | Description                |
-| :-------- | :------- | :------------------------- |
-| `guid` | `string` | Current website guid.|
-| `id` | `number` | The id of the gallery to be deleted.|
-
-A ```string``` response if the gallery has been deleted.
-
-### getAssetByID
-| Parameter | Type     | Description                |
-| :-------- | :------- | :------------------------- |
-| `mediaID` | `number` | The mediaID of the requested asset.|
-| `guid` | `string` | Current website guid.|
-
-Returns: An object of ```Media``` class with the information of the asset.
-
-### getAssetByUrl
-| Parameter | Type     | Description                |
-| :-------- | :------- | :------------------------- |
-| `url` | `string` | The url of the requested asset.|
-| `guid` | `string` | Current website guid.|
-
-Returns: An object of ```Media``` class with the information of the asset.
-
-## Class BatchMethods
-This class is used to perform **workflow operations** on existing batches. 
-
-**Important**: To CREATE new content or pages, use `contentMethods.saveContentItem(s)` or `pageMethods.savePage()` instead. These batch methods are for managing workflow operations (publish, unpublish, approve, etc.) on existing batches.
-
-### getBatch
-Retrieves details of an existing batch.
-
-| Parameter | Type     | Description                |
-| :-------- | :------- | :------------------------- |
-| `batchID` | `number` | The batchID of the requested batch.|
-| `guid` | `string` | Current website guid.|
-| `expandItems` | `boolean` | *(Optional)* Whether to include full item details. Default: `true`|
-
-Returns: An object of ```Batch``` class.
-
-```javascript
-// Get batch with full item details (default)
-const batch = await apiClient.batchMethods.getBatch(123, guid);
-
-// Get basic batch information only (performance optimization)
-const batchBasic = await apiClient.batchMethods.getBatch(123, guid, false);
-```
-
-### publishBatch
-Publishes all items in an existing batch.
-
-| Parameter | Type     | Description                |
-| :-------- | :------- | :------------------------- |
-| `batchID` | `number` | The batchID of the batch to publish.|
-| `guid` | `string` | Current website guid.|
-| `returnBatchId` | `boolean` | *(Optional)* If `true`, returns batch ID immediately. If `false` (default), waits for completion.|
-
-Returns: A ```number``` representing the batch ID.
-
-```javascript
-// Publish batch and wait for completion (default)
-const batchId = await apiClient.batchMethods.publishBatch(123, guid);
-
-// Publish batch and return immediately for custom polling
-const batchId = await apiClient.batchMethods.publishBatch(123, guid, true);
-```
-
-### unpublishBatch
-Unpublishes all items in an existing batch.
-
-| Parameter | Type     | Description                |
-| :-------- | :------- | :------------------------- |
-| `batchID` | `number` | The batchID of the batch to unpublish.|
-| `guid` | `string` | Current website guid.|
-| `returnBatchId` | `boolean` | *(Optional)* If `true`, returns batch ID immediately. If `false` (default), waits for completion.|
-
-Returns: A ```number``` representing the batch ID.
-
-### approveBatch
-Approves all items in an existing batch.
-
-| Parameter | Type     | Description                |
-| :-------- | :------- | :------------------------- |
-| `batchID` | `number` | The batchID of the batch to approve.|
-| `guid` | `string` | Current website guid.|
-| `returnBatchId` | `boolean` | *(Optional)* If `true`, returns batch ID immediately. If `false` (default), waits for completion.|
-
-Returns: A ```number``` representing the batch ID.
-
-### declineBatch
-Declines all items in an existing batch.
-
-| Parameter | Type     | Description                |
-| :-------- | :------- | :------------------------- |
-| `batchID` | `number` | The batchID of the batch to decline.|
-| `guid` | `string` | Current website guid.|
-| `returnBatchId` | `boolean` | *(Optional)* If `true`, returns batch ID immediately. If `false` (default), waits for completion.|
-
-Returns: A ```number``` representing the batch ID.
-
-### requestApprovalBatch
-Requests approval for all items in an existing batch.
-
-| Parameter | Type     | Description                |
-| :-------- | :------- | :------------------------- |
-| `batchID` | `number` | The batchID of the batch to request approval for.|
-| `guid` | `string` | Current website guid.|
-| `returnBatchId` | `boolean` | *(Optional)* If `true`, returns batch ID immediately. If `false` (default), waits for completion.|
-
-Returns: A ```number``` representing the batch ID.
-
-### getBatchTypes
-Retrieves all batch-related enum types for developer discovery and dynamic UI population.
-
-| Parameter | Type     | Description                |
-| :-------- | :------- | :------------------------- |
-| `guid` | `string` | Current website guid.|
-
-Returns: A ```BatchTypesResponse``` object containing all enum types.
-
-```javascript
-// Get all batch types for dynamic UI population
-const types = await apiClient.batchMethods.getBatchTypes(guid);
-
-// Create dropdown options for item types
-const itemTypeOptions = types.itemTypes.map(type => ({
-    label: type.name,
-    value: type.value
-}));
-
-// Validate operation type
-const isValidWorkflowOperation = (value) => 
-    types.workflowOperations.some(op => op.value === value);
-
-// Access specific enum data
-console.log('Available item types:', types.itemTypes);
-console.log('Available workflow operations:', types.workflowOperations);  
-console.log('Available batch states:', types.states);
-console.log('All operation types:', types.operationTypes);
-```
-
-**Response Structure:**
-```typescript
-interface BatchTypesResponse {
-    itemTypes: EnumInfo[];         // Page, ContentItem, ContentList, Tag, ModuleDef
-    operationTypes: EnumInfo[];    // All operation types 
-    workflowOperations: EnumInfo[]; // Publish, Unpublish, Approve, Decline, RequestApproval
-    states: EnumInfo[];            // None, Pending, InProcess, Processed, Deleted
-}
-
-interface EnumInfo {
-    value: number;      // Numeric enum value
-    name: string;       // String name (e.g., "Publish")
-    description: string; // Human-readable description
-}
-```
-
-**Benefits:**
-- 🎨 **Dynamic UI Population** - Frontend dropdowns populate automatically
-- ✅ **Client Validation** - Validate inputs against live API data
-- 🔍 **API Discovery** - Explore options without reading docs
-- 🚀 **Future-Proof** - New enum values appear automatically
-
-## Complete Workflow Example
-
-Here's a complete example showing how to work with batches:
+### Complete Workflow Example
 
 ```typescript
-import { ApiClient } from '@agility/management-sdk';
+import * as mgmtApi from '@agility/management-sdk';
 
-const client = new ApiClient({ token: 'your-token' });
+// Authenticate with simple OAuth flow
+const client = new mgmtApi.ApiClient();
+await client.auth();
+
 const guid = 'your-instance-guid';
 const locale = 'en-us';
 
@@ -457,26 +195,6 @@ console.log('Batch submitted for publishing:', batchId);
 
 console.log('All operations completed successfully!');
 ```
-
-## Summary: Complete BatchMethods API
-
-The `BatchMethods` class provides **7 essential methods** for batch workflow management:
-
-### **Batch Operations (7 methods)**
-- `getBatch()` - Retrieve batch details and status
-- `publishBatch()` - Publish all items in a batch
-- `unpublishBatch()` - Unpublish all items in a batch
-- `approveBatch()` - Approve all items in a batch
-- `declineBatch()` - Decline all items in a batch
-- `requestApprovalBatch()` - Request approval for all items in a batch
-- `getBatchTypes()` - Get all enum types for dynamic UIs
-
-**Developer Experience Features:**
-- 🎨 **Dynamic UI Support** - `getBatchTypes()` populates dropdowns automatically
-- ✅ **Strong Typing** - Full TypeScript support with intellisense
-- 🔄 **Auto-Retry Logic** - Built-in polling for operation completion
-- 📚 **Self-Documenting** - Enum discovery eliminates hard-coded values
-- ⚡ **Streamlined API** - Focused on essential batch workflow operations
 
 ## TypeScript Interfaces
 
