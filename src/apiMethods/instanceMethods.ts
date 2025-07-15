@@ -13,6 +13,9 @@ export class InstanceMethods {
     }
 
     async getLocales(guid: string) {
+        console.log('getLocales', guid);
+        console.log('this._options.token', this._options.token);
+        console.log('this._clientInstance', this._clientInstance);
         try {
             const apiPath = `locales`;
             const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
