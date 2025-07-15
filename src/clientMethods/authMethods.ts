@@ -1,5 +1,5 @@
 import { Options } from "../models/options";
-import { ClientInstance } from "./clientInstance";
+import { ClientInstance } from "../apiMethods/clientInstance";
 import { Exception } from "../models/exception";
 import { 
     OAuthTokenResponse, 
@@ -231,7 +231,7 @@ export class AuthMethods {
      * Get a valid access token - automatically refreshes if expired
      * @returns Promise containing valid access token or null if authentication required
      */
-    async getValidAccessToken(): Promise<string | null> {
+    public async getValidAccessToken(): Promise<string | null> {
         // Check if manual token is set (highest priority)
         if (this._options.token) {
             return this._options.token;
@@ -283,7 +283,7 @@ export class AuthMethods {
     /**
      * Clear all authentication data
      */
-    async clearAuthentication(): Promise<void> {
+    public async clearAuthentication(): Promise<void> {
         await this._tokenStorage.clearTokens();
         this._options.token = undefined;
     }
@@ -292,7 +292,7 @@ export class AuthMethods {
      * Check if user is authenticated (has valid token)
      * @returns Promise resolving to true if authenticated
      */
-    async isAuthenticated(): Promise<boolean> {
+    public async isAuthenticated(): Promise<boolean> {
         const validToken = await this.getValidAccessToken();
         return validToken !== null;
     }
@@ -420,7 +420,7 @@ export class AuthMethods {
      * }
      * ```
      */
-    getAuthState(token?: string, expiresAt?: number, refreshToken?: string): AuthState {
+    public getAuthState(token?: string, expiresAt?: number, refreshToken?: string): AuthState {
         if (!token) {
             return { isAuthenticated: false };
         }

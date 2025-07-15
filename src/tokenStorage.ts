@@ -1,4 +1,16 @@
-import * as keytar from 'keytar';
+// Dynamic keytar import to avoid bundling issues in browser environments
+let keytar: any = null;
+
+// Only try to load keytar in Node.js environments
+if (typeof window === 'undefined' && typeof process !== 'undefined' && process.versions && process.versions.node) {
+    try {
+        // Dynamic import to avoid bundling
+        const keytarModuleName = 'keytar';
+        keytar = eval(`require('${keytarModuleName}')`);
+    } catch (error) {
+        console.warn('Keytar not available in this environment:', error);
+    }
+}
 
 export interface StoredTokenData {
     accessToken: string;
@@ -16,7 +28,7 @@ export interface TokenStorageOptions {
 
 /**
  * Secure token storage using OS-level keychain/credential store
- * Falls back to in-memory storage if keytar is unavailable
+ * Falls back to localStorage in browsers, then to in-memory storage if neither is available
  */
 export class TokenStorage {
     private serviceName: string;
@@ -24,11 +36,13 @@ export class TokenStorage {
     private fallbackToMemory: boolean;
     private memoryStorage: Map<string, StoredTokenData> = new Map();
     private keytarAvailable: boolean = true;
+    private isBrowser: boolean;
 
     constructor(options: TokenStorageOptions = {}) {
         this.serviceName = options.serviceName || 'agility-cms-management-sdk';
         this.accountName = options.accountName || 'default';
         this.fallbackToMemory = options.fallbackToMemory !== false;
+        this.isBrowser = typeof window !== 'undefined';
         
         // Test keytar availability
         this.testKeytarAvailability();
@@ -40,11 +54,67 @@ export class TokenStorage {
     private async testKeytarAvailability(): Promise<void> {
         try {
             // Test keytar by trying to access it
-            await keytar.findCredentials(this.serviceName + '-test');
-            this.keytarAvailable = true;
+            if (keytar && keytar.findCredentials) {
+                await keytar.findCredentials(this.serviceName + '-test');
+                this.keytarAvailable = true;
+            } else {
+                this.keytarAvailable = false;
+            }
         } catch (error) {
-            console.warn('Keytar not available, falling back to memory storage:', error);
+            console.warn('Keytar not available, falling back to localStorage or memory storage:', error);
             this.keytarAvailable = false;
+        }
+    }
+
+    /**
+     * Get localStorage key for token storage
+     */
+    private getLocalStorageKey(): string {
+        return `${this.serviceName}-${this.accountName}`;
+    }
+
+    /**
+     * Store tokens in localStorage (browser fallback)
+     */
+    private setTokensInLocalStorage(tokenData: StoredTokenData): void {
+        try {
+            if (this.isBrowser && window.localStorage) {
+                const serializedData = JSON.stringify(tokenData);
+                window.localStorage.setItem(this.getLocalStorageKey(), serializedData);
+            }
+        } catch (error) {
+            console.warn('Failed to store tokens in localStorage:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Retrieve tokens from localStorage (browser fallback)
+     */
+    private getTokensFromLocalStorage(): StoredTokenData | null {
+        try {
+            if (this.isBrowser && window.localStorage) {
+                const serializedData = window.localStorage.getItem(this.getLocalStorageKey());
+                if (serializedData) {
+                    return JSON.parse(serializedData);
+                }
+            }
+        } catch (error) {
+            console.warn('Failed to retrieve tokens from localStorage:', error);
+        }
+        return null;
+    }
+
+    /**
+     * Clear tokens from localStorage (browser fallback)
+     */
+    private clearTokensFromLocalStorage(): void {
+        try {
+            if (this.isBrowser && window.localStorage) {
+                window.localStorage.removeItem(this.getLocalStorageKey());
+            }
+        } catch (error) {
+            console.warn('Failed to clear tokens from localStorage:', error);
         }
     }
 
@@ -54,7 +124,8 @@ export class TokenStorage {
     async setTokens(tokenData: StoredTokenData): Promise<void> {
         const serializedData = JSON.stringify(tokenData);
         
-        if (this.keytarAvailable) {
+        // Try keytar first (Node.js environments)
+        if (this.keytarAvailable && keytar) {
             try {
                 await keytar.setPassword(this.serviceName, this.accountName, serializedData);
                 return;
@@ -66,7 +137,20 @@ export class TokenStorage {
             }
         }
         
-        // Fallback to memory storage
+        // Try localStorage second (browser environments)
+        if (this.isBrowser) {
+            try {
+                this.setTokensInLocalStorage(tokenData);
+                return;
+            } catch (error) {
+                console.warn('Failed to store tokens in localStorage:', error);
+                if (!this.fallbackToMemory) {
+                    throw error;
+                }
+            }
+        }
+        
+        // Final fallback to memory storage
         this.memoryStorage.set(this.accountName, tokenData);
     }
 
@@ -74,7 +158,8 @@ export class TokenStorage {
      * Retrieve token data
      */
     async getTokens(): Promise<StoredTokenData | null> {
-        if (this.keytarAvailable) {
+        // Try keytar first (Node.js environments)
+        if (this.keytarAvailable && keytar) {
             try {
                 const serializedData = await keytar.getPassword(this.serviceName, this.accountName);
                 if (serializedData) {
@@ -88,7 +173,15 @@ export class TokenStorage {
             }
         }
         
-        // Fallback to memory storage
+        // Try localStorage second (browser environments)
+        if (this.isBrowser) {
+            const localStorageData = this.getTokensFromLocalStorage();
+            if (localStorageData) {
+                return localStorageData;
+            }
+        }
+        
+        // Final fallback to memory storage
         return this.memoryStorage.get(this.accountName) || null;
     }
 
@@ -149,7 +242,8 @@ export class TokenStorage {
      * Clear all stored tokens
      */
     async clearTokens(): Promise<void> {
-        if (this.keytarAvailable) {
+        // Clear keytar storage
+        if (this.keytarAvailable && keytar) {
             try {
                 await keytar.deletePassword(this.serviceName, this.accountName);
             } catch (error) {
@@ -157,7 +251,12 @@ export class TokenStorage {
             }
         }
         
-        // Also clear memory storage
+        // Clear localStorage storage
+        if (this.isBrowser) {
+            this.clearTokensFromLocalStorage();
+        }
+        
+        // Clear memory storage
         this.memoryStorage.delete(this.accountName);
     }
 
@@ -194,7 +293,13 @@ export class TokenStorage {
     /**
      * Get storage type being used
      */
-    getStorageType(): 'keytar' | 'memory' {
-        return this.keytarAvailable ? 'keytar' : 'memory';
+    getStorageType(): 'keytar' | 'localStorage' | 'memory' {
+        if (this.keytarAvailable) {
+            return 'keytar';
+        } else if (this.isBrowser) {
+            return 'localStorage';
+        } else {
+            return 'memory';
+        }
     }
 } 

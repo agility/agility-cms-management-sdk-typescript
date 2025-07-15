@@ -1,3 +1,4 @@
+// export api methods
 export * from "./apiClient";
 export * from "./apiMethods/contentMethods";
 export * from "./apiMethods/assetMethods";
@@ -10,6 +11,12 @@ export * from "./apiMethods/pageMethods";
 export * from "./apiMethods/serverUserMethods";
 export * from "./apiMethods/webhookMethods";
 export * from "./tokenStorage";
+
+// export client methods
+export * from "./clientMethods/authMethods";
+
+// export authentication component
+export * from "./components/auth";
 
 //export models
 export * from "./models/assetContainer";
@@ -48,6 +55,9 @@ export * from "./models/webhook";
 export * from "./models/websiteListing";
 export * from "./models/websiteUser";
 export * from "./models/authTokens";
+export * from "./models/authComponent";
+export * from "./models/authConfig";
+export * from "./models/authState";
 
 //export enums
 export * from "./enums/assetGroupingType";
@@ -56,3 +66,4 @@ export * from "./enums/batchOperationType";
 export * from "./enums/batchState.";
 export * from "./enums/pageItemTemplateType";
 export * from "./enums/workflowOperationType";
+

@@ -9,7 +9,7 @@ import { Options } from "./models/options";
 import { ServerUserMethods } from "./apiMethods/serverUserMethods";
 import { WebhookMethods } from "./apiMethods/webhookMethods";
 import { InstanceMethods } from "./apiMethods/instanceMethods";
-import { AuthMethods } from "./apiMethods/authMethods";
+import { AuthMethods } from "./clientMethods/authMethods";
 import { TokenStorage } from "./tokenStorage";
 import { Exception } from "./models/exception";
 
@@ -25,7 +25,7 @@ export class ApiClient {
     pageMethods!: PageMethods
     serverUserMethods!: ServerUserMethods
     webhookMethods!: WebhookMethods
-    private _authMethods!: AuthMethods
+    authMethods!: AuthMethods
     
     constructor(options: Options = new Options()){
         this._options = options;
@@ -39,14 +39,14 @@ export class ApiClient {
         this.pageMethods = new PageMethods(this._options);
         this.serverUserMethods = new ServerUserMethods(this._options);
         this.webhookMethods = new WebhookMethods(this._options);
-        this._authMethods = new AuthMethods(this._options);
+        this.authMethods = new AuthMethods(this._options);
         
         // Set up automatic token refresh for all method classes
         this.setupTokenRefresh();
         
         // If token is provided via options, store it in keytar
         if (options.token) {
-            this._authMethods.setAccessToken(options.token).catch(error => {
+            this.authMethods.setAccessToken(options.token).catch(error => {
                 // Log error but don't fail constructor
                 console.warn('Failed to store token in keytar:', error.message);
             });
@@ -58,7 +58,7 @@ export class ApiClient {
      */
     private setupTokenRefresh(): void {
         const refreshHandler = async () => {
-            return await this._authMethods.getValidAccessToken();
+            return await this.authMethods.getValidAccessToken();
         };
 
         // Set token refresh handler on all method classes that use ClientInstance
@@ -76,7 +76,7 @@ export class ApiClient {
 
     /**
      * Authenticate with Agility CMS using OAuth flow
-     * This method handles the entire OAuth authentication process internally
+     * Opens a popup window, handles the OAuth flow, and automatically exchanges tokens
      * 
      * @param options - Optional OAuth configuration for custom setup
      * 
@@ -92,34 +92,104 @@ export class ApiClient {
      */
     async auth(options?: { redirectUri?: string; scope?: string; region?: string }): Promise<void> {
         // Check if already authenticated with valid token
-        if (await this._authMethods.isAuthenticated()) {
+        if (await this.authMethods.isAuthenticated()) {
             return;
         }
 
-        // For a Node.js environment, the OAuth flow requires external handling
-        // This would typically involve:
-        // 1. Generating auth URL
-        // 2. User visiting URL and granting permission
-        // 3. Getting authorization code from callback
-        // 4. Exchanging code for tokens
-        
+        // Check if we're in a browser environment
+        if (typeof window === 'undefined') {
+            throw new Exception('OAuth flow requires a browser environment. For Node.js, use exchangeCodeForToken() manually.');
+        }
+
         const defaultOptions = {
-            redirectUri: options?.redirectUri || 'http://localhost:3000/auth/callback',
+            redirectUri: options?.redirectUri || `${window.location.origin}/auth-callback.html`,
             scope: options?.scope || 'openid profile email offline_access',
             region: options?.region
         };
 
-        const authUrl = this._authMethods.generateAuthUrl({
+        const authUrl = this.authMethods.generateAuthUrl({
             ...defaultOptions,
-            state: this._authMethods.generateState()
+            state: this.authMethods.generateState()
         });
 
-        // In a real implementation, this would:
-        // - Open browser to auth URL
-        // - Start local server to handle callback
-        // - Exchange code for tokens automatically
-        
-        throw new Exception(`OAuth flow requires manual implementation. Please visit: ${authUrl}\n\nAfter authorization, exchange the code using:\nconst tokens = await client.exchangeCodeForToken({ code: 'auth_code', redirectUri: '${defaultOptions.redirectUri}' });`);
+        return new Promise((resolve, reject) => {
+            // Open popup window for OAuth
+            const popup = window.open(
+                authUrl,
+                'agility-auth',
+                'width=600,height=700,scrollbars=yes,resizable=yes'
+            );
+
+            if (!popup) {
+                reject(new Exception('Popup blocked. Please allow popups and try again.'));
+                return;
+            }
+
+            // Listen for postMessage events from the popup
+            const messageHandler = (event: MessageEvent) => {
+                // Ensure the message is from the popup window
+                if (event.source !== popup) {
+                    return;
+                }
+
+                // Handle authentication success
+                if (event.data.type === 'AGILITY_AUTH_SUCCESS') {
+                    cleanup();
+                    popup.close();
+
+                    const { code } = event.data;
+                    
+                    // Exchange code for tokens
+                    this.authMethods.exchangeCodeForToken({
+                        code: code,
+                        redirectUri: defaultOptions.redirectUri
+                    }, options?.region)
+                    .then(() => {
+                        resolve();
+                    })
+                    .catch((err) => {
+                        reject(err);
+                    });
+                    return;
+                }
+
+                // Handle authentication error
+                if (event.data.type === 'AGILITY_AUTH_ERROR') {
+                    cleanup();
+                    popup.close();
+                    reject(new Exception(`Authentication failed: ${event.data.error}`));
+                    return;
+                }
+            };
+
+            // Monitor popup for closure (fallback for manual close)
+            const checkPopup = setInterval(() => {
+                if (popup.closed) {
+                    cleanup();
+                    reject(new Exception('Authentication cancelled by user'));
+                    return;
+                }
+            }, 1000);
+
+            // Cleanup function to remove listeners and intervals
+            const cleanup = () => {
+                clearInterval(checkPopup);
+                clearTimeout(timeoutId);
+                window.removeEventListener('message', messageHandler);
+            };
+
+            // Set up message listener
+            window.addEventListener('message', messageHandler);
+
+            // Timeout after 5 minutes
+            const timeoutId = setTimeout(() => {
+                cleanup();
+                if (!popup.closed) {
+                    popup.close();
+                }
+                reject(new Exception('Authentication timeout'));
+            }, 5 * 60 * 1000);
+        });
     }
 
     /**
@@ -129,7 +199,7 @@ export class ApiClient {
      * @returns Promise containing access and refresh tokens
      */
     async exchangeCodeForToken(request: { code: string; redirectUri: string; grantType?: string }, region?: string) {
-        return await this._authMethods.exchangeCodeForToken(request, region);
+        return await this.authMethods.exchangeCodeForToken(request, region);
     }
 
     /**
@@ -137,7 +207,7 @@ export class ApiClient {
      * @returns Promise resolving to true if authenticated with valid token
      */
     async isAuthenticated(): Promise<boolean> {
-        return await this._authMethods.isAuthenticated();
+        return await this.authMethods.isAuthenticated();
     }
 
     /**
@@ -155,13 +225,21 @@ export class ApiClient {
      * ```
      */
     async setToken(token: string): Promise<void> {
-        await this._authMethods.setAccessToken(token);
+        await this.authMethods.setAccessToken(token);
     }
 
     /**
      * Clear the current authentication token and stored tokens
      */
     async clearToken(): Promise<void> {
-        await this._authMethods.clearAuthentication();
+        await this.authMethods.clearAuthentication();
+    }
+
+    /**
+     * Sign out the user by clearing all authentication data
+     * @returns Promise indicating successful sign out
+     */
+    async signOut(): Promise<void> {
+        await this.authMethods.clearAuthentication();
     }
 }

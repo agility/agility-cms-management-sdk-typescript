@@ -12,10 +12,10 @@ export class ServerUserMethods{
         this._clientInstance = new ClientInstance(this._options);
     }
 
-    async me(guid: string){
+    async me(){
         try{
             let apiPath = `users/me`;
-            const resp = await this._clientInstance.executeServerGet(apiPath, guid, this._options.token);
+            const resp = await this._clientInstance.executeServerGet(apiPath, null, this._options.token);
 
             return resp.data as ServerUser;
         } catch(err){

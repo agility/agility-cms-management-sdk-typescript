@@ -141,8 +141,8 @@ export class ClientInstance {
         return instance;
     }
 
-    async executeServerGet(apiPath: string, guid: string, token: string){
-        let instance = this.getAxiosInstance(guid);
+    async executeServerGet(apiPath: string, guid?: string, token?: string){
+        let instance = this.getAxiosInstance(guid || '');
         
         const makeRequest = async () => {
             return await instance.get(apiPath, {
@@ -164,6 +164,8 @@ export class ClientInstance {
     async executeGet(apiPath: string, guid: string, token: string) {
         let instance = this.getInstance(guid);
         
+console.log('executeGet', apiPath, guid, token);
+
         const makeRequest = async () => {
             return await instance.get(apiPath, {
                 headers: {
