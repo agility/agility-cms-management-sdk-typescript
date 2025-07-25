@@ -116,7 +116,7 @@ export class PageMethods {
             const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
 
             let batchID = resp.data as number;
-            
+
             // If user wants batchID immediately, return it for custom polling
             if (returnBatchId) {
                 return [batchID];
@@ -139,7 +139,7 @@ export class PageMethods {
             const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
 
             let batchID = resp.data as number;
-            
+
             // If user wants batchID immediately, return it for custom polling
             if (returnBatchId) {
                 return [batchID];
@@ -162,7 +162,7 @@ export class PageMethods {
             const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
 
             let batchID = resp.data as number;
-            
+
             // If user wants batchID immediately, return it for custom polling
             if (returnBatchId) {
                 return [batchID];
@@ -185,7 +185,7 @@ export class PageMethods {
             const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
 
             let batchID = resp.data as number;
-            
+
             // If user wants batchID immediately, return it for custom polling
             if (returnBatchId) {
                 return [batchID];
@@ -208,7 +208,7 @@ export class PageMethods {
             const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
 
             let batchID = resp.data as number;
-            
+
             // If user wants batchID immediately, return it for custom polling
             if (returnBatchId) {
                 return [batchID];
@@ -231,7 +231,7 @@ export class PageMethods {
             const resp = await this._clientInstance.executeDelete(apiPath, guid, this._options.token);
 
             let batchID = resp.data as number;
-            
+
             // If user wants batchID immediately, return it for custom polling
             if (returnBatchId) {
                 return [batchID];
@@ -248,13 +248,29 @@ export class PageMethods {
         }
     }
 
-    async savePage(pageItem: PageItem, guid: string, locale: string, parentPageID: number = -1, placeBeforePageItemID: number = -1, returnBatchId: boolean = false): Promise<number[]> {
+    /**
+     * Save a new page or update an existing page.
+     * @param pageItem The PageItem to save
+     * @param guid The GUID of the user making the request
+     * @param locale The locale of the page
+     * @param parentPageID The ID of the parent page
+     * @param placeBeforePageItemID The ID of the page item to place this page before
+     * @param returnBatchId Whether to return the batch ID immediately
+     * @param pageIDInOtherLocale The ID of the page in the other locale if you need to link it up.
+     * @param otherLocale The other locale to link the page to.
+     * @returns The IDs of the created or updated pages
+     */
+    async savePage(pageItem: PageItem, guid: string, locale: string, parentPageID: number = -1, placeBeforePageItemID: number = -1, returnBatchId: boolean = false, pageIDInOtherLocale: number = -1, otherLocale: string = null): Promise<number[]> {
         try {
             let apiPath = `${locale}/page?parentPageID=${parentPageID}&placeBeforePageItemID=${placeBeforePageItemID}`;
+            if (pageIDInOtherLocale > -1 && otherLocale) {
+                // If we have the other locale and the pageID in that locale, we need to link it up.
+                apiPath += `&pageIDInOtherLocale=${pageIDInOtherLocale}&otherLocale=${otherLocale}`;
+            }
             const resp = await this._clientInstance.executePost(apiPath, guid, this._options.token, pageItem);
 
             let batchID = resp.data as number;
-            
+
             // If user wants batchID immediately, return it for custom polling
             if (returnBatchId) {
                 return [batchID];
