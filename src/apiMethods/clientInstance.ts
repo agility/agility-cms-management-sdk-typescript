@@ -20,22 +20,25 @@ export class ClientInstance {
         //if we have a baseUrl overridden, use it
         if (this._options.baseUrl) return this._options.baseUrl
 
-        var seperator = guid.split('-');
+        var separator = guid.split('-');
 
         //determine the base url based on the GUID
-        if (seperator[1] === 'd') {
+        if (separator[1] === 'd') {
             return "https://mgmt-dev.aglty.io";
         }
-        else if (seperator[1] === 'u') {
+        else if (separator[1] === 'u') {
             return "https://mgmt.aglty.io";
         }
-        else if (seperator[1] === 'c') {
+        else if(separator[1] === 'us2'){
+            return "https://mgmt-usa2.aglty.io";
+        }
+        else if (separator[1] === 'c') {
             return "https://mgmt-ca.aglty.io";
         }
-        else if (seperator[1] === 'e') {
+        else if (separator[1] === 'e') {
             return "https://mgmt-eu.aglty.io";
         }
-        else if (seperator[1] === 'a') {
+        else if (separator[1] === 'a') {
             return "https://mgmt-aus.aglty.io";
         }
 
