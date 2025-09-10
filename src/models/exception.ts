@@ -1,9 +1,8 @@
 export class Exception extends Error {
+	innerError?: Error;
 
 	constructor(message: string, inner?: Error) {
-		super(message)
-		this.innerError = inner
+		super(message);
+		this.innerError = inner;
 	}
-
-	innerError?: Error
 }

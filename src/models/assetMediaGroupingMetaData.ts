@@ -1,4 +1,4 @@
-export class assetMediaGroupingMetaData{
-    key: string;
-    value: string;
+export class assetMediaGroupingMetaData {
+	key!: string;
+	value!: string;
 }

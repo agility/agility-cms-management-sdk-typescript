@@ -11,12 +11,39 @@
   },
   "homepage": "https://github.com/agility/agility-cms-management-sdk-typescript#readme",
   "main": "dist/index.js",
-  "scripts": {
-    "clean": "git clean -Xf && rm -rf ./dist",
-    "build": "tsc",
-    "prepare": "yarn build",
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
+	"scripts": {
+		"clean": "git clean -Xf && rm -rf ./dist",
+		"build": "tsc",
+		"build:watch": "tsc --watch",
+		"prepare": "husky install",
+		"lint": "eslint src --ext .ts,.tsx",
+		"lint:fix": "eslint src --ext .ts,.tsx --fix",
+		"format": "prettier --write \"src/**/*.{ts,tsx,json,md}\"",
+		"format:check": "prettier --check \"src/**/*.{ts,tsx,json,md}\"",
+		"type-check": "tsc --noEmit",
+		"test": "jest --passWithNoTests --runInBand",
+		"test:watch": "jest --watch",
+		"test:coverage": "jest --coverage",
+		"test:ci": "jest --ci --coverage --watchAll=false",
+		"test:integration": "jest --testPathPatterns=tests/integration --maxWorkers=1 --verbose",
+		"test:client": "jest tests/integration/client.test.ts --runInBand --verbose",
+		"test:diagnostic": "jest tests/integration/endpointDiagnostic.test.ts --runInBand --verbose",
+
+		"test:unit": "jest tests/unit --verbose",
+		"test:unit:models": "jest tests/unit/modelMethods.test.ts --verbose",
+		"test:unit:assets": "jest tests/unit/assetMethods.test.ts --verbose",
+		"test:unit:containers": "jest tests/unit/containerMethods.test.ts --verbose",
+		"test:unit:content": "jest tests/unit/contentMethods.test.ts --verbose",
+		"test:unit:pages": "jest tests/unit/pageMethods.test.ts --verbose",
+		"test:unit:webhooks": "jest tests/unit/webhookMethods.test.ts --verbose",
+		"test:unit:batch": "jest tests/unit/batchMethods.test.ts --verbose",
+		"test:unit:instance": "jest tests/unit/instanceMethods.test.ts --verbose",
+		"test:unit:instance-users": "jest tests/unit/instanceUserMethods.test.ts --verbose",
+		"test:unit:server-users": "jest tests/unit/serverUserMethods.test.ts --verbose",
+		"test:unit:all": "jest tests/unit --verbose --coverage",
+		"precommit": "lint-staged",
+		"postinstall": "husky install"
+	},
   "keywords": [
     "typescript",
     "agility",
@@ -33,9 +60,38 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "axios": "^0.27.2"
+    "axios": "^1.11.0"
   },
   "devDependencies": {
-    "@types/node": "^18.11.9"
+    "@commitlint/cli": "^17.7.2",
+    "@commitlint/config-conventional": "^17.7.0",
+    "@types/jest": "^29.5.5",
+    "@types/node": "^18.11.9",
+    "@typescript-eslint/eslint-plugin": "^8.8.0",
+    "@typescript-eslint/parser": "^8.8.0",
+    "audit-ci": "^6.6.1",
+    "dotenv": "^16.3.1",
+    "eslint": "^8.50.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-import": "^2.28.1",
+    "eslint-plugin-prettier": "^5.0.0",
+    "husky": "^8.0.3",
+    "jest": "^29.7.0",
+    "lint-staged": "^16.1.6",
+    "prettier": "^3.0.3",
+    "ts-jest": "^29.1.1",
+    "typescript": "^5.6.2"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,yml,yaml}": [
+      "prettier --write"
+    ]
   }
 }

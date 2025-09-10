@@ -1,0 +1,209 @@
+name: CI/CD Pipeline
+
+on:
+  pull_request:
+    branches: [main, dev]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Quality checks and testing
+  quality:
+    name: Code Quality & Testing
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [16, 18, 20]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: TypeScript type checking
+        run: yarn type-check
+
+      - name: Lint code
+        run: yarn lint
+
+      - name: Format check
+        run: yarn format:check
+
+      - name: Run tests
+        run: yarn test:ci
+        env:
+          AGILITY_PAT: ${{ secrets.AGILITY_PAT }}
+          AGILITY_GUID: ${{ secrets.AGILITY_GUID }}
+          AGILITY_WEBSITE: ${{ secrets.AGILITY_WEBSITE }}
+          AGILITY_LOCALES: ${{ secrets.AGILITY_LOCALES }}
+          AGILITY_BASE_URL: ${{ secrets.AGILITY_BASE_URL }}
+
+      - name: Upload coverage to Codecov
+        if: matrix.node-version == 18
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./coverage/lcov.info
+          flags: unittests
+          name: codecov-umbrella
+
+  # Security and dependency checks
+  security:
+    name: Security Audit
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Run security audit
+        run: yarn audit --level moderate
+
+      - name: Check for vulnerabilities
+        run: npx audit-ci --moderate
+
+  # Build and package
+  build:
+    name: Build Package
+    runs-on: ubuntu-latest
+    needs: [quality, security]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Clean build
+        run: yarn clean
+
+      - name: Build package
+        run: yarn build
+
+      - name: Check build output
+        run: |
+          ls -la dist/
+          node -e "console.log('Build check:', require('./dist/index.js'))"
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-${{ github.sha }}
+          path: dist/
+          retention-days: 7
+
+  # Comprehensive integration tests (only on main branches with secrets)
+  integration-test:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    needs: [quality, security]
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/platform-hardening')
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Build project
+        run: yarn build
+
+      - name: Run comprehensive integration tests
+        run: yarn test:integration
+        env:
+          NODE_ENV: integration
+          AGILITY_PAT: ${{ secrets.AGILITY_PAT }}
+          AGILITY_GUID: ${{ secrets.AGILITY_GUID }}
+          AGILITY_WEBSITE: ${{ secrets.AGILITY_WEBSITE }}
+          AGILITY_LOCALES: ${{ secrets.AGILITY_LOCALES }}
+          AGILITY_BASE_URL: ${{ secrets.AGILITY_BASE_URL }}
+
+      - name: Upload integration test results
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: integration-test-results-${{ github.sha }}
+          path: |
+            coverage/
+            test-results/
+          retention-days: 7
+
+  # Performance and comprehensive testing
+  performance-test:
+    name: Performance & Comprehensive Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: integration-test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Build project
+        run: yarn build
+
+      - name: Run comprehensive test suite
+        run: yarn test:comprehensive
+        env:
+          NODE_ENV: integration
+          AGILITY_PAT: ${{ secrets.AGILITY_PAT }}
+          AGILITY_GUID: ${{ secrets.AGILITY_GUID }}
+          AGILITY_WEBSITE: ${{ secrets.AGILITY_WEBSITE }}
+          AGILITY_LOCALES: ${{ secrets.AGILITY_LOCALES }}
+          AGILITY_BASE_URL: ${{ secrets.AGILITY_BASE_URL }}
+
+      - name: Upload performance results
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: performance-test-results-${{ github.sha }}
+          path: |
+            coverage/
+            test-results/
+          retention-days: 30
+

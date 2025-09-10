@@ -1,56 +1,62 @@
-import { Exception } from "../models/exception";
-import { Options } from "../models/options";
-import { Webhook } from "../models/webhook";
-import { ClientInstance } from "./clientInstance";
+import { Exception } from '../models/exception';
+import { Options } from '../models/options';
+import { Webhook } from '../models/webhook';
 
-export class WebhookMethods{
-    _options!: Options;
-    _cleintInstance!: ClientInstance;
+import { ClientInstance } from './clientInstance';
 
-    constructor(options: Options){
-        this._options = options;
-        this._cleintInstance = new ClientInstance(this._options);
-    }
+export class WebhookMethods {
+	_options!: Options;
+	_cleintInstance!: ClientInstance;
 
-    async webhookList(guid: string, take: number = 20, token: string = null){
-        try{
-            let apiPath = `webhook/list`;
-            const resp = await this._cleintInstance.executeGet(apiPath, guid, this._options.token);
+	constructor(options: Options) {
+		this._options = options;
+		this._cleintInstance = new ClientInstance(this._options);
+	}
 
-            return resp.data;
-        } catch(err){
-            throw new Exception(`Unable to get the webhook list`, err);
-        }
-    }
+	async webhookList(guid: string, _take: number = 20, _token?: string) {
+		try {
+			const apiPath = `webhook/list`;
+			const resp = await this._cleintInstance.executeGet(apiPath, guid, this._options.token);
 
-    async saveWebhook(guid: string, webhook: Webhook){
-        try{
-            let apiPath = `webhook`;
-            const resp = await this._cleintInstance.executePost(apiPath, guid, this._options.token, webhook);
+			return resp.data;
+		} catch (err) {
+			throw new Exception(`Unable to get the webhook list`, err as Error);
+		}
+	}
 
-            return resp.data;
-        } catch(err){
-            throw new Exception('Unable to save webhook.', err);
-        }
-    }
+	async saveWebhook(guid: string, webhook: Webhook) {
+		try {
+			const apiPath = `webhook`;
+			const resp = await this._cleintInstance.executePost(
+				apiPath,
+				guid,
+				this._options.token,
+				webhook
+			);
 
-    async getWebhook(guid: string, webhookID: string){
-        try{
-            let apiPath = `webhook/${webhookID}`;
-            const resp = await this._cleintInstance.executeGet(apiPath, guid, this._options.token);
+			return resp.data;
+		} catch (err) {
+			throw new Exception('Unable to save webhook.', err as Error);
+		}
+	}
 
-            return resp.data;
-        } catch(err){
-            throw new Exception(`Unable to retrieve webhook for webhookID: ${webhookID},`, err);
-        }
-    }
+	async getWebhook(guid: string, webhookID: string) {
+		try {
+			const apiPath = `webhook/${webhookID}`;
+			const resp = await this._cleintInstance.executeGet(apiPath, guid, this._options.token);
 
-    async deleteWebhook(guid: string, webhookID: string){
-        try{
-            let apiPath = `webhook/${webhookID}`;
-            await this._cleintInstance.executeDelete(apiPath, guid, this._options.token);
-        } catch(err){
-            throw new Exception(`Unable to delete webhook for webhookID: ${webhookID}.`, err);
-        }
-    }
+			return resp.data;
+		} catch (err) {
+			throw new Exception(`Unable to retrieve webhook for webhookID: ${webhookID},`, err as Error);
+		}
+	}
+
+	async deleteWebhook(guid: string, webhookID: string) {
+		try {
+			const apiPath = `webhook/${webhookID}`;
+			await this._cleintInstance.executeDelete(apiPath, guid, this._options.token);
+		} catch (err) {
+			throw new Exception(`Unable to delete webhook for webhookID: ${webhookID}.`, err as Error);
+		}
+	}
 }

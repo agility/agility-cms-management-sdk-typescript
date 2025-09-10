@@ -1,3 +1,3 @@
-export enum AssetGroupingType{
-    Gallery = 1
+export enum AssetGroupingType {
+	Gallery = 1,
 }

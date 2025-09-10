@@ -1,4 +1,4 @@
 export enum PageItemTemplateType {
-    Variable = 0,
-	FixedModule = 1
+	Variable = 0,
+	FixedModule = 1,
 }

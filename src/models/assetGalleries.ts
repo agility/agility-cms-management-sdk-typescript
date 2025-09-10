@@ -1,6 +1,6 @@
-import { assetMediaGrouping } from "./assetMediaGrouping";
+import { assetMediaGrouping } from './assetMediaGrouping';
 
-export class assetGalleries{
-    totalCount: number | null;
-    assetMediaGroupings: (assetMediaGrouping | null)[];
+export class assetGalleries {
+	totalCount!: number | null;
+	assetMediaGroupings!: (assetMediaGrouping | null)[];
 }
