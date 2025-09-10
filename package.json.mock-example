@@ -1,0 +1,19 @@
+{
+  "scripts": {
+    "test": "jest",
+    "test:unit": "jest tests/unit --coverage",
+    "test:integration": "jest tests/integration --runInBand",
+
+    // Mock test suites - fast and reliable
+    "test:mock:models": "jest tests/unit/modelMethods.mock.test.ts --verbose",
+    "test:mock:galleries": "jest tests/unit/assetMethods.mock.test.ts --verbose",
+    "test:mock:containers": "jest tests/unit/containerMethods.mock.test.ts --verbose",
+    "test:mock:content": "jest tests/unit/contentMethods.mock.test.ts --verbose",
+    "test:mock:all": "jest tests/unit --verbose",
+
+    // Integration tests - real API calls (when needed)
+    "test:integration:auth": "jest tests/integration/basicAuth.test.ts --runInBand",
+    "test:integration:galleries": "jest tests/integration/galleries/galleryMethods.test.ts --runInBand",
+    "test:integration:models": "jest tests/integration/models/modelMethods.test.ts --runInBand"
+  }
+}

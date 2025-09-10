@@ -1,30 +1,30 @@
 export class ContentListFilterModel {
-    sortIDs: number[];
-    modifiedByIds: number[];
-    dateRange: DateRangeFilter | null;
-    stateIds: number[];
-    fieldFilters: FieldFilter[];
-    genericSearch: string;
+	sortIDs!: number[];
+	modifiedByIds!: number[];
+	dateRange!: DateRangeFilter | null;
+	stateIds!: number[];
+	fieldFilters!: FieldFilter[];
+	genericSearch!: string;
 }
 
 export class DateRangeFilter {
-    startDate: string | null;
-    endDate: string | null;
+	startDate!: string | null;
+	endDate!: string | null;
 }
 
 export class NumRangeFilter {
-    fromNum: number;
-    toNum: number;
+	fromNum!: number;
+	toNum!: number;
 }
 
 export class FieldFilterValue {
-    stringValue: string | null;
-    dateRangeValue: DateRangeFilter | null;
-    numRangeValue: NumRangeFilter | null;
-    boolValue: boolean | null;
+	stringValue!: string | null;
+	dateRangeValue!: DateRangeFilter | null;
+	numRangeValue!: NumRangeFilter | null;
+	boolValue!: boolean | null;
 }
 
 export class FieldFilter {
-    field: string | null;
-    value: FieldFilterValue | null;
+	field!: string | null;
+	value!: FieldFilterValue | null;
 }
