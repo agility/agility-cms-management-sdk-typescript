@@ -39,7 +39,7 @@ export class PageMethods {
 		searchFilter?: string
 	) {
 		try {
-			if (!searchFilter) searchFilter = '';
+			searchFilter ??= '';
 			const apiPath = `${locale}/page/templates?includeModuleZones=${includeModuleZones}&searchFilter=${searchFilter}`;
 			const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
 
@@ -374,7 +374,7 @@ export class PageMethods {
 
 			return resp.data as PageHistory;
 		} catch (err) {
-			throw new Exception(`Unable to retrieve history for pageID: ${pageID}`);
+			throw new Exception(`Unable to retrieve history for pageID: ${pageID}`, err as Error);
 		}
 	}
 
@@ -391,7 +391,7 @@ export class PageMethods {
 
 			return resp.data as ItemComments;
 		} catch (err) {
-			throw new Exception(`Unable to retrieve history for pageID: ${pageID}`);
+			throw new Exception(`Unable to retrieve comments for pageID: ${pageID}`, err as Error);
 		}
 	}
 }

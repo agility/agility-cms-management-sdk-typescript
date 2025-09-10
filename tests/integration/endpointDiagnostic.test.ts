@@ -63,7 +63,7 @@ describe('API Endpoint Diagnostic Tests', () => {
 						for (const prop of arrayProps) {
 							if ((result as any)[prop]) {
 								console.log(
-									`  - Found ${prop}: ${Array.isArray((result as any)[prop]) ? 'array' : 'not array'} with ${(result as any)[prop].length || 0} items`
+									`  - Found ${prop}: ${Array.isArray((result as any)[prop]) ? 'array' : 'not array'} with ${(result as any)[prop].length ?? 0} items`
 								);
 							}
 						}

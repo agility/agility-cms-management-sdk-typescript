@@ -187,7 +187,7 @@ export class BatchMethods {
 	async Retry(method: Function) {
 		let retryCount = this._options.retryCount;
 		const duration = this._options.duration;
-		if (retryCount <= 0) throw new Error('Number of retries has been exhausted.');
+		if (retryCount <= 0) throw new Exception('Number of retries has been exhausted.');
 		// eslint-disable-next-line no-constant-condition
 		while (true) {
 			try {
@@ -197,15 +197,16 @@ export class BatchMethods {
 				} else {
 					--retryCount;
 					if (--retryCount <= 0) {
-						throw new Error(
+						throw new Exception(
 							'Timeout exceeded but operation still in progress. Please check the Batches page in the Agility Content Manager app.'
 						);
 					}
 					await this.delay(duration);
 				}
 			} catch (err) {
-				throw new Error(
-					'Timeout exceeded but operation still in progress. Please check the Batches page in the Agility Content Manager app.'
+				throw new Exception(
+					'Timeout exceeded but operation still in progress. Please check the Batches page in the Agility Content Manager app.',
+					err as Error
 				);
 			}
 		}

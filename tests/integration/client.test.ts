@@ -63,7 +63,7 @@ describe('Client Integration Tests', () => {
 		it('should fail with invalid credentials', async () => {
 			const invalidOptions: Options = {
 				token: 'invalid-token-123',
-				baseUrl: config.baseUrl || 'https://mgmt-api.aglty.io',
+				baseUrl: config.baseUrl ?? 'https://mgmt.aglty.io',
 			};
 
 			const invalidClient = new ApiClient(invalidOptions);

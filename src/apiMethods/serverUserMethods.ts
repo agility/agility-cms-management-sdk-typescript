@@ -20,7 +20,7 @@ export class ServerUserMethods {
 
 			return resp.data as ServerUser;
 		} catch (err) {
-			throw new Exception('Unable to retrieve user information.');
+			throw new Exception('Unable to retrieve user information.', err as Error);
 		}
 	}
 
@@ -31,7 +31,7 @@ export class ServerUserMethods {
 
 			return resp.data;
 		} catch (err) {
-			throw new Exception('Unable to retrieve user information.');
+			throw new Exception('Unable to retrieve user information.', err as Error);
 		}
 	}
 }

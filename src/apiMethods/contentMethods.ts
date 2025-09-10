@@ -346,7 +346,7 @@ export class ContentMethods {
 
 			return resp.data as ContentItemHistory;
 		} catch (err) {
-			throw new Exception(`Unable to retrieve history for contentID: ${contentID}`);
+			throw new Exception(`Unable to retrieve history for contentID: ${contentID}`, err as Error);
 		}
 	}
 
@@ -363,7 +363,7 @@ export class ContentMethods {
 
 			return resp.data as ItemComments;
 		} catch (err) {
-			throw new Exception(`Unable to retrieve comments for contentID: ${contentID}`);
+			throw new Exception(`Unable to retrieve comments for contentID: ${contentID}`, err as Error);
 		}
 	}
 }
