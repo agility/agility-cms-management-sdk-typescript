@@ -258,10 +258,10 @@ export class PageMethods {
      * @param returnBatchId Whether to return the batch ID immediately
      * @param pageIDInOtherLocale The ID of the page in the other locale if you need to link it up.
      * @param otherLocale The other locale to link the page to.
-     * @param linkExisitingComponents Whether to link existing components to the page. If not set, the page save will create new components for each content zone.
+     * @param linkExistingComponents Whether to link existing components to the page. If not set, the page save will create new components for each content zone.
      * @returns The IDs of the created or updated pages
      */
-    async savePage(pageItem: PageItem, guid: string, locale: string, parentPageID: number = -1, placeBeforePageItemID: number = -1, returnBatchId: boolean = false, pageIDInOtherLocale: number = -1, otherLocale: string = null, linkExisitingComponents: boolean = false): Promise<number[]> {
+    async savePage(pageItem: PageItem, guid: string, locale: string, parentPageID: number = -1, placeBeforePageItemID: number = -1, returnBatchId: boolean = false, pageIDInOtherLocale: number = -1, otherLocale: string = null, linkExistingComponents: boolean = false): Promise<number[]> {
         try {
             let apiPath = `${locale}/page?parentPageID=${parentPageID}&placeBeforePageItemID=${placeBeforePageItemID}`;
             if (pageIDInOtherLocale > -1 && otherLocale) {
@@ -270,8 +270,8 @@ export class PageMethods {
             }
 
             // if not set, the page save will create new components for each content zone.
-            if (linkExisitingComponents) {
-                apiPath += `&linkExisitingComponents=true`;
+            if (linkExistingComponents) {
+                apiPath += `&linkExistingComponents=true`;
             }
 
             const resp = await this._clientInstance.executePost(apiPath, guid, this._options.token, pageItem);
