@@ -7,6 +7,7 @@ import { ContentListFilterModel } from "../models/contentListFilterModel";
 import { ContentItemHistory } from "../models/contentItemHistory";
 import { ItemComments } from "../models/itemComments";
 import { ListParams } from "../models/listParams";
+import { buildQueryString } from "../util/queryString";
 
 export class ContentMethods {
     _options!: Options;
@@ -215,7 +216,16 @@ export class ContentMethods {
 
     async getContentItems(referenceName: string, guid: string, locale: string, listParams: ListParams) {
         try {
-            let apiPath = `${locale}/list/${referenceName}?filter=${listParams.filter}&fields=${listParams.fields}&sortDirection=${listParams.sortDirection}&sortField=${listParams.sortField}&take=${listParams.take}&skip=${listParams.skip}`;
+            const queryParams = buildQueryString({
+                filter: listParams.filter,
+                fields: listParams.fields,
+                sortDirection: listParams.sortDirection,
+                sortField: listParams.sortField,
+                take: listParams.take,
+                skip: listParams.skip
+            });
+            
+            let apiPath = `${locale}/list/${referenceName}${queryParams}`;
             const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
 
             return resp.data as ContentList;
@@ -226,7 +236,16 @@ export class ContentMethods {
 
     async getContentList(referenceName: string, guid: string, locale: string, listParams: ListParams, filterObject: ContentListFilterModel = null) {
         try {
-            let apiPath = `${locale}/list/${referenceName}?fields=${listParams.fields}&sortDirection=${listParams.sortDirection}&sortField=${listParams.sortField}&take=${listParams.take}&skip=${listParams.skip}&showDeleted=${listParams.showDeleted}`
+            const queryParams = buildQueryString({
+                fields: listParams.fields,
+                sortDirection: listParams.sortDirection,
+                sortField: listParams.sortField,
+                take: listParams.take,
+                skip: listParams.skip,
+                showDeleted: listParams.showDeleted
+            });
+            
+            let apiPath = `${locale}/list/${referenceName}${queryParams}`;
             const resp = await this._clientInstance.executePost(apiPath, guid, this._options.token, filterObject)
 
             return resp.data as ContentList;
