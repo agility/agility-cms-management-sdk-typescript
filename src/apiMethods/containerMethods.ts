@@ -3,6 +3,8 @@ import { ClientInstance } from "./clientInstance";
 import { Container } from "../models/container";
 import { Notification } from "../models/notification";
 import { Exception } from "../models/exception";
+import { PagedResult } from "../models/pagedResult";
+import { ContentViewType } from "../enums/contentViewType";
 
 export class ContainerMethods {
     _options!: Options;
@@ -75,6 +77,35 @@ export class ContainerMethods {
             return resp.data as Container[];
         } catch (err) {
             throw new Exception(`Unable to retrieve the container list`, err);
+        }
+    }
+
+    async getContainerListPaged(
+        guid: string,
+        pageSize: number = 20,
+        recordOffset: number = 0,
+        contentType: ContentViewType = ContentViewType.All,
+        includeModules: boolean = true,
+        updatedSince?: Date
+    ): Promise<PagedResult<Container>> {
+        try {
+            const params = new URLSearchParams({
+                pageSize: pageSize.toString(),
+                recordOffset: recordOffset.toString(),
+                contentType: contentType.toString(),
+                includeModules: includeModules.toString()
+            });
+
+            if (updatedSince) {
+                params.append('updatedSince', updatedSince.toISOString());
+            }
+
+            let apiPath = `container/list/paged?${params.toString()}`;
+            const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
+
+            return resp.data as PagedResult<Container>;
+        } catch (err) {
+            throw new Exception(`Unable to retrieve the paged container list`, err);
         }
     }
 
