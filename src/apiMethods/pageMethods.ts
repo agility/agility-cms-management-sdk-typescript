@@ -8,6 +8,7 @@ import { PageModel } from "../models/pageModel";
 import { ContentSectionDefinition } from "../models/contentSectionDefinition";
 import { PageHistory } from "../models/pageHistory";
 import { ItemComments } from "../models/itemComments";
+import { BatchState } from "../enums/batchState.";
 
 export class PageMethods {
     _options!: Options;
@@ -153,6 +154,87 @@ export class PageMethods {
             return pageIDs;
         } catch (err) {
             throw new Exception(`Unable to un-publish the page for id: ${pageID}`, err);
+        }
+    }
+
+    /**
+     * Batch publish multiple pages.
+     * @param pageIDs Array of page IDs to publish
+     * @param guid The GUID of the user making the request
+     * @param locale The locale of the pages
+     * @param comments Optional comments for the batch request
+     * @param returnBatchId Whether to return the batch ID immediately
+     * @returns The IDs of the published pages
+     */
+    async batchPublishPages(pageIDs: number[], guid: string, locale: string, returnBatchId: boolean = false): Promise<number[]> {
+        try {
+            // Convert pageIDs array to comma-separated string for query parameter
+            const pageIDsParam = pageIDs.join(',');
+            let apiPath = `${locale}/page/batch-publish?pageIDs=${pageIDsParam}`;
+
+            // Send empty body since IDs are in query string
+            const resp = await this._clientInstance.executePost(apiPath, guid, this._options.token, null);
+            let batchID = resp.data as number;
+
+            // If user wants batchID immediately, return it for custom polling
+            if (returnBatchId) {
+                return [batchID];
+            }
+
+            // Default behavior: wait for completion and return IDs
+            var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID, guid));
+            
+            if(batch.batchState === BatchState.Processed && batch.errorData && batch.errorData.length > 0) {
+                throw new Exception(`Unable to batch publish pages. Batch is not completed. Error: ${batch.errorData}`, null);
+            }
+            
+            let publishedPageIDs: number[] = [];
+
+            batch.items.forEach(element => publishedPageIDs.push(element.itemID));
+            return publishedPageIDs;
+        } catch (err) {
+            throw new Exception(`Unable to batch publish pages.`, err);
+        }
+    }
+
+    /**
+     * Batch unpublish multiple pages.
+     * @param pageIDs Array of page IDs to unpublish
+     * @param guid The GUID of the user making the request
+     * @param locale The locale of the pages
+     * @param comments Optional comments for the batch request
+     * @param returnBatchId Whether to return the batch ID immediately
+     * @returns The IDs of the unpublished pages
+     */
+    async batchUnpublishPages(pageIDs: number[], guid: string, locale: string, returnBatchId: boolean = false): Promise<number[]> {
+        try {
+            // Convert pageIDs array to comma-separated string for query parameter
+            const pageIDsParam = pageIDs.join(',');
+            let apiPath = `${locale}/page/batch-unpublish?pageIDs=${pageIDsParam}`;
+      
+            // Send empty body since IDs are in query string
+            const resp = await this._clientInstance.executePost(apiPath, guid, this._options.token, null);
+
+            let batchID = resp.data as number;
+
+            // If user wants batchID immediately, return it for custom polling
+            if (returnBatchId) {
+                return [batchID];
+            }
+
+            // Default behavior: wait for completion and return IDs
+            var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID, guid));
+
+            if(batch.batchState === BatchState.Processed && batch.errorData && batch.errorData.length > 0) {
+                throw new Exception(`Unable to batch unpublish pages. Batch is not completed. Error: ${batch.errorData}`, null);
+            }
+
+            let unpublishedPageIDs: number[] = [];
+
+            batch.items.forEach(element => unpublishedPageIDs.push(element.itemID));
+            return unpublishedPageIDs;
+        } catch (err) {
+            throw new Exception(`Unable to batch unpublish pages.`, err);
         }
     }
 

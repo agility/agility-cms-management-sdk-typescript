@@ -135,15 +135,15 @@ console.log('Content retrieved:', contentItem.fields.title);
 - **[ContainerMethods](./docs/container-methods.md)** - Container management operations (8 functions)
   - [getContainerByID](./docs/container-methods.md#getcontainerbyid), [getContainersByModel](./docs/container-methods.md#getcontainersbymodel), [getContainerByReferenceName](./docs/container-methods.md#getcontainerbyreferencename), [getContainerSecurity](./docs/container-methods.md#getcontainersecurity), [getContainerList](./docs/container-methods.md#getcontainerlist), [getNotificationList](./docs/container-methods.md#getnotificationlist), [saveContainer](./docs/container-methods.md#savecontainer), [deleteContainer](./docs/container-methods.md#deletecontainer)
 
-- **[ContentMethods](./docs/content-methods.md)** - Content item operations (13 functions)
-  - [getContentItem](./docs/content-methods.md#getcontentitem), [publishContent](./docs/content-methods.md#publishcontent), [unPublishContent](./docs/content-methods.md#unpublishcontent), [contentRequestApproval](./docs/content-methods.md#contentrequestapproval), [approveContent](./docs/content-methods.md#approvecontent), [declineContent](./docs/content-methods.md#declinecontent), [deleteContent](./docs/content-methods.md#deletecontent), [saveContentItem](./docs/content-methods.md#savecontentitem), [saveContentItems](./docs/content-methods.md#savecontentitems), [getContentItems](./docs/content-methods.md#getcontentitems), [getContentList](./docs/content-methods.md#getcontentlist), [getContentHistory](./docs/content-methods.md#getcontenthistory), [getContentComments](./docs/content-methods.md#getcontentcomments)
+- **[ContentMethods](./docs/content-methods.md)** - Content item operations (15 functions)
+  - [getContentItem](./docs/content-methods.md#getcontentitem), [publishContent](./docs/content-methods.md#publishcontent), [unPublishContent](./docs/content-methods.md#unpublishcontent), [batchPublishContent](./docs/content-methods.md#batchpublishcontent), [batchUnpublishContent](./docs/content-methods.md#batchunpublishcontent), [contentRequestApproval](./docs/content-methods.md#contentrequestapproval), [approveContent](./docs/content-methods.md#approvecontent), [declineContent](./docs/content-methods.md#declinecontent), [deleteContent](./docs/content-methods.md#deletecontent), [saveContentItem](./docs/content-methods.md#savecontentitem), [saveContentItems](./docs/content-methods.md#savecontentitems), [getContentItems](./docs/content-methods.md#getcontentitems), [getContentList](./docs/content-methods.md#getcontentlist), [getContentHistory](./docs/content-methods.md#getcontenthistory), [getContentComments](./docs/content-methods.md#getcontentcomments)
 
 - **[ModelMethods](./docs/model-methods.md)** - Content model operations (6 functions)
   - [getContentModel](./docs/model-methods.md#getcontentmodel), [getModelByReferenceName](./docs/model-methods.md#getmodelbyreferencename), [getContentModules](./docs/model-methods.md#getcontentmodules), [getPageModules](./docs/model-methods.md#getpagemodules), [saveModel](./docs/model-methods.md#savemodel), [deleteModel](./docs/model-methods.md#deletemodel)
 
 ### Page Management
-- **[PageMethods](./docs/page-methods.md)** - Page management operations (17 functions)
-  - [getPage](./docs/page-methods.md#getpage), [getPageByPath](./docs/page-methods.md#getpagebypath), [getPageHistory](./docs/page-methods.md#getpagehistory), [getPageComments](./docs/page-methods.md#getpagecomments), [getPageList](./docs/page-methods.md#getpagelist), [getPageListByPageTemplateID](./docs/page-methods.md#getpagelistbypagetemplateid), [getPageListByPage](./docs/page-methods.md#getpagelistbypage), [getPageListByPageAndPageTemplateID](./docs/page-methods.md#getpagelistbypageandpagetemplateid), [getPageTree](./docs/page-methods.md#getpagetree), [getPageTemplateList](./docs/page-methods.md#getpagetemplatelist), [getPageSecurity](./docs/page-methods.md#getpagesecurity), [getPageItemTemplateList](./docs/page-methods.md#getpageitemtemplatelist), [getPageContentZones](./docs/page-methods.md#getpagecontentzones), [savePage](./docs/page-methods.md#savepage), [savePageSecurity](./docs/page-methods.md#savepagesecurity), [movePageItem](./docs/page-methods.md#movepageitem), [deletePage](./docs/page-methods.md#deletepage)
+- **[PageMethods](./docs/page-methods.md)** - Page management operations (19 functions)
+  - [getPage](./docs/page-methods.md#getpage), [getPageByPath](./docs/page-methods.md#getpagebypath), [getPageHistory](./docs/page-methods.md#getpagehistory), [getPageComments](./docs/page-methods.md#getpagecomments), [getPageList](./docs/page-methods.md#getpagelist), [getPageListByPageTemplateID](./docs/page-methods.md#getpagelistbypagetemplateid), [getPageListByPage](./docs/page-methods.md#getpagelistbypage), [getPageListByPageAndPageTemplateID](./docs/page-methods.md#getpagelistbypageandpagetemplateid), [getPageTree](./docs/page-methods.md#getpagetree), [getPageTemplateList](./docs/page-methods.md#getpagetemplatelist), [getPageSecurity](./docs/page-methods.md#getpagesecurity), [getPageItemTemplateList](./docs/page-methods.md#getpageitemtemplatelist), [getPageContentZones](./docs/page-methods.md#getpagecontentzones), [savePage](./docs/page-methods.md#savepage), [savePageSecurity](./docs/page-methods.md#savepagesecurity), [movePageItem](./docs/page-methods.md#movepageitem), [deletePage](./docs/page-methods.md#deletepage), [batchPublishPages](./docs/page-methods.md#batchpublishpages), [batchUnpublishPages](./docs/page-methods.md#batchunpublishpages)
 
 ### User Management
 - **[InstanceMethods](./docs/instance-methods.md)** - Instance-level operations (1 function)
@@ -248,6 +248,39 @@ const batchId = await client.batchMethods.publishBatch(newContentBatchID, guid, 
 console.log('Batch submitted for publishing:', batchId);
 
 console.log('All operations completed successfully!');
+```
+
+### Batch Publish/Unpublish Operations
+
+Publish or unpublish multiple content items or pages in a single operation:
+
+```typescript
+import * as mgmtApi from '@agility/management-sdk';
+
+const options = new mgmtApi.Options();
+options.token = 'your-access-token';
+const client = new mgmtApi.ApiClient(options);
+
+const guid = 'your-instance-guid';
+const locale = 'en-us';
+
+// Batch publish multiple content items
+const contentIDs = [101, 102, 103];
+const publishedContentIDs = await client.contentMethods.batchPublishContent(contentIDs, guid, locale);
+console.log('Published content IDs:', publishedContentIDs);
+
+// Batch unpublish multiple content items
+const unpublishedContentIDs = await client.contentMethods.batchUnpublishContent(contentIDs, guid, locale);
+console.log('Unpublished content IDs:', unpublishedContentIDs);
+
+// Batch publish multiple pages
+const pageIDs = [201, 202, 203];
+const publishedPageIDs = await client.pageMethods.batchPublishPages(pageIDs, guid, locale);
+console.log('Published page IDs:', publishedPageIDs);
+
+// Batch unpublish multiple pages
+const unpublishedPageIDs = await client.pageMethods.batchUnpublishPages(pageIDs, guid, locale);
+console.log('Unpublished page IDs:', unpublishedPageIDs);
 ```
 
 ## TypeScript Interfaces

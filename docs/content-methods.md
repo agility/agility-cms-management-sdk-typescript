@@ -9,6 +9,8 @@ The `ContentMethods` class provides comprehensive functionality for managing con
 | [getContentItem](#getcontentitem) | Retrieves a specific content item by ID |
 | [publishContent](#publishcontent) | Publishes a content item |
 | [unPublishContent](#unpublishcontent) | Unpublishes a content item |
+| [batchPublishContent](#batchpublishcontent) | Batch publish multiple content items |
+| [batchUnpublishContent](#batchunpublishcontent) | Batch unpublish multiple content items |
 | [contentRequestApproval](#contentrequestapproval) | Requests approval for a content item |
 | [approveContent](#approvecontent) | Approves a content item |
 | [declineContent](#declinecontent) | Declines a content item |
@@ -99,6 +101,60 @@ Unpublishes a content item through the batch workflow system.
 
 ```typescript
 const unpublishedIds = await client.contentMethods.unPublishContent(123, 'your-guid', 'en-us', 'Temporary unpublish');
+```
+
+---
+
+## batchPublishContent
+
+Publishes multiple content items in a single batch operation.
+
+### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| contentIDs | number[] | Yes | Array of content IDs to publish |
+| guid | string | Yes | The website GUID |
+| locale | string | Yes | The locale code |
+| returnBatchId | boolean | No | If true, returns batch ID immediately without waiting |
+
+### Returns
+
+`Promise<number[]>` - Array of content IDs that were published
+
+### Usage Example
+
+```typescript
+const contentIDs = [101, 102, 103];
+const publishedIds = await client.contentMethods.batchPublishContent(contentIDs, 'your-guid', 'en-us');
+console.log('Published content IDs:', publishedIds);
+```
+
+---
+
+## batchUnpublishContent
+
+Unpublishes multiple content items in a single batch operation.
+
+### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| contentIDs | number[] | Yes | Array of content IDs to unpublish |
+| guid | string | Yes | The website GUID |
+| locale | string | Yes | The locale code |
+| returnBatchId | boolean | No | If true, returns batch ID immediately without waiting |
+
+### Returns
+
+`Promise<number[]>` - Array of content IDs that were unpublished
+
+### Usage Example
+
+```typescript
+const contentIDs = [101, 102, 103];
+const unpublishedIds = await client.contentMethods.batchUnpublishContent(contentIDs, 'your-guid', 'en-us');
+console.log('Unpublished content IDs:', unpublishedIds);
 ```
 
 ---
