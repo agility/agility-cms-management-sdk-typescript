@@ -8,6 +8,8 @@ import { PageModel } from "../models/pageModel";
 import { ContentSectionDefinition } from "../models/contentSectionDefinition";
 import { PageHistory } from "../models/pageHistory";
 import { ItemComments } from "../models/itemComments";
+import { BatchState } from "../enums/batchState.";
+import { WorkflowOperationType } from "../enums/workflowOperationType";
 
 export class PageMethods {
     _options!: Options;
@@ -156,6 +158,49 @@ export class PageMethods {
         }
     }
 
+    /**
+     * Perform a batch workflow operation on multiple pages.
+     * Supports Publish, Unpublish, Approve, Decline, and RequestApproval operations.
+     * @param pageIDs Array of page IDs to process
+     * @param guid The GUID of the user making the request
+     * @param locale The locale of the pages
+     * @param operation The workflow operation type (Publish, Unpublish, Approve, Decline, RequestApproval)
+     * @param returnBatchId Whether to return the batch ID immediately
+     * @returns The IDs of the processed pages
+     */
+    async batchWorkflowPages(pageIDs: number[], guid: string, locale: string, operation: WorkflowOperationType, returnBatchId: boolean = false): Promise<number[]> {
+        try {
+            // Convert pageIDs array to comma-separated string for query parameter
+            const pageIDsParam = pageIDs.join(',');
+            // Convert enum to string name for API
+            const operationName = WorkflowOperationType[operation];
+            let apiPath = `${locale}/page/batch-workflow?pageIDs=${pageIDsParam}&operation=${operationName}`;
+
+            // Send empty body since IDs are in query string
+            const resp = await this._clientInstance.executePost(apiPath, guid, this._options.token, null);
+            let batchID = resp.data as number;
+
+            // If user wants batchID immediately, return it for custom polling
+            if (returnBatchId) {
+                return [batchID];
+            }
+
+            // Default behavior: wait for completion and return IDs
+            var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID, guid));
+            
+            if(batch.batchState === BatchState.Processed && batch.errorData && batch.errorData.length > 0) {
+                throw new Exception(`Unable to batch ${operationName.toLowerCase()} pages. Batch is not completed. Error: ${batch.errorData}`, null);
+            }
+            
+            let processedPageIDs: number[] = [];
+
+            batch.items.forEach(element => processedPageIDs.push(element.itemID));
+            return processedPageIDs;
+        } catch (err) {
+            throw new Exception(`Unable to batch ${WorkflowOperationType[operation].toLowerCase()} pages.`, err);
+        }
+    }
+
     async pageRequestApproval(pageID: number, guid: string, locale: string, comments: string = null, returnBatchId: boolean = false): Promise<number[]> {
         try {
             let apiPath = `${locale}/page/${pageID}/request-approval?comments=${comments}`;
@@ -258,15 +303,22 @@ export class PageMethods {
      * @param returnBatchId Whether to return the batch ID immediately
      * @param pageIDInOtherLocale The ID of the page in the other locale if you need to link it up.
      * @param otherLocale The other locale to link the page to.
+     * @param linkExistingComponents Whether to link existing components to the page. If not set, the page save will create new components for each content zone.
      * @returns The IDs of the created or updated pages
      */
-    async savePage(pageItem: PageItem, guid: string, locale: string, parentPageID: number = -1, placeBeforePageItemID: number = -1, returnBatchId: boolean = false, pageIDInOtherLocale: number = -1, otherLocale: string = null): Promise<number[]> {
+    async savePage(pageItem: PageItem, guid: string, locale: string, parentPageID: number = -1, placeBeforePageItemID: number = -1, returnBatchId: boolean = false, pageIDInOtherLocale: number = -1, otherLocale: string = null, linkExistingComponents: boolean = false): Promise<number[]> {
         try {
             let apiPath = `${locale}/page?parentPageID=${parentPageID}&placeBeforePageItemID=${placeBeforePageItemID}`;
             if (pageIDInOtherLocale > -1 && otherLocale) {
                 // If we have the other locale and the pageID in that locale, we need to link it up.
                 apiPath += `&pageIDInOtherLocale=${pageIDInOtherLocale}&otherLocale=${otherLocale}`;
             }
+
+            // if not set, the page save will create new components for each content zone.
+            if (linkExistingComponents) {
+                apiPath += `&linkExistingComponents=true`;
+            }
+
             const resp = await this._clientInstance.executePost(apiPath, guid, this._options.token, pageItem);
 
             let batchID = resp.data as number;

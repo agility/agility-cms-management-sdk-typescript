@@ -30,6 +30,7 @@ This class provides comprehensive page management operations for Agility CMS. Pa
 - [savePageSecurity](#savepagesecurity) - Updates page security settings
 - [movePageItem](#movepageitem) - Moves a page item within the hierarchy
 - [deletePage](#deletepage) - Deletes a page by ID
+- [batchWorkflowPages](#batchworkflowpages) - Batch workflow operation on multiple pages
 
 ---
 
@@ -653,6 +654,72 @@ const safeDeletePage = async (pageID) => {
 - Throws `Exception` when page not found, has children, or deletion fails
 
 **Note:** Pages cannot be deleted if they have child pages or are referenced by other content.
+
+---
+
+### batchWorkflowPages
+
+Performs a batch workflow operation on multiple pages. Supports Publish, Unpublish, Approve, Decline, and RequestApproval operations.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `pageIDs` | `number[]` | Yes | Array of page IDs to process |
+| `guid` | `string` | Yes | Current website GUID |
+| `locale` | `string` | Yes | The locale code |
+| `operation` | `WorkflowOperationType` | Yes | The workflow operation (Publish, Unpublish, Approve, Decline, RequestApproval) |
+| `returnBatchId` | `boolean` | No | If `true`, returns batch ID immediately without waiting |
+
+**Returns:** `Promise<number[]>` - Array of page IDs that were processed
+
+**Usage Example:**
+```typescript
+import { WorkflowOperationType } from '@agility/management-sdk';
+
+// Publish multiple pages
+const pageIDs = [201, 202, 203];
+const publishedPageIDs = await client.pageMethods.batchWorkflowPages(
+    pageIDs, 
+    'your-guid', 
+    'en-us', 
+    WorkflowOperationType.Publish
+);
+console.log('Published page IDs:', publishedPageIDs);
+
+// Unpublish multiple pages
+const unpublishedPageIDs = await client.pageMethods.batchWorkflowPages(
+    pageIDs, 
+    'your-guid', 
+    'en-us', 
+    WorkflowOperationType.Unpublish
+);
+
+// Request approval for multiple pages
+const approvalRequestedPageIDs = await client.pageMethods.batchWorkflowPages(
+    pageIDs, 
+    'your-guid', 
+    'en-us', 
+    WorkflowOperationType.RequestApproval
+);
+
+// Approve multiple pages
+const approvedPageIDs = await client.pageMethods.batchWorkflowPages(
+    pageIDs, 
+    'your-guid', 
+    'en-us', 
+    WorkflowOperationType.Approve
+);
+
+// Decline multiple pages
+const declinedPageIDs = await client.pageMethods.batchWorkflowPages(
+    pageIDs, 
+    'your-guid', 
+    'en-us', 
+    WorkflowOperationType.Decline
+);
+```
+
+**Error Handling:**
+- Throws `Exception` when batch operation fails
 
 ---
 
