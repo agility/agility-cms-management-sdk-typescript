@@ -8,6 +8,8 @@ import { ContentItemHistory } from "../models/contentItemHistory";
 import { ItemComments } from "../models/itemComments";
 import { ListParams } from "../models/listParams";
 import { buildQueryString } from "../util/queryString";
+import { BatchState } from "../enums/batchState.";
+import { WorkflowOperationType } from "../enums/workflowOperationType";
 
 export class ContentMethods {
     _options!: Options;
@@ -74,6 +76,50 @@ export class ContentMethods {
             return contentIDs;
         } catch (err) {
             throw new Exception(`Unable to un-publish the content for id: ${contentID}`, err);
+        }
+    }
+
+    /**
+     * Perform a batch workflow operation on multiple content items.
+     * Supports Publish, Unpublish, Approve, Decline, and RequestApproval operations.
+     * @param contentIDs Array of content IDs to process
+     * @param guid The GUID of the user making the request
+     * @param locale The locale of the content items
+     * @param operation The workflow operation type (Publish, Unpublish, Approve, Decline, RequestApproval)
+     * @param returnBatchId Whether to return the batch ID immediately
+     * @returns The IDs of the processed content items
+     */
+    async batchWorkflowContent(contentIDs: number[], guid: string, locale: string, operation: WorkflowOperationType, returnBatchId: boolean = false): Promise<number[]> {
+        try {
+            // Convert contentIDs array to comma-separated string for query parameter
+            const contentIDsParam = contentIDs.join(',');
+            // Convert enum to string name for API
+            const operationName = WorkflowOperationType[operation];
+            let apiPath = `${locale}/item/batch-workflow?contentIDs=${contentIDsParam}&operation=${operationName}`;
+
+            // Send empty body since IDs are in query string
+            const resp = await this._clientInstance.executePost(apiPath, guid, this._options.token, null);
+
+            let batchID = resp.data as number;
+            
+            // If user wants batchID immediately, return it for custom polling
+            if (returnBatchId) {
+                return [batchID];
+            }
+
+            // Default behavior: wait for completion and return IDs
+            var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID, guid));
+            
+            if(batch.batchState === BatchState.Processed && batch.errorData && batch.errorData.length > 0) {
+                throw new Exception(`Unable to batch ${operationName.toLowerCase()} content items. Batch is not completed. Error: ${batch.errorData}`, null);
+            }
+
+            let processedContentIDs: number[] = [];
+
+            batch.items.forEach(element => processedContentIDs.push(element.itemID));
+            return processedContentIDs;
+        } catch (err) {
+            throw new Exception(`Unable to batch ${WorkflowOperationType[operation].toLowerCase()} content items.`, err);
         }
     }
 

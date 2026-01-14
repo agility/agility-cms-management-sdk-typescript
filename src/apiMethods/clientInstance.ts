@@ -1,12 +1,21 @@
 import axios, { AxiosInstance } from 'axios';
+import https from 'https';
 import { Options } from "../models/options";
 
 export class ClientInstance {
 
     _options: Options
+    _httpsAgent: https.Agent | undefined;
 
     constructor(options: Options) {
-        this._options = options
+        this._options = options;
+        
+        // Create an HTTPS agent that ignores SSL certificate errors for local development
+        if (process.env.NODE_TLS_REJECT_UNAUTHORIZED === '0') {
+            this._httpsAgent = new https.Agent({
+                rejectUnauthorized: false
+            });
+        }
     }
     /**
      * Figure out the Base Url, which can be overriden using options.baseUrl
@@ -50,7 +59,8 @@ export class ClientInstance {
         let instance = axios.create({
             baseURL: `${baseUrl}/api/v1/instance/${guid}`,
             maxContentLength: Infinity,
-            maxBodyLength: Infinity
+            maxBodyLength: Infinity,
+            httpsAgent: this._httpsAgent
         })
         return instance;
     }
@@ -60,7 +70,8 @@ export class ClientInstance {
         let instance = axios.create({
             baseURL: `${baseUrl}/api/v1`,
             maxContentLength: Infinity,
-            maxBodyLength: Infinity
+            maxBodyLength: Infinity,
+            httpsAgent: this._httpsAgent
         })
         return instance;
     }
