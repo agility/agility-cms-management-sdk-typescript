@@ -9,8 +9,7 @@ The `ContentMethods` class provides comprehensive functionality for managing con
 | [getContentItem](#getcontentitem) | Retrieves a specific content item by ID |
 | [publishContent](#publishcontent) | Publishes a content item |
 | [unPublishContent](#unpublishcontent) | Unpublishes a content item |
-| [batchPublishContent](#batchpublishcontent) | Batch publish multiple content items |
-| [batchUnpublishContent](#batchunpublishcontent) | Batch unpublish multiple content items |
+| [batchWorkflowContent](#batchworkflowcontent) | Batch workflow operation on multiple content items |
 | [contentRequestApproval](#contentrequestapproval) | Requests approval for a content item |
 | [approveContent](#approvecontent) | Approves a content item |
 | [declineContent](#declinecontent) | Declines a content item |
@@ -105,56 +104,70 @@ const unpublishedIds = await client.contentMethods.unPublishContent(123, 'your-g
 
 ---
 
-## batchPublishContent
+## batchWorkflowContent
 
-Publishes multiple content items in a single batch operation.
+Performs a batch workflow operation on multiple content items. Supports Publish, Unpublish, Approve, Decline, and RequestApproval operations.
 
 ### Parameters
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| contentIDs | number[] | Yes | Array of content IDs to publish |
+| contentIDs | number[] | Yes | Array of content IDs to process |
 | guid | string | Yes | The website GUID |
 | locale | string | Yes | The locale code |
+| operation | WorkflowOperationType | Yes | The workflow operation (Publish, Unpublish, Approve, Decline, RequestApproval) |
 | returnBatchId | boolean | No | If true, returns batch ID immediately without waiting |
 
 ### Returns
 
-`Promise<number[]>` - Array of content IDs that were published
+`Promise<number[]>` - Array of content IDs that were processed
 
 ### Usage Example
 
 ```typescript
+import { WorkflowOperationType } from '@agility/management-sdk';
+
+// Publish multiple content items
 const contentIDs = [101, 102, 103];
-const publishedIds = await client.contentMethods.batchPublishContent(contentIDs, 'your-guid', 'en-us');
+const publishedIds = await client.contentMethods.batchWorkflowContent(
+    contentIDs, 
+    'your-guid', 
+    'en-us', 
+    WorkflowOperationType.Publish
+);
 console.log('Published content IDs:', publishedIds);
-```
 
----
+// Unpublish multiple content items
+const unpublishedIds = await client.contentMethods.batchWorkflowContent(
+    contentIDs, 
+    'your-guid', 
+    'en-us', 
+    WorkflowOperationType.Unpublish
+);
 
-## batchUnpublishContent
+// Request approval for multiple content items
+const approvalRequestedIds = await client.contentMethods.batchWorkflowContent(
+    contentIDs, 
+    'your-guid', 
+    'en-us', 
+    WorkflowOperationType.RequestApproval
+);
 
-Unpublishes multiple content items in a single batch operation.
+// Approve multiple content items
+const approvedIds = await client.contentMethods.batchWorkflowContent(
+    contentIDs, 
+    'your-guid', 
+    'en-us', 
+    WorkflowOperationType.Approve
+);
 
-### Parameters
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| contentIDs | number[] | Yes | Array of content IDs to unpublish |
-| guid | string | Yes | The website GUID |
-| locale | string | Yes | The locale code |
-| returnBatchId | boolean | No | If true, returns batch ID immediately without waiting |
-
-### Returns
-
-`Promise<number[]>` - Array of content IDs that were unpublished
-
-### Usage Example
-
-```typescript
-const contentIDs = [101, 102, 103];
-const unpublishedIds = await client.contentMethods.batchUnpublishContent(contentIDs, 'your-guid', 'en-us');
-console.log('Unpublished content IDs:', unpublishedIds);
+// Decline multiple content items
+const declinedIds = await client.contentMethods.batchWorkflowContent(
+    contentIDs, 
+    'your-guid', 
+    'en-us', 
+    WorkflowOperationType.Decline
+);
 ```
 
 ---

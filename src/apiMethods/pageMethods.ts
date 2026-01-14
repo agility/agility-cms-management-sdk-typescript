@@ -9,6 +9,7 @@ import { ContentSectionDefinition } from "../models/contentSectionDefinition";
 import { PageHistory } from "../models/pageHistory";
 import { ItemComments } from "../models/itemComments";
 import { BatchState } from "../enums/batchState.";
+import { WorkflowOperationType } from "../enums/workflowOperationType";
 
 export class PageMethods {
     _options!: Options;
@@ -158,19 +159,22 @@ export class PageMethods {
     }
 
     /**
-     * Batch publish multiple pages.
-     * @param pageIDs Array of page IDs to publish
+     * Perform a batch workflow operation on multiple pages.
+     * Supports Publish, Unpublish, Approve, Decline, and RequestApproval operations.
+     * @param pageIDs Array of page IDs to process
      * @param guid The GUID of the user making the request
      * @param locale The locale of the pages
-     * @param comments Optional comments for the batch request
+     * @param operation The workflow operation type (Publish, Unpublish, Approve, Decline, RequestApproval)
      * @param returnBatchId Whether to return the batch ID immediately
-     * @returns The IDs of the published pages
+     * @returns The IDs of the processed pages
      */
-    async batchPublishPages(pageIDs: number[], guid: string, locale: string, returnBatchId: boolean = false): Promise<number[]> {
+    async batchWorkflowPages(pageIDs: number[], guid: string, locale: string, operation: WorkflowOperationType, returnBatchId: boolean = false): Promise<number[]> {
         try {
             // Convert pageIDs array to comma-separated string for query parameter
             const pageIDsParam = pageIDs.join(',');
-            let apiPath = `${locale}/page/batch-publish?pageIDs=${pageIDsParam}`;
+            // Convert enum to string name for API
+            const operationName = WorkflowOperationType[operation];
+            let apiPath = `${locale}/page/batch-workflow?pageIDs=${pageIDsParam}&operation=${operationName}`;
 
             // Send empty body since IDs are in query string
             const resp = await this._clientInstance.executePost(apiPath, guid, this._options.token, null);
@@ -185,56 +189,15 @@ export class PageMethods {
             var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID, guid));
             
             if(batch.batchState === BatchState.Processed && batch.errorData && batch.errorData.length > 0) {
-                throw new Exception(`Unable to batch publish pages. Batch is not completed. Error: ${batch.errorData}`, null);
+                throw new Exception(`Unable to batch ${operationName.toLowerCase()} pages. Batch is not completed. Error: ${batch.errorData}`, null);
             }
             
-            let publishedPageIDs: number[] = [];
+            let processedPageIDs: number[] = [];
 
-            batch.items.forEach(element => publishedPageIDs.push(element.itemID));
-            return publishedPageIDs;
+            batch.items.forEach(element => processedPageIDs.push(element.itemID));
+            return processedPageIDs;
         } catch (err) {
-            throw new Exception(`Unable to batch publish pages.`, err);
-        }
-    }
-
-    /**
-     * Batch unpublish multiple pages.
-     * @param pageIDs Array of page IDs to unpublish
-     * @param guid The GUID of the user making the request
-     * @param locale The locale of the pages
-     * @param comments Optional comments for the batch request
-     * @param returnBatchId Whether to return the batch ID immediately
-     * @returns The IDs of the unpublished pages
-     */
-    async batchUnpublishPages(pageIDs: number[], guid: string, locale: string, returnBatchId: boolean = false): Promise<number[]> {
-        try {
-            // Convert pageIDs array to comma-separated string for query parameter
-            const pageIDsParam = pageIDs.join(',');
-            let apiPath = `${locale}/page/batch-unpublish?pageIDs=${pageIDsParam}`;
-      
-            // Send empty body since IDs are in query string
-            const resp = await this._clientInstance.executePost(apiPath, guid, this._options.token, null);
-
-            let batchID = resp.data as number;
-
-            // If user wants batchID immediately, return it for custom polling
-            if (returnBatchId) {
-                return [batchID];
-            }
-
-            // Default behavior: wait for completion and return IDs
-            var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID, guid));
-
-            if(batch.batchState === BatchState.Processed && batch.errorData && batch.errorData.length > 0) {
-                throw new Exception(`Unable to batch unpublish pages. Batch is not completed. Error: ${batch.errorData}`, null);
-            }
-
-            let unpublishedPageIDs: number[] = [];
-
-            batch.items.forEach(element => unpublishedPageIDs.push(element.itemID));
-            return unpublishedPageIDs;
-        } catch (err) {
-            throw new Exception(`Unable to batch unpublish pages.`, err);
+            throw new Exception(`Unable to batch ${WorkflowOperationType[operation].toLowerCase()} pages.`, err);
         }
     }
 

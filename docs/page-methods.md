@@ -30,8 +30,7 @@ This class provides comprehensive page management operations for Agility CMS. Pa
 - [savePageSecurity](#savepagesecurity) - Updates page security settings
 - [movePageItem](#movepageitem) - Moves a page item within the hierarchy
 - [deletePage](#deletepage) - Deletes a page by ID
-- [batchPublishPages](#batchpublishpages) - Batch publish multiple pages
-- [batchUnpublishPages](#batchunpublishpages) - Batch unpublish multiple pages
+- [batchWorkflowPages](#batchworkflowpages) - Batch workflow operation on multiple pages
 
 ---
 
@@ -658,49 +657,65 @@ const safeDeletePage = async (pageID) => {
 
 ---
 
-### batchPublishPages
+### batchWorkflowPages
 
-Publishes multiple pages in a single batch operation.
+Performs a batch workflow operation on multiple pages. Supports Publish, Unpublish, Approve, Decline, and RequestApproval operations.
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `pageIDs` | `number[]` | Yes | Array of page IDs to publish |
+| `pageIDs` | `number[]` | Yes | Array of page IDs to process |
 | `guid` | `string` | Yes | Current website GUID |
 | `locale` | `string` | Yes | The locale code |
+| `operation` | `WorkflowOperationType` | Yes | The workflow operation (Publish, Unpublish, Approve, Decline, RequestApproval) |
 | `returnBatchId` | `boolean` | No | If `true`, returns batch ID immediately without waiting |
 
-**Returns:** `Promise<number[]>` - Array of page IDs that were published
+**Returns:** `Promise<number[]>` - Array of page IDs that were processed
 
 **Usage Example:**
 ```typescript
+import { WorkflowOperationType } from '@agility/management-sdk';
+
+// Publish multiple pages
 const pageIDs = [201, 202, 203];
-const publishedPageIDs = await client.pageMethods.batchPublishPages(pageIDs, 'your-guid', 'en-us');
+const publishedPageIDs = await client.pageMethods.batchWorkflowPages(
+    pageIDs, 
+    'your-guid', 
+    'en-us', 
+    WorkflowOperationType.Publish
+);
 console.log('Published page IDs:', publishedPageIDs);
-```
 
-**Error Handling:**
-- Throws `Exception` when batch operation fails
+// Unpublish multiple pages
+const unpublishedPageIDs = await client.pageMethods.batchWorkflowPages(
+    pageIDs, 
+    'your-guid', 
+    'en-us', 
+    WorkflowOperationType.Unpublish
+);
 
----
+// Request approval for multiple pages
+const approvalRequestedPageIDs = await client.pageMethods.batchWorkflowPages(
+    pageIDs, 
+    'your-guid', 
+    'en-us', 
+    WorkflowOperationType.RequestApproval
+);
 
-### batchUnpublishPages
+// Approve multiple pages
+const approvedPageIDs = await client.pageMethods.batchWorkflowPages(
+    pageIDs, 
+    'your-guid', 
+    'en-us', 
+    WorkflowOperationType.Approve
+);
 
-Unpublishes multiple pages in a single batch operation.
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `pageIDs` | `number[]` | Yes | Array of page IDs to unpublish |
-| `guid` | `string` | Yes | Current website GUID |
-| `locale` | `string` | Yes | The locale code |
-| `returnBatchId` | `boolean` | No | If `true`, returns batch ID immediately without waiting |
-
-**Returns:** `Promise<number[]>` - Array of page IDs that were unpublished
-
-**Usage Example:**
-```typescript
-const pageIDs = [201, 202, 203];
-const unpublishedPageIDs = await client.pageMethods.batchUnpublishPages(pageIDs, 'your-guid', 'en-us');
-console.log('Unpublished page IDs:', unpublishedPageIDs);
+// Decline multiple pages
+const declinedPageIDs = await client.pageMethods.batchWorkflowPages(
+    pageIDs, 
+    'your-guid', 
+    'en-us', 
+    WorkflowOperationType.Decline
+);
 ```
 
 **Error Handling:**
