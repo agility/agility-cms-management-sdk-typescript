@@ -146,8 +146,8 @@ console.log('Content retrieved:', contentItem.fields.title);
   - [getPage](./docs/page-methods.md#getpage), [getPageByPath](./docs/page-methods.md#getpagebypath), [getPageHistory](./docs/page-methods.md#getpagehistory), [getPageComments](./docs/page-methods.md#getpagecomments), [getPageList](./docs/page-methods.md#getpagelist), [getPageListByPageTemplateID](./docs/page-methods.md#getpagelistbypagetemplateid), [getPageListByPage](./docs/page-methods.md#getpagelistbypage), [getPageListByPageAndPageTemplateID](./docs/page-methods.md#getpagelistbypageandpagetemplateid), [getPageTree](./docs/page-methods.md#getpagetree), [getPageTemplateList](./docs/page-methods.md#getpagetemplatelist), [getPageSecurity](./docs/page-methods.md#getpagesecurity), [getPageItemTemplateList](./docs/page-methods.md#getpageitemtemplatelist), [getPageContentZones](./docs/page-methods.md#getpagecontentzones), [savePage](./docs/page-methods.md#savepage), [savePageSecurity](./docs/page-methods.md#savepagesecurity), [movePageItem](./docs/page-methods.md#movepageitem), [deletePage](./docs/page-methods.md#deletepage), [batchWorkflowPages](./docs/page-methods.md#batchworkflowpages)
 
 ### User Management
-- **[InstanceMethods](./docs/instance-methods.md)** - Instance-level operations (1 function)
-  - [getLocales](./docs/instance-methods.md#getlocales)
+- **[InstanceMethods](./docs/instance-methods.md)** - Instance-level operations (2 functions)
+  - [getLocales](./docs/instance-methods.md#getlocales), [getFetchApiStatus](./docs/instance-methods.md#getfetchapistatus)
 
 - **[InstanceUserMethods](./docs/instance-user-methods.md)** - Instance user management (3 functions)
   - [getUsers](./docs/instance-user-methods.md#getusers), [saveUser](./docs/instance-user-methods.md#saveuser), [deleteUser](./docs/instance-user-methods.md#deleteuser)
@@ -302,6 +302,31 @@ const [batchId] = await client.contentMethods.batchWorkflowContent(
     contentIDs, guid, locale, WorkflowOperationType.Publish, true
 );
 console.log('Batch submitted, ID:', batchId);
+```
+
+### Checking Fetch API Sync Status
+
+After batch operations, you may want to verify that changes have propagated to the Fetch API CDN before using the content on your frontend:
+
+```typescript
+import * as mgmtApi from '@agility/management-sdk';
+
+const options = new mgmtApi.Options();
+options.token = 'your-access-token';
+const client = new mgmtApi.ApiClient(options);
+
+const guid = 'your-instance-guid';
+
+// After a batch publish operation, wait for CDN sync
+await client.batchMethods.publishBatch(batchId, guid);
+
+// Wait for sync to complete
+await client.instanceMethods.getFetchApiStatus(guid, 'fetch', true);
+console.log('Sync complete! Content is now available on the CDN');
+
+// Or just check current status without waiting
+const status = await client.instanceMethods.getFetchApiStatus(guid);
+console.log('Sync in progress:', status.inProgress);
 ```
 
 ## TypeScript Interfaces
