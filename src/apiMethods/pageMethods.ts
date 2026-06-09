@@ -311,7 +311,7 @@ export class PageMethods {
 
             return resp.data as ItemComments;
         } catch (err) {
-            throw new Exception(`Unable to retrieve history for pageID: ${pageID}`)
+            throw new Exception(`Unable to retrieve comments for pageID: ${pageID}`)
         }
     }
 }
