@@ -351,12 +351,12 @@ export class PageMethods {
 
     async getPageComments(locale: string, guid: string, pageID: number, take: number = 50, skip: number = 0) {
         try {
-            let apiPath = `${locale}/item/${pageID}/history?take=${take}&skip=${skip}`;
+            let apiPath = `${locale}/item/${pageID}/comments?take=${take}&skip=${skip}`;
             const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
 
             return resp.data as ItemComments;
         } catch (err) {
-            throw new Exception(`Unable to retrieve history for pageID: ${pageID}`)
+            throw new Exception(`Unable to retrieve comments for pageID: ${pageID}`)
         }
     }
 }
