@@ -6,10 +6,6 @@ name: Publish to npm
 #   1. Bump "version" in package.json and merge to main.
 #   2. Tag the commit: `git tag v0.1.40 && git push origin v0.1.40`
 #   3. This workflow verifies the tag matches package.json, builds, and publishes.
-#
-# Auth: uses npm Trusted Publisher (OIDC) — no NPM_TOKEN secret required.
-# One-time setup on npmjs.org: add this repo + workflow as a Trusted Publisher for
-# the @agility/management-sdk package (Package settings → Publishing access).
 
 on:
   push:
