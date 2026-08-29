@@ -16,6 +16,8 @@ export * from "./models/notification";
 export * from "./models/pageItem";
 export * from "./models/pagedResult";
 export * from "./models/sitemap";
+export * from "./models/webhook";
+export * from "./models/webhookHistory";
 export * from "./models/websiteUser";
 export * from "./models/assetContainer";
 export * from "./models/assetGalleries";
