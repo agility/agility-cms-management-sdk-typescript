@@ -7,7 +7,7 @@ This class provides webhook management operations for Agility CMS. Webhooks deli
 **Important Notes:**
 - Webhooks fire on three event categories: content save, content publish, and content workflow events — each can be toggled per webhook
 - Webhook IDs are string GUIDs (the `rowKey` of the stored record), not numbers
-- Every delivery is signed using the [Standard Webhooks](https://www.standardwebhooks.com/) specification — see [Verifying deliveries](#verifying-deliveries-signing) below
+- Signed delivery is **opt-in per webhook** (`secureDeliveryEnabled`, off by default): when enabled, deliveries carry [Standard Webhooks](https://www.standardwebhooks.com/) signature headers — see [Verifying deliveries](#verifying-deliveries-signing) below. Webhooks with it off (including every webhook created before the feature shipped) are delivered unsigned, exactly as before
 - List responses never include signing secrets; `getWebhook` masks the signing secret unless the caller has *Manage* permission on webhooks
 - Rotating a signing secret requires *FullControl* permission; reading delivery history requires *Manage* permission
 - Failed deliveries are retried automatically when retries are enabled — see [Retry behavior](#retry-behavior)
@@ -205,9 +205,9 @@ console.log(`Failed deliveries in window: ${failures.length}`);
 ```
 
 **WebhookHistory Properties:**
-- `partitionKey` / `rowKey`: Storage identity of the history record
+- `partitionKey` / `rowKey`: Storage identity of the history record. **`rowKey` is the value sent as the `webhook-id` header**, so use it to correlate a history record with what your endpoint received
 - `webhookRowKey`: The ID of the webhook this delivery belongs to
-- `eventKey`: Identifier of the triggering event — also sent as the `webhook-id` header, so you can correlate a history record with what your endpoint received
+- `eventKey`: Identifier of the triggering *event*, shared by every webhook that received it (used server-side for de-duplication). This is **not** the `webhook-id` header — correlate with `rowKey` instead
 - `queuedDate` / `sendDate`: When the delivery was queued and sent
 - `url`: The URL the payload was POSTed to
 - `instanceGuid`: The instance the event originated from
@@ -273,11 +273,11 @@ class Webhook {
 
 ## Verifying deliveries (signing)
 
-Every delivery is signed per the [Standard Webhooks](https://www.standardwebhooks.com/) specification. Each POST to your endpoint carries three headers:
+Deliveries for a webhook with `secureDeliveryEnabled: true` are signed per the [Standard Webhooks](https://www.standardwebhooks.com/) specification; those carry three extra headers. Deliveries for webhooks without it carry no signature headers at all, so verify signatures only for endpoints you have enabled secure delivery on:
 
 | Header | Description |
 |--------|-------------|
-| `webhook-id` | Unique ID of this event — reuse it as an **idempotency key**, since retries resend the same `webhook-id` |
+| `webhook-id` | Unique ID of this delivery (the history record's `rowKey`) — reuse it as an **idempotency key**, since retries resend the same `webhook-id` |
 | `webhook-timestamp` | Unix timestamp (seconds) of the delivery attempt |
 | `webhook-signature` | `v1,<base64 signature>` — HMAC-SHA256 over `{id}.{timestamp}.{body}` keyed with the decoded secret |
 
