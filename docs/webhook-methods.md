@@ -95,7 +95,7 @@ Creates a new webhook or updates an existing one.
 
 **To update an existing webhook, the `partitionKey` and `rowKey` from a previously retrieved webhook must be present on the object** — without them the API treats the save as a create and mints a new webhook. The easiest pattern is get → modify → save.
 
-Signing secrets are controlled by the server: a new webhook is issued a secret automatically, and any `signingSecret` value you send is ignored. Use [rotateWebhookSecret](#rotatewebhooksecret) to change it.
+Signed delivery is opt-in per webhook: set `secureDeliveryEnabled: true` and the server mints a signing secret on that save (webhooks with it off — including every webhook created before this feature — are delivered unsigned, exactly as before). Any `signingSecret` value you send is ignored; secrets are always server-controlled. Use [rotateWebhookSecret](#rotatewebhooksecret) to change one.
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
@@ -261,6 +261,7 @@ class Webhook {
     contentWorkflowEvents: boolean;   // Fire on workflow events (request approval, approve, decline)
     contentPublishEvents: boolean;    // Fire on publish/unpublish events
     contentSaveEvents: boolean;       // Fire on save/delete events
+    secureDeliveryEnabled: boolean;   // Opt-in for signed delivery (default false; existing webhooks stay unsigned)
     signingSecret: string | null;     // Standard Webhooks secret (whsec_...) — server-controlled, masked without Manage permission
     previousSigningSecret: string | null; // Prior secret, kept for the rotation rollover window
     secretRolledUtc: string | null;   // When the secret was last rotated

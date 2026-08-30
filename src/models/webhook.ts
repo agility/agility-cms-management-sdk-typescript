@@ -10,6 +10,7 @@ export class Webhook {
     contentWorkflowEvents: boolean;
     contentPublishEvents: boolean;
     contentSaveEvents: boolean;
+    secureDeliveryEnabled: boolean;
     signingSecret: string | null;
     previousSigningSecret: string | null;
     secretRolledUtc: string | null;
