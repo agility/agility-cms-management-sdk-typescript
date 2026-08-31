@@ -8,7 +8,7 @@ This class provides webhook management operations for Agility CMS. Webhooks deli
 - Webhooks fire on three event categories: content save, content publish, and content workflow events — each can be toggled per webhook
 - Webhook IDs are string GUIDs (the `rowKey` of the stored record), not numbers
 - Signed delivery is **opt-in per webhook** (`secureDeliveryEnabled`, off by default): when enabled, deliveries carry [Standard Webhooks](https://www.standardwebhooks.com/) signature headers — see [Verifying deliveries](#verifying-deliveries-signing) below. Webhooks with it off (including every webhook created before the feature shipped) are delivered unsigned, exactly as before
-- List responses never include signing secrets; `getWebhook` masks the signing secret unless the caller has *Manage* permission on webhooks
+- List responses never include signing secrets; `getWebhook` masks the signing secret unless the caller has *FullControl* permission on webhooks
 - Rotating a signing secret requires *FullControl* permission; reading delivery history requires *Manage* permission
 - Failed deliveries are retried automatically when retries are enabled — see [Retry behavior](#retry-behavior)
 
@@ -68,7 +68,7 @@ Retrieves a specific webhook by its ID (the `rowKey` GUID).
 | `guid` | `string` | Yes | Current website GUID |
 | `webhookID` | `string` | Yes | The webhook ID (`rowKey`) to retrieve |
 
-**Returns:** `Webhook` - The webhook object. The `signingSecret` is masked unless the caller has *Manage* permission on webhooks.
+**Returns:** `Webhook` - The webhook object. The `signingSecret` is masked unless the caller has *FullControl* permission on webhooks — the same bar as rotating it.
 
 **Usage Example:**
 ```typescript
@@ -137,7 +137,7 @@ console.log('Webhook updated:', updated.name);
 
 ### deleteWebhook
 
-Deletes a webhook by its ID. Deletion immediately stops future deliveries for that webhook.
+Deletes a webhook by its ID. Deletion immediately stops future deliveries for that webhook, and also removes that webhook's delivery history — history is keyed by webhook, so it is not retrievable once the webhook is gone. Export anything you need first.
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
@@ -159,7 +159,9 @@ console.log('Webhook deleted');
 
 Retrieves the delivery history for a webhook — one record per event delivery, including the payload, HTTP response, and retry state. Requires *Manage* permission on webhooks.
 
-Dates are UTC dates. The date range may span at most **31 days**; when no range is given, the **last 7 days** are returned. `take` is capped at **100** per page; use the continuation `token` for more.
+Dates are UTC dates. The date range may span at most **366 days**; when no range is given, the **last 7 days** are returned. `take` is capped at **100** per page; use the continuation `token` for more.
+
+Records come back **newest first**, and that ordering holds *across* pages — history is stored newest-first, so paging walks it in order rather than sorting each page in isolation. Treat `token` as opaque: it identifies a position in the sequence and is only meaningful for the same `webhookID` and date range.
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
@@ -167,7 +169,7 @@ Dates are UTC dates. The date range may span at most **31 days**; when no range 
 | `webhookID` | `string` | Yes | The webhook ID (`rowKey`) whose history to retrieve |
 | `options` | `object` | No | Optional query options (below) |
 | `options.fromDate` | `string` | No | UTC start date (e.g. `2026-08-01`) |
-| `options.toDate` | `string` | No | UTC end date; range max 31 days |
+| `options.toDate` | `string` | No | UTC end date; range max 366 days |
 | `options.take` | `number` | No | Records per page, max 100 |
 | `options.token` | `string` | No | Continuation token from a previous response |
 
@@ -205,7 +207,7 @@ console.log(`Failed deliveries in window: ${failures.length}`);
 ```
 
 **WebhookHistory Properties:**
-- `partitionKey` / `rowKey`: Storage identity of the history record. **`rowKey` is the value sent as the `webhook-id` header**, so use it to correlate a history record with what your endpoint received
+- `partitionKey` / `rowKey`: Storage identity of the history record. **`rowKey` is the value sent as the `webhook-id` header**, so use it to correlate a history record with what your endpoint received. Both are opaque — treat them as strings and don't parse them; the internal format is not part of this contract
 - `webhookRowKey`: The ID of the webhook this delivery belongs to
 - `eventKey`: Identifier of the triggering *event*, shared by every webhook that received it (used server-side for de-duplication). This is **not** the `webhook-id` header — correlate with `rowKey` instead
 - `queuedDate` / `sendDate`: When the delivery was queued and sent
@@ -262,7 +264,7 @@ class Webhook {
     contentPublishEvents: boolean;    // Fire on publish/unpublish events
     contentSaveEvents: boolean;       // Fire on save/delete events
     secureDeliveryEnabled: boolean;   // Opt-in for signed delivery (default false; existing webhooks stay unsigned)
-    signingSecret: string | null;     // Standard Webhooks secret (whsec_...) — server-controlled, masked without Manage permission
+    signingSecret: string | null;     // Standard Webhooks secret (whsec_...) — server-controlled, masked without FullControl permission
     previousSigningSecret: string | null; // Prior secret, kept for the rotation rollover window
     secretRolledUtc: string | null;   // When the secret was last rotated
     retriesEnabled: boolean;          // Whether failed deliveries are retried
