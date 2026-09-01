@@ -18,4 +18,15 @@ export class WebhookHistory {
     lastAttemptDate: string | null;
     nextAttemptUtc: string | null;
     lastError: string | null;
+    /**
+     * Whether the last attempt was sent with Standard Webhooks signature headers, as recorded at send
+     * time. `null` means no record — the delivery has not been attempted yet, or the row predates the
+     * field. This is the fact at delivery time, not the webhook's current `secureDeliveryEnabled`.
+     */
+    signed: boolean | null;
+    /**
+     * Signatures sent in the `webhook-signature` header on the last attempt: 0 unsigned, 1 normally,
+     * 2 during the 24-hour grace window after a secret roll.
+     */
+    signatureKeyCount: number;
 }

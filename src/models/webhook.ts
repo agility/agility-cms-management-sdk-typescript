@@ -17,4 +17,10 @@ export class Webhook {
     retriesEnabled: boolean;
     retryCount: number;
     retrySpeed: "fast" | "standard" | "slow" | null;
+    /**
+     * Set only on a `saveWebhook` response, and only when that save is what minted `signingSecret`
+     * (the first save with `secureDeliveryEnabled` on). Use it to surface the new secret once — it is
+     * never stored on the webhook, so a `getWebhook` response never has it.
+     */
+    signingSecretJustCreated?: boolean;
 }

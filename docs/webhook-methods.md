@@ -97,6 +97,8 @@ Creates a new webhook or updates an existing one.
 
 Signed delivery is opt-in per webhook: set `secureDeliveryEnabled: true` and the server mints a signing secret on that save (webhooks with it off — including every webhook created before this feature — are delivered unsigned, exactly as before). Any `signingSecret` value you send is ignored; secrets are always server-controlled. Use [rotateWebhookSecret](#rotatewebhooksecret) to change one.
 
+The response sets **`signingSecretJustCreated: true`** on exactly the save that mints the secret, so you can tell a newly created secret from one that was already there. It is a property of the response, never of the stored webhook — `getWebhook` never returns it. Note that flipping `secureDeliveryEnabled` off and back on does **not** mint a new secret: the original is retained, and the flag stays `false`.
+
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `guid` | `string` | Yes | Current website GUID |
@@ -216,7 +218,8 @@ console.log(`Failed deliveries in window: ${failures.length}`);
 - `contentSaveEvent` / `contentPublishEvent` / `contentWorkflowEvent`: Which event category fired
 - `payload`: The JSON payload that was sent
 - `httpResponseCode` / `success` / `responseText`: The endpoint's response (any 2xx counts as success)
-- `attemptCount` / `lastAttemptDate` / `nextAttemptUtc` / `lastError`: Retry state for failed deliveries
+- `attemptCount` / `lastAttemptDate` / `nextAttemptUtc` / `lastError`: Retry state for failed deliveries. `attemptCount > 1` means the record is a retry; a failed record with no `nextAttemptUtc` will not be attempted again
+- `signed` / `signatureKeyCount`: Whether the last attempt went out with signature headers, and how many signatures it carried (0 unsigned, 1 normally, 2 inside the 24-hour window after a secret roll). Recorded at send time, so it reports what *that* delivery did — it is not the webhook's current `secureDeliveryEnabled`, which can change at any time. `signed` is `null` when there is no record: the delivery has not been attempted yet, or the record predates the field
 
 **Error Handling:**
 - Throws `Exception` when retrieval fails (including insufficient permissions or an invalid date range)
