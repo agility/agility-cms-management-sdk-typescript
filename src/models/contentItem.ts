@@ -24,6 +24,26 @@ export class SeoProperties {
     metaHTML: string | null;
     menuVisible: boolean | null;
     sitemapVisible: boolean | null;
+
+    // Pages only: title, canonicalUrl, robots and ogImage. On save each is three-state: left out
+    // (`undefined`) keeps the stored value, `null` clears it, and a value replaces it.
+    // Responses leave them out when they're not set.
+
+    /** The page's `<title>`, when it differs from the page title. */
+    title?: string | null;
+    /** The page's canonical URL override. */
+    canonicalUrl?: string | null;
+    /** The page's robots directives. */
+    robots?: SeoRobots | null;
+    /** The URL of the page's social share (Open Graph) image. */
+    ogImage?: string | null;
+}
+
+export class SeoRobots {
+    /** Whether search engines may index the page. */
+    index?: boolean | null;
+    /** Whether search engines may follow the page's links. */
+    follow?: boolean | null;
 }
 
 export class ContentScripts {

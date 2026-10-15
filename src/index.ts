@@ -14,6 +14,7 @@ export * from "./models/media";
 export * from "./models/model";
 export * from "./models/notification";
 export * from "./models/pageItem";
+export * from "./models/geo";
 export * from "./models/pagedResult";
 export * from "./models/sitemap";
 export * from "./models/webhook";
