@@ -1,8 +1,21 @@
+import { GeoProperties } from "./geo";
+
 export class ContentItem {
     contentID: number;
     properties: ContentItemProperties;
     fields: { [key: string]: any; };
     seo: SeoProperties | null;
+    /**
+     * GEO / AEO properties of the page this item generates. Only items in a list that backs a
+     * dynamic page carry them. On save, three states:
+     * - left out (`undefined`): everything stored is kept;
+     * - `null`: the whole block is cleared;
+     * - an object: each property in it is applied (a property set to `null` clears just that
+     *   property, one left out is kept; see `GeoProperties`).
+     *
+     * Absent from responses when the item has no GEO data.
+     */
+    geo?: GeoProperties | null;
     scripts: ContentScripts | null;
 }
 
@@ -25,7 +38,7 @@ export class SeoProperties {
     menuVisible: boolean | null;
     sitemapVisible: boolean | null;
 
-    // Pages only: title, canonicalUrl, robots and ogImage. On save each is three-state: left out
+    // Pages and dynamic page list items only: title, canonicalUrl, robots and ogImage. On save each is three-state: left out
     // (`undefined`) keeps the stored value, `null` clears it, and a value replaces it.
     // Responses leave them out when they're not set.
 

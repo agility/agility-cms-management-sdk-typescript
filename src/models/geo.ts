@@ -1,5 +1,6 @@
 /**
- * GEO / AEO (generative and answer engine optimization) properties of a page.
+ * GEO / AEO (generative and answer engine optimization) properties of a page, or of a content item
+ * in a list that backs a dynamic page (`ContentItem.geo`, the item's own values).
  *
  * Writes are three-state, per property:
  * - property left out (`undefined`), or the whole `geo` left out: the stored value is kept;
@@ -8,8 +9,9 @@
  *
  * To clear the whole block, save the page with `geo: null`.
  *
- * `JSON.stringify` drops `undefined`, so a page read with `getPage`, changed elsewhere and saved
- * with `savePage` keeps its GEO data. Only set a property to `null` when you mean to clear it.
+ * `JSON.stringify` drops `undefined`, so a page read with `getPage` (or an item read with
+ * `getContentItem`), changed elsewhere and saved keeps its GEO data. Only set a property to `null`
+ * when you mean to clear it.
  * Responses leave out properties that aren't set.
  */
 export class GeoProperties {
