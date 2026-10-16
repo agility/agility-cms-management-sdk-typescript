@@ -337,6 +337,16 @@ const contentItems = [
 const savedIds = await client.contentMethods.saveContentItems(contentItems, 'your-guid', 'en-us');
 ```
 
+### GEO / AEO on dynamic page list items
+
+An item in a list that backs a dynamic page can carry a top-level `geo` object (`schemaType`, `summary`, `structuredData`, `ai`), the same shape as a page's `geo` (see [savePage](./page-methods.md#savepage)). `saveContentItem` and `saveContentItems` send it as given, with the same three states: leave `geo` (or a property in it) out to keep what's stored, set a property to `null` to clear it, send `geo: null` to clear the whole block. Items in other lists don't carry `geo`, and `getContentItem` leaves it out when the item has none.
+
+```typescript
+const item = await client.contentMethods.getContentItem(123, 'your-guid', 'en-us');
+item.geo = { ...item.geo, summary: 'The post in one sentence.', ai: { crawl: 'block' } };
+await client.contentMethods.saveContentItem(item, 'your-guid', 'en-us');
+```
+
 ---
 
 ## getContentItems
