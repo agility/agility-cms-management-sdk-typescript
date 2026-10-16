@@ -15,11 +15,15 @@ export class PageItem {
     visible: PageVisible | null;
     seo: SeoProperties | null;
     /**
-     * GEO / AEO properties. Leave out (`undefined`) to keep everything stored; to clear one
-     * property, send it as `null` inside `geo` (see `GeoProperties`). Absent from responses
-     * when the page has no GEO data.
+     * GEO / AEO properties. On save, three states:
+     * - left out (`undefined`): everything stored is kept;
+     * - `null`: the whole block is cleared;
+     * - an object: each property in it is applied (a property set to `null` clears just that
+     *   property, one left out is kept; see `GeoProperties`).
+     *
+     * Absent from responses when the page has no GEO data.
      */
-    geo?: GeoProperties;
+    geo?: GeoProperties | null;
     scripts: PageScripts | null;
     dynamic: PageDynamic | null;
     properties: PageItemProperties | null;

@@ -532,6 +532,7 @@ A page can carry a top-level `geo` object (`schemaType`, `summary`, `structuredD
 | In the object you save | Effect |
 |---|---|
 | Property left out (`undefined`), or the whole `geo` left out | The stored value is kept |
+| `geo: null` | The whole `geo` block is cleared |
 | Property set to `null` | The stored value is cleared |
 | Property set to a value | The stored value is replaced |
 
@@ -551,6 +552,9 @@ await apiClient.pageMethods.savePage(page, guid, locale);
 
 // Clear the summary only; everything else in geo is kept
 await apiClient.pageMethods.savePage({ ...page, geo: { summary: null } }, guid, locale);
+
+// Clear all of geo
+await apiClient.pageMethods.savePage({ ...page, geo: null }, guid, locale);
 ```
 
 ### savePageSecurity

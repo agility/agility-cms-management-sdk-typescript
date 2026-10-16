@@ -6,6 +6,8 @@
  * - property set to `null`: the stored value is cleared;
  * - property set to a value: the stored value is replaced.
  *
+ * To clear the whole block, save the page with `geo: null`.
+ *
  * `JSON.stringify` drops `undefined`, so a page read with `getPage`, changed elsewhere and saved
  * with `savePage` keeps its GEO data. Only set a property to `null` when you mean to clear it.
  * Responses leave out properties that aren't set.
