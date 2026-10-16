@@ -33,7 +33,9 @@ export type GeoSchemaType =
     | "CollectionPage"
     | "FAQPage"
     | "ItemPage"
-    | "ProfilePage";
+    | "ProfilePage"
+    // Any other string: tolerates schema types the API adds later.
+    | (string & {});
 
 export class GeoAiProperties {
     /** Whether the page is listed in llms.txt: `inherit` (follow sitemap visibility), `include` or `exclude`. */

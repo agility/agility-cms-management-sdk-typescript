@@ -48,7 +48,7 @@ export class SeoProperties {
     canonicalUrl?: string | null;
     /** The page's robots directives. */
     robots?: SeoRobots | null;
-    /** The URL of the page's social share (Open Graph) image. */
+    /** The page's social share (Open Graph) image: an absolute http(s) URL or a site-relative path. */
     ogImage?: string | null;
 }
 
