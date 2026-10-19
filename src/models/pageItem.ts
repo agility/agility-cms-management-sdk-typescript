@@ -1,4 +1,5 @@
 import { SeoProperties } from "./contentItem";
+import { GeoProperties } from "./geo";
 
 export class PageItem {
     pageID: number | null;
@@ -13,6 +14,16 @@ export class PageItem {
     excludeFromOutputCache: boolean | null;
     visible: PageVisible | null;
     seo: SeoProperties | null;
+    /**
+     * GEO / AEO properties. On save, three states:
+     * - left out (`undefined`): everything stored is kept;
+     * - `null`: the whole block is cleared;
+     * - an object: each property in it is applied (a property set to `null` clears just that
+     *   property, one left out is kept; see `GeoProperties`).
+     *
+     * Absent from responses when the page has no GEO data.
+     */
+    geo?: GeoProperties | null;
     scripts: PageScripts | null;
     dynamic: PageDynamic | null;
     properties: PageItemProperties | null;

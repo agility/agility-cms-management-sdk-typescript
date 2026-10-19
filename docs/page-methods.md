@@ -525,6 +525,38 @@ console.log('Batch created with ID:', batchId);
 **Error Handling:**
 - Throws `Exception` when validation fails or save operation fails
 
+**GEO / AEO and the extra SEO properties:**
+
+A page can carry a top-level `geo` object (`schemaType`, `summary`, `structuredData`, `ai`) and four more `seo` properties (`title`, `canonicalUrl`, `robots`, `ogImage`). On save, each of these properties has three states:
+
+| In the object you save | Effect |
+|---|---|
+| Property left out (`undefined`), or the whole `geo` left out | The stored value is kept |
+| `geo: null` | The whole `geo` block is cleared |
+| Property set to `null` | The stored value is cleared |
+| Property set to a value | The stored value is replaced |
+
+`savePage` sends the object as JSON, and `JSON.stringify` drops `undefined`, so a read-modify-save that doesn't touch these properties keeps them. Don't set them to `null` unless you mean to clear them. Responses leave out any property that isn't set.
+
+```typescript
+const page = await apiClient.pageMethods.getPage(123, guid, locale);
+page.geo = {
+    ...page.geo,
+    schemaType: 'AboutPage',
+    summary: 'Who we are, in two sentences.',
+    structuredData: { '@context': 'https://schema.org', '@type': 'Organization', name: 'Example' },
+    ai: { llmsInclude: 'include' }
+};
+page.seo = { ...page.seo, title: 'About us | Example', robots: { index: true, follow: true } };
+await apiClient.pageMethods.savePage(page, guid, locale);
+
+// Clear the summary only; everything else in geo is kept
+await apiClient.pageMethods.savePage({ ...page, geo: { summary: null } }, guid, locale);
+
+// Clear all of geo
+await apiClient.pageMethods.savePage({ ...page, geo: null }, guid, locale);
+```
+
 ### savePageSecurity
 
 Updates security settings for a specific page.
