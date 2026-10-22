@@ -1,6 +1,7 @@
 import { Options } from "../models/options";
 import { ClientInstance } from "./clientInstance";
 import { Model } from "../models/model";
+import { ModelAvailability } from "../models/modelAvailability";
 import { Exception } from "../models/exception";
 
 export class ModelMethods {
@@ -64,6 +65,49 @@ export class ModelMethods {
             return resp.data as Model;
         } catch (err) {
             throw new Exception(`Unable to save the model.`, err);
+        }
+    }
+
+    /**
+     * The availability rules of one component model: who can add it, and where it can go.
+     * A model with no rules comes back with `addableBy` and `allowedIn` both `null`.
+     */
+    async getModelAvailability(modelID: number, guid: string) {
+        try {
+            let apiPath = `model/${modelID}/availability`;
+            const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
+
+            return resp.data as ModelAvailability;
+        } catch (err) {
+            throw new Exception(`Unable to retrieve availability for model id: ${modelID}.`, err);
+        }
+    }
+
+    /** The availability rules of every model on the instance that has any rule. */
+    async getAllModelAvailability(guid: string) {
+        try {
+            let apiPath = `model/availability`;
+            const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
+
+            return resp.data as ModelAvailability[];
+        } catch (err) {
+            throw new Exception(`Unable to retrieve model availability.`, err);
+        }
+    }
+
+    /**
+     * Save the availability rules of one component model and return them as saved.
+     * A group (`addableBy`, `allowedIn`) left out or `null` keeps its stored rules; an object replaces
+     * them; an object whose lists are all empty clears them.
+     */
+    async saveModelAvailability(modelID: number, availability: ModelAvailability, guid: string) {
+        try {
+            let apiPath = `model/${modelID}/availability`;
+            const resp = await this._clientInstance.executePost(apiPath, guid, this._options.token, availability);
+
+            return resp.data as ModelAvailability;
+        } catch (err) {
+            throw new Exception(`Unable to save availability for model id: ${modelID}.`, err);
         }
     }
 

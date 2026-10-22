@@ -18,6 +18,9 @@ This class provides comprehensive content model management operations for Agilit
 - [getPageModules](#getpagemodules) - Retrieves list of all page modules
 - [saveModel](#savemodel) - Creates or updates a content model
 - [deleteModel](#deletemodel) - Deletes a content model by ID
+- [getModelAvailability](#getmodelavailability) - Retrieves who can add a component model, and where it can go
+- [getAllModelAvailability](#getallmodelavailability) - Retrieves the availability rules of every model that has any
+- [saveModelAvailability](#savemodelavailability) - Saves a component model's availability rules
 
 ---
 
@@ -242,6 +245,8 @@ Creates a new content model or updates an existing one.
 
 **Returns:** `Model` - Saved model object with updated metadata
 
+**`isVisible`:** leave it out (or `null`) to keep the stored value; a new model defaults to `true`. Set it to `false` to disable a component model: nobody can add or copy it into a zone, and the component picker doesn't list it. Components already on a page still render and can still be moved to another zone or page model. Older API versions don't return it.
+
 **Usage Example:**
 ```typescript
 // Create a new model
@@ -415,6 +420,128 @@ const cleanupUnusedModels = async () => {
 - Throws `Exception` when model not found
 - Throws `Exception` when model is in use and cannot be deleted
 - Throws `Exception` when insufficient permissions to delete models
+
+### getModelAvailability
+
+Retrieves the availability rules of one component model: who can add it to a page, and where it can be placed. The rules only govern adding a component, moving it to another zone and copying it. They never affect rendering, or a component that's already on a page.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `modelID` | `number` | Yes | The component model's ID |
+| `guid` | `string` | Yes | Current website GUID |
+
+**Returns:** `ModelAvailability`. A model with no rules comes back with `addableBy` and `allowedIn` both `null` (anyone who can edit the page can add it, anywhere).
+
+```json
+{
+  "modelID": 12,
+  "modelReferenceName": "HeroBanner",
+  "addableBy": {
+    "permissions": ["Administrator", "Designer"],
+    "users": [{ "userID": 5, "emailAddress": "a@example.com" }],
+    "teams": [{ "teamID": 9, "name": "Web team" }]
+  },
+  "allowedIn": {
+    "sitemaps": [{ "sitemapID": 1, "referenceName": "website", "name": "Website" }],
+    "pageModels": [{ "pageModelID": 3, "name": "Landing Page" }],
+    "zones": [{ "zoneID": 14, "pageModelID": 3, "pageModelName": "Landing Page", "referenceName": "MainContentZone", "name": "Main Content Zone" }]
+  }
+}
+```
+
+**How the rules apply:**
+- **`addableBy`:** a user may add the component when they hold FullControl (Administrators are always allowed), hold a listed permission (`Manager` = Manage, `Designer` = Design), are a listed user, or belong to a listed team. These are permissions, not role names: a role that holds the Design permission passes a `Designer` rule.
+- **`allowedIn`:** the placement is allowed when the page's sitemap is allowed (no sitemaps listed, or the sitemap of the page's top-level ancestor is listed) **and** its layout is allowed (no page models or zones listed, or the page's page model is listed, which allows all of its zones, or the target zone is listed).
+- **Disabled** is the model's own `isVisible: false` (see [saveModel](#savemodel)), not part of this object. Nobody can add or copy a disabled component, but one that's already on a page can still be moved to another zone or page model (the `addableBy` and `allowedIn` rules still apply to the move).
+- **Deleted targets:** a sitemap, page model, zone, user or team that was deleted after the rule was saved comes back as a stale entry, with its ID and `stale: true` only. A stale entry never matches, but a list that holds only stale entries is still a restriction: if every listed sitemap is stale, the component is allowed on no sitemap.
+
+**Usage Example:**
+```typescript
+const availability = await apiClient.modelMethods.getModelAvailability(12, guid);
+if (!availability.addableBy && !availability.allowedIn) {
+    console.log('No restrictions');
+}
+```
+
+**Error Handling:**
+- Throws `Exception` with `statusCode` 404 when the model isn't found
+- An instance whose database doesn't have availability rules yet answers as if the model had no rules (`addableBy` and `allowedIn` both `null`). It doesn't return an error.
+
+### getAllModelAvailability
+
+Retrieves the availability rules of every model on the instance that has any rule. Models with no rules aren't listed.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `guid` | `string` | Yes | Current website GUID |
+
+**Returns:** `ModelAvailability[]`
+
+**Usage Example:**
+```typescript
+const rules = await apiClient.modelMethods.getAllModelAvailability(guid);
+const byModel = new Map(rules.map(r => [r.modelID, r]));
+```
+
+**Error Handling:**
+- An instance whose database doesn't have availability rules yet returns an empty list, the same as an instance with no rules. A read can't tell the two apart: only [saveModelAvailability](#savemodelavailability) returns 409.
+- An older Management API without this route answers with an error (usually 404), or, when the instance has a model whose reference name is `availability`, with that model instead of a list. Treat both as "no rules".
+
+### saveModelAvailability
+
+Saves the availability rules of one component model, and returns them as saved. Needs the Manage or Design permission (FullControl implied).
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `modelID` | `number` | Yes | The component model's ID |
+| `availability` | `ModelAvailability` | Yes | The rules to save |
+| `guid` | `string` | Yes | Current website GUID |
+
+**Returns:** `ModelAvailability` - the rules as saved
+
+**Each group (`addableBy`, `allowedIn`) is three-state:**
+- left out (`undefined`) or `null`: the stored rules are kept;
+- an object: the stored rules are replaced;
+- an object whose lists are all empty: the rules are cleared, so no restriction applies.
+
+**Targets are resolved by ID, then by name.** An ID that exists on this instance is used as is. Otherwise the target is matched by its portable name: a user by `emailAddress`, a team by `name`, a sitemap by `referenceName` (case-insensitive), a page model by `name`, and a zone by `pageModelName` + `referenceName`. So rules copied from another instance can be saved with the IDs left out. If any target can't be resolved, the whole save is rejected (HTTP 400) with a list of them.
+
+**Stale targets are dropped on save.** A sitemap, page model or zone sent back by the ID of a stale entry (see [getModelAvailability](#getmodelavailability)) is left out of the saved rules. If a non-empty `sitemaps` list, or a non-empty `pageModels` + `zones` set, would be left with only stale targets, the save is rejected (HTTP 400) instead, because saving it empty would allow the component everywhere. Stale users and teams are kept.
+
+- **Saving back to the same instance:** send entries as you read them, stale ones (`stale: true`) included. Stale sitemaps, page models and zones are dropped, and a group with only stale entries gets a 400 instead of being widened.
+- **Copying to another instance:** leave stale entries out. If that empties a list, send that group (`addableBy` or `allowedIn`) as `null` (keep what's stored) instead, because an empty list clears the restriction.
+
+**Usage Example:**
+```typescript
+// Only allow the Hero component in the Hero zone of the Landing Page model,
+// and keep whatever who-can-add rules the instance already has.
+await apiClient.modelMethods.saveModelAvailability(12, {
+    addableBy: null,
+    allowedIn: {
+        sitemaps: [],
+        pageModels: [],
+        zones: [{ pageModelName: 'Landing Page', referenceName: 'HeroZone' }]
+    }
+}, guid);
+
+// Administrators only
+await apiClient.modelMethods.saveModelAvailability(12, {
+    addableBy: { permissions: ['Administrator'], users: [], teams: [] }
+}, guid);
+
+// Clear every restriction
+await apiClient.modelMethods.saveModelAvailability(12, {
+    addableBy: { permissions: [], users: [], teams: [] },
+    allowedIn: { sitemaps: [], pageModels: [], zones: [] }
+}, guid);
+```
+
+**Error Handling:**
+- Throws `Exception` with `statusCode` 400 when a target can't be resolved (the message lists them), when a sitemap list or a page-model + zone set holds only stale targets, or when the model is a content model (availability can only be set on component models)
+- Throws `Exception` with `statusCode` 404 when the model isn't found
+- Throws `Exception` with `statusCode` 409 when the instance's database doesn't have availability rules yet
+- Throws `Exception` with `statusCode` 403 when the user lacks the Manage or Design permission
+
 
 ---
 
