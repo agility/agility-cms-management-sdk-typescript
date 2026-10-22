@@ -13,8 +13,8 @@ export class Model {
     wasUnpublished: boolean | null;
     /**
      * Whether the model can be used. For a component model, `false` means it's disabled: nobody can
-     * add, move or copy it into a zone, and the component picker doesn't list it. Components already
-     * on a page still render and stay editable.
+     * add or copy it into a zone, and the component picker doesn't list it. Components already on a
+     * page still render, stay editable and can still be moved to another zone or page model.
      *
      * On `saveModel`, leave it out (or `null`) to keep the stored value; a new model defaults to `true`.
      * Older API versions don't return it.
