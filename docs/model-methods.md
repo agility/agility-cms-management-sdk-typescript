@@ -463,8 +463,8 @@ if (!availability.addableBy && !availability.allowedIn) {
 ```
 
 **Error Handling:**
-- Throws `Exception` with `statusCode` 409 when the instance doesn't support availability rules yet
-- Throws `Exception` when the model isn't found
+- Throws `Exception` with `statusCode` 404 when the model isn't found
+- An instance whose database doesn't have availability rules yet answers as if the model had no rules (`addableBy` and `allowedIn` both `null`). It doesn't return an error.
 
 ### getAllModelAvailability
 
@@ -483,7 +483,8 @@ const byModel = new Map(rules.map(r => [r.modelID, r]));
 ```
 
 **Error Handling:**
-- Throws `Exception` with `statusCode` 409 when the instance doesn't support availability rules yet. Treat it (and a 404 from an older API) as "no rules".
+- An instance whose database doesn't have availability rules yet returns an empty list, the same as an instance with no rules. A read can't tell the two apart: only [saveModelAvailability](#savemodelavailability) returns 409.
+- An older Management API without this route answers with an error (usually 404), or, when the instance has a model whose reference name is `availability`, with that model instead of a list. Treat both as "no rules".
 
 ### saveModelAvailability
 
@@ -530,9 +531,10 @@ await apiClient.modelMethods.saveModelAvailability(12, {
 ```
 
 **Error Handling:**
-- Throws `Exception` with `statusCode` 400 when a target can't be resolved (the message lists them)
-- Throws `Exception` with `statusCode` 409 when the instance doesn't support availability rules yet
-- Throws `Exception` when the user lacks the Manage or Design permission
+- Throws `Exception` with `statusCode` 400 when a target can't be resolved (the message lists them), or when the model is a content model (availability can only be set on component models)
+- Throws `Exception` with `statusCode` 404 when the model isn't found
+- Throws `Exception` with `statusCode` 409 when the instance's database doesn't have availability rules yet
+- Throws `Exception` with `statusCode` 403 when the user lacks the Manage or Design permission
 
 
 ---
