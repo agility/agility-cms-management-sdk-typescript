@@ -12,6 +12,7 @@ export * from "./models/fetchApiStatus";
 export * from "./models/instanceUser";
 export * from "./models/media";
 export * from "./models/model";
+export * from "./models/modelAvailability";
 export * from "./models/notification";
 export * from "./models/pageItem";
 export * from "./models/geo";
