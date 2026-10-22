@@ -68,6 +68,40 @@ test("getModelAvailability returns null groups for a model with no rules", async
     assert.equal(availability.allowedIn, null);
 });
 
+test("getModelAvailability passes stale (deleted) targets through with stale: true", async () => {
+    const withStale = {
+        modelID: 12,
+        modelReferenceName: "HeroBanner",
+        addableBy: {
+            permissions: [],
+            users: [{ userID: 5, emailAddress: "a@example.com" }, { userID: 6, stale: true }],
+            teams: [{ teamID: 9, stale: true }],
+        },
+        allowedIn: {
+            sitemaps: [{ sitemapID: 2, stale: true }],
+            pageModels: [{ pageModelID: 3, name: "Landing Page" }, { pageModelID: 4, stale: true }],
+            zones: [{ zoneID: 15, stale: true }],
+        },
+    };
+    respond(withStale);
+    const availability = await client().modelMethods.getModelAvailability(12, guid);
+    assert.deepEqual(availability, withStale);
+    assert.equal(availability.allowedIn.sitemaps[0].stale, true);
+    assert.equal(availability.allowedIn.pageModels[0].stale, undefined);
+});
+
+test("a 400 for a sitemap list that holds only stale targets reaches the caller with its message", async () => {
+    respond("Every sitemap in the list has been deleted.", 400);
+    await assert.rejects(
+        client().modelMethods.saveModelAvailability(12, { allowedIn: { sitemaps: [{ sitemapID: 2 }] } }, guid),
+        (err) => {
+            assert.equal(err.statusCode, 400);
+            assert.match(err.message, /\(HTTP 400\): Every sitemap in the list has been deleted\./);
+            return true;
+        }
+    );
+});
+
 test("getAllModelAvailability reads the instance's list", async () => {
     respond([hero]);
     const list = await client().modelMethods.getAllModelAvailability(guid);

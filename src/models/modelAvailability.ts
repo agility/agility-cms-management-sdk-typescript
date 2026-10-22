@@ -16,8 +16,14 @@
  * rules copied from another instance can be saved with the IDs left out. If any target can't be
  * resolved, the whole save is rejected (HTTP 400) with a list of them.
  *
- * Disabling a component (nobody can add it) is the model's own `isVisible` flag (`Model.isVisible`),
- * not part of this object.
+ * Deleted targets: a read returns a target that was deleted after the rule was saved as a stale entry
+ * (`stale: true`, ID only). A group that holds only stale entries is still a restriction. On a write,
+ * stale sitemaps, page models and zones are dropped. A save whose non-empty `sitemaps` list, or whose
+ * non-empty `pageModels` + `zones` set, resolves only to stale targets is rejected (HTTP 400), because
+ * dropping them would widen the rule to "anywhere". Leave stale entries out before saving rules back.
+ *
+ * Disabling a component (nobody can add or copy it; one already on a page can still be moved) is the
+ * model's own `isVisible` flag (`Model.isVisible`), not part of this object.
  */
 export class ModelAvailability {
     /** The component model's ID. */
@@ -57,12 +63,22 @@ export class ModelAvailabilityUser {
     /** The user's ID on this instance. Leave it out to match by `emailAddress`. */
     userID?: number | null;
     emailAddress?: string | null;
+    /**
+     * Set on a read when the user no longer exists on the instance (it was deleted after the rule was
+     * saved). A stale entry carries only its ID. Read-only: ignored on a write.
+     */
+    stale?: boolean | null;
 }
 
 export class ModelAvailabilityTeam {
     /** The team's ID. Leave it out to match by `name` within the instance's organization. */
     teamID?: number | null;
     name?: string | null;
+    /**
+     * Set on a read when the team no longer exists on the instance (it was deleted after the rule was
+     * saved). A stale entry carries only its ID. Read-only: ignored on a write.
+     */
+    stale?: boolean | null;
 }
 
 /**
@@ -83,12 +99,22 @@ export class ModelAvailabilitySitemap {
     referenceName?: string | null;
     /** The sitemap's display name. Not used to match. */
     name?: string | null;
+    /**
+     * Set on a read when the sitemap no longer exists on the instance (it was deleted after the rule was
+     * saved). A stale entry carries only its ID. Read-only: ignored on a write.
+     */
+    stale?: boolean | null;
 }
 
 export class ModelAvailabilityPageModel {
     /** The page model's (page template's) ID. Leave it out to match by `name`. */
     pageModelID?: number | null;
     name?: string | null;
+    /**
+     * Set on a read when the page model no longer exists on the instance (it was deleted after the rule was
+     * saved). A stale entry carries only its ID. Read-only: ignored on a write.
+     */
+    stale?: boolean | null;
 }
 
 export class ModelAvailabilityZone {
@@ -100,4 +126,9 @@ export class ModelAvailabilityZone {
     referenceName?: string | null;
     /** The zone's display name. Not used to match. */
     name?: string | null;
+    /**
+     * Set on a read when the zone no longer exists on the instance (it was deleted after the rule was
+     * saved). A stale entry carries only its ID. Read-only: ignored on a write.
+     */
+    stale?: boolean | null;
 }
