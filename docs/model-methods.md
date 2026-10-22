@@ -506,7 +506,10 @@ Saves the availability rules of one component model, and returns them as saved. 
 
 **Targets are resolved by ID, then by name.** An ID that exists on this instance is used as is. Otherwise the target is matched by its portable name: a user by `emailAddress`, a team by `name`, a sitemap by `referenceName` (case-insensitive), a page model by `name`, and a zone by `pageModelName` + `referenceName`. So rules copied from another instance can be saved with the IDs left out. If any target can't be resolved, the whole save is rejected (HTTP 400) with a list of them.
 
-**Stale targets are dropped on save.** A sitemap, page model or zone sent back by the ID of a stale entry (see [getModelAvailability](#getmodelavailability)) is left out of the saved rules. If a non-empty `sitemaps` list, or a non-empty `pageModels` + `zones` set, would be left with only stale targets, the save is rejected (HTTP 400) instead, because saving it empty would allow the component everywhere. Leave stale entries (`stale: true`) out before saving rules you read back.
+**Stale targets are dropped on save.** A sitemap, page model or zone sent back by the ID of a stale entry (see [getModelAvailability](#getmodelavailability)) is left out of the saved rules. If a non-empty `sitemaps` list, or a non-empty `pageModels` + `zones` set, would be left with only stale targets, the save is rejected (HTTP 400) instead, because saving it empty would allow the component everywhere. Stale users and teams are kept.
+
+- **Saving back to the same instance:** send entries as you read them, stale ones (`stale: true`) included. Stale sitemaps, page models and zones are dropped, and a group with only stale entries gets a 400 instead of being widened.
+- **Copying to another instance:** leave stale entries out. If that empties a list, send that group (`addableBy` or `allowedIn`) as `null` (keep what's stored) instead, because an empty list clears the restriction.
 
 **Usage Example:**
 ```typescript
