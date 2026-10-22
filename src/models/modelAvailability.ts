@@ -20,7 +20,13 @@
  * (`stale: true`, ID only). A group that holds only stale entries is still a restriction. On a write,
  * stale sitemaps, page models and zones are dropped. A save whose non-empty `sitemaps` list, or whose
  * non-empty `pageModels` + `zones` set, resolves only to stale targets is rejected (HTTP 400), because
- * dropping them would widen the rule to "anywhere". Leave stale entries out before saving rules back.
+ * dropping them would widen the rule to "anywhere". Stale users and teams are kept.
+ *
+ * Saving rules back to the same instance: send entries as you read them, stale ones included. Stale
+ * sitemaps, page models and zones are dropped, and a group with only stale entries gets a 400 rather
+ * than being widened. Copying rules to another instance: leave stale entries out, and if that empties
+ * a list, send that group (`addableBy` or `allowedIn`) as `null` (keep what's stored) instead. An
+ * empty list clears the restriction.
  *
  * Disabling a component (nobody can add or copy it; one already on a page can still be moved) is the
  * model's own `isVisible` flag (`Model.isVisible`), not part of this object.
