@@ -16,6 +16,8 @@ export * from "./models/notification";
 export * from "./models/pageItem";
 export * from "./models/geo";
 export * from "./models/pagedResult";
+export * from "./models/search";
+export * from "./models/searchNotAvailableException";
 export * from "./models/sitemap";
 export * from "./models/webhook";
 export * from "./models/webhookHistory";

@@ -15,7 +15,7 @@
 ## About the Management API SDK
 
 - Provides a facility to developers to use the new Agility Management API more effectively.
-- Provides methods to perform operations on Assets, Batches, Containers, Content, Models, Pages, and Users.
+- Provides methods to perform operations on Assets, Batches, Containers, Content, Models, Pages, and Users, and to search an instance.
 - **Content and Page Creation** - Create individual or multiple content items and pages (which automatically get added to batches).
 - **Essential batch workflow operations** - Perform publish, unpublish, approve, decline, and request approval operations on existing batches.
 - Ability to generate Content in bulk for a Website.
@@ -144,6 +144,10 @@ console.log('Content retrieved:', contentItem.fields.title);
 ### Page Management
 - **[PageMethods](./docs/page-methods.md)** - Page management operations (18 functions)
   - [getPage](./docs/page-methods.md#getpage), [getPageByPath](./docs/page-methods.md#getpagebypath), [getPageHistory](./docs/page-methods.md#getpagehistory), [getPageComments](./docs/page-methods.md#getpagecomments), [getPageList](./docs/page-methods.md#getpagelist), [getPageListByPageTemplateID](./docs/page-methods.md#getpagelistbypagetemplateid), [getPageListByPage](./docs/page-methods.md#getpagelistbypage), [getPageListByPageAndPageTemplateID](./docs/page-methods.md#getpagelistbypageandpagetemplateid), [getPageTree](./docs/page-methods.md#getpagetree), [getPageTemplateList](./docs/page-methods.md#getpagetemplatelist), [getPageSecurity](./docs/page-methods.md#getpagesecurity), [getPageItemTemplateList](./docs/page-methods.md#getpageitemtemplatelist), [getPageContentZones](./docs/page-methods.md#getpagecontentzones), [savePage](./docs/page-methods.md#savepage), [savePageSecurity](./docs/page-methods.md#savepagesecurity), [movePageItem](./docs/page-methods.md#movepageitem), [deletePage](./docs/page-methods.md#deletepage), [batchWorkflowPages](./docs/page-methods.md#batchworkflowpages)
+
+### Search
+- **[SearchMethods](./docs/search-methods.md)** - Search everything in an instance (1 function)
+  - [search](./docs/search-methods.md#search)
 
 ### User Management
 - **[InstanceMethods](./docs/instance-methods.md)** - Instance-level operations (2 functions)
