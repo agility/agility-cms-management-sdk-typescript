@@ -5,6 +5,7 @@ export * from "./models/batchTypes";
 export * from "./models/container";
 export * from "./models/contentDefinitionTypeID";
 export * from "./models/contentItem";
+export * from "./models/listItemOrderResult";
 export * from "./models/contentViewColumn";
 export * from "./models/instanceRole";
 export * from "./models/locales";
