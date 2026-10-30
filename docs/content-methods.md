@@ -18,6 +18,7 @@ The `ContentMethods` class provides comprehensive functionality for managing con
 | [saveContentItems](#savecontentitems) | Saves multiple content items |
 | [getContentItems](#getcontentitems) | Retrieves content items with filtering (deprecated) |
 | [getContentList](#getcontentlist) | Retrieves content list with advanced filtering |
+| [setContentListItemOrder](#setcontentlistitemorder) | Puts the items of a content list in a given order |
 | [getContentHistory](#getcontenthistory) | Retrieves content item history |
 | [getContentComments](#getcontentcomments) | Retrieves content item comments |
 
@@ -416,6 +417,49 @@ const filterObject = {
 };
 
 const contentList = await client.contentMethods.getContentList('articles', 'your-guid', 'en-us', listParams, filterObject);
+```
+
+---
+
+## setContentListItemOrder
+
+Puts the items of a content list in a given order, for one locale.
+
+Pass the content IDs in the order they should appear. Items you leave out keep their current relative order after the ones you list, so sending part of a list never drops anything. The new order applies to the staging and the live list at once: no item gets a new version or changes state, so nothing needs publishing, including items that have unpublished changes. Order is kept per locale, so call this once for each locale whose order should change.
+
+This makes one request and doesn't create a batch.
+
+### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| referenceName | string | Yes | The reference name of the content list |
+| guid | string | Yes | The website GUID |
+| locale | string | Yes | The locale code |
+| contentIDs | number[] | Yes | Content IDs in the order they should appear |
+| skipUnknownIds | boolean | No | Leave out IDs that aren't in the list and order the rest, instead of failing. Default `false` |
+
+### Returns
+
+`Promise<ListItemOrderResult>`:
+- `contentIDs`: every item in the list, in its new order
+- `itemsUpdated`: how many items had their order changed (0 when the list was already in that order, in which case nothing is written)
+- `updatedContentIDs`: the items whose order changed, in their new order
+- `skippedContentIDs`: IDs that weren't in the list and were left out (only with `skipUnknownIds`)
+
+### Errors
+
+Throws `Exception`, with nothing changed:
+- `statusCode` 400: a content ID is given twice, `contentIDs` is empty, or a content ID isn't an item in the list for that locale and `skipUnknownIds` is `false`
+- `statusCode` 404: there's no list with that reference name
+
+### Usage Example
+
+```typescript
+// Move 12 to the top of the footer links; the rest keep their order after it.
+const result = await client.contentMethods.setContentListItemOrder('footer_links', 'your-guid', 'en-us', [12]);
+console.log(result.contentIDs);   // e.g. [12, 9, 15]
+console.log(result.itemsUpdated); // 0 if 12 was already first
 ```
 
 ---

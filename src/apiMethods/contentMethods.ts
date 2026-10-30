@@ -1,6 +1,7 @@
 import { Options } from "../models/options";
 import { ClientInstance } from "./clientInstance";
 import { ContentItem, ContentList } from "../models/contentItem";
+import { ListItemOrderResult } from "../models/listItemOrderResult";
 import { BatchMethods } from "./batchMethods";
 import { Exception } from "../models/exception";
 import { ContentListFilterModel } from "../models/contentListFilterModel";
@@ -297,6 +298,33 @@ export class ContentMethods {
             return resp.data as ContentList;
         } catch (err) {
             throw new Exception(`Unable retrieve the content details for list with reference name: ${referenceName}`, err);
+        }
+    }
+
+    /**
+     * Put the items of a content list in the given order, for one locale.
+     *
+     * Pass the content IDs in the order they should appear. Items left out keep their current relative
+     * order after the ones listed. The new order applies to the staging and the live list at once:
+     * no item gets a new version or changes state, so nothing needs publishing. Order is kept per
+     * locale, so call this once for each locale whose order should change.
+     *
+     * Makes one request and doesn't wait on a batch. Throws `Exception` with `statusCode` 400 when a
+     * content ID is given twice, or isn't in the list and `skipUnknownIds` is false (nothing is changed
+     * in either case), and 404 when there is no list with that reference name.
+     *
+     * @param skipUnknownIds Leave out content IDs that aren't in the list and order the rest, instead of
+     * failing. They come back in `skippedContentIDs`.
+     */
+    async setContentListItemOrder(referenceName: string, guid: string, locale: string, contentIDs: number[], skipUnknownIds: boolean = false): Promise<ListItemOrderResult> {
+        try {
+            const queryParams = buildQueryString({ skipUnknownIds: skipUnknownIds || undefined });
+            let apiPath = `${locale}/list/${encodeURIComponent(referenceName)}/item-order${queryParams}`;
+            const resp = await this._clientInstance.executePost(apiPath, guid, this._options.token, contentIDs);
+
+            return resp.data as ListItemOrderResult;
+        } catch (err) {
+            throw new Exception(`Unable to set the item order of list with reference name: ${referenceName}`, err);
         }
     }
 
