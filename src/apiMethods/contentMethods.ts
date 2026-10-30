@@ -310,12 +310,16 @@ export class ContentMethods {
      * locale, so call this once for each locale whose order should change.
      *
      * Makes one request and doesn't wait on a batch. Throws `Exception` with `statusCode` 400 when a
-     * content ID isn't in the list or is given twice (nothing is changed), and 404 when there is no
-     * list with that reference name.
+     * content ID is given twice, or isn't in the list and `skipUnknownIds` is false (nothing is changed
+     * in either case), and 404 when there is no list with that reference name.
+     *
+     * @param skipUnknownIds Leave out content IDs that aren't in the list and order the rest, instead of
+     * failing. They come back in `skippedContentIDs`.
      */
-    async setContentListItemOrder(referenceName: string, guid: string, locale: string, contentIDs: number[]): Promise<ListItemOrderResult> {
+    async setContentListItemOrder(referenceName: string, guid: string, locale: string, contentIDs: number[], skipUnknownIds: boolean = false): Promise<ListItemOrderResult> {
         try {
-            let apiPath = `${locale}/list/${encodeURIComponent(referenceName)}/item-order`;
+            const queryParams = buildQueryString({ skipUnknownIds: skipUnknownIds || undefined });
+            let apiPath = `${locale}/list/${encodeURIComponent(referenceName)}/item-order${queryParams}`;
             const resp = await this._clientInstance.executePost(apiPath, guid, this._options.token, contentIDs);
 
             return resp.data as ListItemOrderResult;

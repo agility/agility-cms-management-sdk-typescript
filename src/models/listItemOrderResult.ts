@@ -4,4 +4,8 @@ export class ListItemOrderResult {
     contentIDs: number[];
     /** How many items had their order changed. 0 when the list was already in that order. */
     itemsUpdated: number;
+    /** The items whose order changed, in their new order. */
+    updatedContentIDs: number[];
+    /** Requested IDs that weren't items in the list and were left out. Only with `skipUnknownIds`. */
+    skippedContentIDs: number[];
 }

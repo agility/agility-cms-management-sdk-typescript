@@ -437,17 +437,20 @@ This makes one request and doesn't create a batch.
 | guid | string | Yes | The website GUID |
 | locale | string | Yes | The locale code |
 | contentIDs | number[] | Yes | Content IDs in the order they should appear |
+| skipUnknownIds | boolean | No | Leave out IDs that aren't in the list and order the rest, instead of failing. Default `false` |
 
 ### Returns
 
 `Promise<ListItemOrderResult>`:
 - `contentIDs`: every item in the list, in its new order
 - `itemsUpdated`: how many items had their order changed (0 when the list was already in that order, in which case nothing is written)
+- `updatedContentIDs`: the items whose order changed, in their new order
+- `skippedContentIDs`: IDs that weren't in the list and were left out (only with `skipUnknownIds`)
 
 ### Errors
 
 Throws `Exception`, with nothing changed:
-- `statusCode` 400: a content ID isn't an item in the list for that locale, a content ID is given twice, or `contentIDs` is empty
+- `statusCode` 400: a content ID is given twice, `contentIDs` is empty, or a content ID isn't an item in the list for that locale and `skipUnknownIds` is `false`
 - `statusCode` 404: there's no list with that reference name
 
 ### Usage Example

@@ -26,10 +26,10 @@ before(async () => {
 
 after(() => new Promise((resolve) => server.close(resolve)));
 
-async function setOrder(referenceName, contentIDs, status = 200, body = { contentIDs, itemsUpdated: contentIDs.length }) {
+async function setOrder(referenceName, contentIDs, status = 200, body = { contentIDs, itemsUpdated: contentIDs.length }, skipUnknownIds) {
     requests.length = 0;
     reply = { status, body };
-    return new ApiClient({ token: "test", baseUrl }).contentMethods.setContentListItemOrder(referenceName, "00000000-u", "en-us", contentIDs);
+    return new ApiClient({ token: "test", baseUrl }).contentMethods.setContentListItemOrder(referenceName, "00000000-u", "en-us", contentIDs, skipUnknownIds);
 }
 
 test("posts the content IDs, in order, to the list's item-order endpoint for the locale", async () => {
@@ -41,9 +41,22 @@ test("posts the content IDs, in order, to the list's item-order endpoint for the
     assert.deepEqual(JSON.parse(requests[0].raw), [12, 9, 15]);
 });
 
-test("returns the list's new order and how many items changed", async () => {
-    const result = await setOrder("footer_links", [12], 200, { contentIDs: [12, 9, 15], itemsUpdated: 2 });
-    assert.deepEqual(result, { contentIDs: [12, 9, 15], itemsUpdated: 2 });
+test("returns the list's new order and which items changed", async () => {
+    const body = { contentIDs: [12, 9, 15], itemsUpdated: 2, updatedContentIDs: [12, 9], skippedContentIDs: [] };
+    const result = await setOrder("footer_links", [12], 200, body);
+    assert.deepEqual(result, body);
+});
+
+test("sends no query string by default", async () => {
+    await setOrder("footer_links", [12]);
+    assert.equal(requests[0].url, "/api/v1/instance/00000000-u/en-us/list/footer_links/item-order");
+});
+
+test("skipUnknownIds adds the flag and returns the skipped IDs", async () => {
+    const body = { contentIDs: [12, 9], itemsUpdated: 1, updatedContentIDs: [12], skippedContentIDs: [99] };
+    const result = await setOrder("footer_links", [12, 99], 200, body, true);
+    assert.equal(requests[0].url, "/api/v1/instance/00000000-u/en-us/list/footer_links/item-order?skipUnknownIds=true");
+    assert.deepEqual(result.skippedContentIDs, [99]);
 });
 
 test("encodes the reference name in the path", async () => {
