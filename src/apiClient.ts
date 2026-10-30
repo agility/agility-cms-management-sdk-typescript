@@ -10,6 +10,7 @@ import { ServerUserMethods } from "./apiMethods/serverUserMethods";
 import { WebhookMethods } from "./apiMethods/webhookMethods";
 import { InstanceMethods } from "./apiMethods/instanceMethods";
 import { SearchMethods } from "./apiMethods/searchMethods";
+import { UrlRedirectionMethods } from "./apiMethods/urlRedirectionMethods";
 
 export class ApiClient {
     _options!: Options;
@@ -23,6 +24,7 @@ export class ApiClient {
     pageMethods!: PageMethods
     searchMethods!: SearchMethods
     serverUserMethods!: ServerUserMethods
+    urlRedirectionMethods!: UrlRedirectionMethods
     webhookMethods!: WebhookMethods
     constructor(options: Options){
         this._options = options;
@@ -36,6 +38,7 @@ export class ApiClient {
         this.pageMethods = new PageMethods(this._options);
         this.searchMethods = new SearchMethods(this._options);
         this.serverUserMethods = new ServerUserMethods(this._options);
+        this.urlRedirectionMethods = new UrlRedirectionMethods(this._options);
         this.webhookMethods = new WebhookMethods(this._options);
     }
 

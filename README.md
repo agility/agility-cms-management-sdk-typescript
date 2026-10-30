@@ -15,7 +15,7 @@
 ## About the Management API SDK
 
 - Provides a facility to developers to use the new Agility Management API more effectively.
-- Provides methods to perform operations on Assets, Batches, Containers, Content, Models, Pages, and Users, and to search an instance.
+- Provides methods to perform operations on Assets, Batches, Containers, Content, Models, Pages, URL Redirections, and Users, and to search an instance.
 - **Content and Page Creation** - Create individual or multiple content items and pages (which automatically get added to batches).
 - **Essential batch workflow operations** - Perform publish, unpublish, approve, decline, and request approval operations on existing batches.
 - Ability to generate Content in bulk for a Website.
@@ -148,6 +148,10 @@ console.log('Content retrieved:', contentItem.fields.title);
 ### Search
 - **[SearchMethods](./docs/search-methods.md)** - Search everything in an instance (1 function)
   - [search](./docs/search-methods.md#search)
+
+### URL Redirections
+- **[UrlRedirectionMethods](./docs/url-redirection-methods.md)** - URL redirection operations (1 function)
+  - [deleteUrlRedirections](./docs/url-redirection-methods.md#deleteurlredirections)
 
 ### User Management
 - **[InstanceMethods](./docs/instance-methods.md)** - Instance-level operations (2 functions)
