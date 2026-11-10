@@ -4,11 +4,11 @@ import { PageItem } from "../models/pageItem";
 import { Sitemap } from "../models/sitemap";
 import { BatchMethods } from "./batchMethods";
 import { Exception } from "../models/exception";
+import { BatchFailedException } from "../models/batchFailedException";
 import { PageModel } from "../models/pageModel";
 import { ContentSectionDefinition } from "../models/contentSectionDefinition";
-import { PageHistory } from "../models/pageHistory";
+import { PageHistoryResponse } from "../models/pageHistory";
 import { ItemComments } from "../models/itemComments";
-import { BatchState } from "../enums/batchState.";
 import { WorkflowOperationType } from "../enums/workflowOperationType";
 
 export class PageMethods {
@@ -126,6 +126,7 @@ export class PageMethods {
 
             // Default behavior: wait for completion and return IDs
             var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID, guid));
+            BatchFailedException.throwIfFailed(batch);
             let pageIDs: number[] = [];
 
             batch.items.forEach(element => pageIDs.push(element.itemID));
@@ -149,6 +150,7 @@ export class PageMethods {
 
             // Default behavior: wait for completion and return IDs
             var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID, guid));
+            BatchFailedException.throwIfFailed(batch);
             let pageIDs: number[] = [];
 
             batch.items.forEach(element => pageIDs.push(element.itemID));
@@ -187,10 +189,7 @@ export class PageMethods {
 
             // Default behavior: wait for completion and return IDs
             var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID, guid));
-            
-            if(batch.batchState === BatchState.Processed && batch.errorData && batch.errorData.length > 0) {
-                throw new Exception(`Unable to batch ${operationName.toLowerCase()} pages. Batch is not completed. Error: ${batch.errorData}`, null);
-            }
+            BatchFailedException.throwIfFailed(batch);
             
             let processedPageIDs: number[] = [];
 
@@ -215,6 +214,7 @@ export class PageMethods {
 
             // Default behavior: wait for completion and return IDs
             var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID, guid));
+            BatchFailedException.throwIfFailed(batch);
             let pageIDs: number[] = [];
 
             batch.items.forEach(element => pageIDs.push(element.itemID));
@@ -238,6 +238,7 @@ export class PageMethods {
 
             // Default behavior: wait for completion and return IDs
             var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID, guid));
+            BatchFailedException.throwIfFailed(batch);
             let pageIDs: number[] = [];
 
             batch.items.forEach(element => pageIDs.push(element.itemID));
@@ -261,6 +262,7 @@ export class PageMethods {
 
             // Default behavior: wait for completion and return IDs
             var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID, guid));
+            BatchFailedException.throwIfFailed(batch);
             let pageIDs: number[] = [];
 
             batch.items.forEach(element => pageIDs.push(element.itemID));
@@ -284,6 +286,7 @@ export class PageMethods {
 
             // Default behavior: wait for completion and return IDs
             var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID, guid));
+            BatchFailedException.throwIfFailed(batch);
             let pageIDs: number[] = [];
 
             batch.items.forEach(element => pageIDs.push(element.itemID));
@@ -330,33 +333,34 @@ export class PageMethods {
 
             // Default behavior: wait for completion and return IDs
             var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID, guid));
+            BatchFailedException.throwIfFailed(batch);
             let pageIDs: number[] = [];
             batch.items.forEach(element => pageIDs.push(element.itemID));
             return pageIDs;
         } catch (err) {
-            throw new Exception(`Unable to create page. ${err}`, err);
+            throw new Exception(`Unable to save page.`, err);
         }
     }
 
     async getPageHistory(locale: string, guid: string, pageID: number, take: number = 50, skip: number = 0) {
         try {
-            let apiPath = `${locale}/item/${pageID}/history?take=${take}&skip=${skip}`;
+            let apiPath = `${locale}/page/${pageID}/history?take=${take}&skip=${skip}`;
             const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
 
-            return resp.data as PageHistory;
+            return resp.data as PageHistoryResponse;
         } catch (err) {
-            throw new Exception(`Unable to retrieve history for pageID: ${pageID}`)
+            throw new Exception(`Unable to retrieve history for pageID: ${pageID}`, err)
         }
     }
 
     async getPageComments(locale: string, guid: string, pageID: number, take: number = 50, skip: number = 0) {
         try {
-            let apiPath = `${locale}/item/${pageID}/history?take=${take}&skip=${skip}`;
+            let apiPath = `${locale}/page/${pageID}/comments?take=${take}&skip=${skip}`;
             const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
 
             return resp.data as ItemComments;
         } catch (err) {
-            throw new Exception(`Unable to retrieve history for pageID: ${pageID}`)
+            throw new Exception(`Unable to retrieve comments for pageID: ${pageID}`, err)
         }
     }
 }

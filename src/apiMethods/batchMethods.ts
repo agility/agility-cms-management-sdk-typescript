@@ -3,6 +3,7 @@ import { ClientInstance } from "./clientInstance";
 import { Batch } from "../models/batch";
 import { BatchState } from "../enums/batchState.";
 import { Exception } from "../models/exception";
+import { BatchFailedException } from "../models/batchFailedException";
 import { BatchTypesResponse } from "../models/batchTypes";
 
 export class BatchMethods {
@@ -38,7 +39,8 @@ export class BatchMethods {
             }
 
             // Default behavior: wait for completion and return batch ID
-            await this.Retry(async () => await this.getBatch(resultBatchID, guid));
+            const batch = await this.Retry(async () => await this.getBatch(resultBatchID, guid));
+            BatchFailedException.throwIfFailed(batch);
             return resultBatchID;
         } catch (err) {
             throw new Exception(`Unable to publish the batch with id: ${batchID}`, err);
@@ -58,7 +60,8 @@ export class BatchMethods {
             }
 
             // Default behavior: wait for completion and return batch ID
-            await this.Retry(async () => await this.getBatch(resultBatchID, guid));
+            const batch = await this.Retry(async () => await this.getBatch(resultBatchID, guid));
+            BatchFailedException.throwIfFailed(batch);
             return resultBatchID;
         } catch (err) {
             throw new Exception(`Unable to unpublish the batch with id: ${batchID}`, err);
@@ -78,7 +81,8 @@ export class BatchMethods {
             }
 
             // Default behavior: wait for completion and return batch ID
-            await this.Retry(async () => await this.getBatch(resultBatchID, guid));
+            const batch = await this.Retry(async () => await this.getBatch(resultBatchID, guid));
+            BatchFailedException.throwIfFailed(batch);
             return resultBatchID;
         } catch (err) {
             throw new Exception(`Unable to approve the batch with id: ${batchID}`, err);
@@ -98,7 +102,8 @@ export class BatchMethods {
             }
 
             // Default behavior: wait for completion and return batch ID
-            await this.Retry(async () => await this.getBatch(resultBatchID, guid));
+            const batch = await this.Retry(async () => await this.getBatch(resultBatchID, guid));
+            BatchFailedException.throwIfFailed(batch);
             return resultBatchID;
         } catch (err) {
             throw new Exception(`Unable to decline the batch with id: ${batchID}`, err);
@@ -118,7 +123,8 @@ export class BatchMethods {
             }
 
             // Default behavior: wait for completion and return batch ID
-            await this.Retry(async () => await this.getBatch(resultBatchID, guid));
+            const batch = await this.Retry(async () => await this.getBatch(resultBatchID, guid));
+            BatchFailedException.throwIfFailed(batch);
             return resultBatchID;
         } catch (err) {
             throw new Exception(`Unable to request approval for the batch with id: ${batchID}`, err);

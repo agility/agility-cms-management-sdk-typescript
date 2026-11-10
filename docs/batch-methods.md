@@ -9,6 +9,19 @@ This class provides essential batch workflow operations for managing content and
 - These batch methods are for managing workflow operations on existing batches
 - All batch operations support both immediate return and completion polling
 - Use `getBatchTypes()` for dynamic UI population and validation
+- **A batch can finish with failed items.** Every method that waits for a batch (here, and the save and workflow methods on `pageMethods` and `contentMethods`) throws when the finished batch reports a failed item, instead of returning as if it succeeded. The batch methods here throw a `BatchFailedException`; the page and content methods throw an `Exception` with the `BatchFailedException` as `innerError`. It carries `batchID`, `failedItems` (each with `itemID`, `itemType` and `errorMessage`) and `itemIDs` (the items that succeeded). With `returnBatchId` true nothing is checked, so read the batch with `getBatch` and look at its `errorData` and each item's `errorMessage`.
+
+```typescript
+import { BatchFailedException } from "@agility/management-sdk";
+
+try {
+    await apiClient.pageMethods.savePage(page, guid, "en-us");
+} catch (err) {
+    const failed = err.innerError instanceof BatchFailedException ? err.innerError : null;
+    if (failed) failed.failedItems.forEach(f => console.error(`${f.itemType} ${f.itemID}: ${f.errorMessage}`));
+    else throw err;
+}
+```
 
 ### Function List
 - [getBatch](#getbatch) - Retrieves details of an existing batch
