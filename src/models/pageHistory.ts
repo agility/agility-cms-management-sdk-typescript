@@ -14,6 +14,10 @@ export class PageHistory {
     Comment: string;
     Pinned: boolean;
     VersionNumber: number;
+    /** The page's parent in this version; -1 for a top-level page. */
+    ParentPageID: number;
+    /** The page's position among its siblings in this version. */
+    PageHierarchyPosition: number;
 }
 
 export class PageHistoryResponse {

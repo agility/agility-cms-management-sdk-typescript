@@ -4,12 +4,12 @@ import { ContentItem, ContentList } from "../models/contentItem";
 import { ListItemOrderResult } from "../models/listItemOrderResult";
 import { BatchMethods } from "./batchMethods";
 import { Exception } from "../models/exception";
+import { BatchFailedException } from "../models/batchFailedException";
 import { ContentListFilterModel } from "../models/contentListFilterModel";
 import { ContentItemHistory } from "../models/contentItemHistory";
 import { ItemComments } from "../models/itemComments";
 import { ListParams } from "../models/listParams";
 import { buildQueryString } from "../util/queryString";
-import { BatchState } from "../enums/batchState.";
 import { WorkflowOperationType } from "../enums/workflowOperationType";
 
 export class ContentMethods {
@@ -48,6 +48,7 @@ export class ContentMethods {
 
             // Default behavior: wait for completion and return IDs
             var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID, guid));
+            BatchFailedException.throwIfFailed(batch);
             let contentIDs: number[] = [];
 
             batch.items.forEach(element => contentIDs.push(element.itemID));
@@ -71,6 +72,7 @@ export class ContentMethods {
 
             // Default behavior: wait for completion and return IDs
             var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID, guid));
+            BatchFailedException.throwIfFailed(batch);
             let contentIDs: number[] = [];
 
             batch.items.forEach(element => contentIDs.push(element.itemID));
@@ -110,10 +112,7 @@ export class ContentMethods {
 
             // Default behavior: wait for completion and return IDs
             var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID, guid));
-            
-            if(batch.batchState === BatchState.Processed && batch.errorData && batch.errorData.length > 0) {
-                throw new Exception(`Unable to batch ${operationName.toLowerCase()} content items. Batch is not completed. Error: ${batch.errorData}`, null);
-            }
+            BatchFailedException.throwIfFailed(batch);
 
             let processedContentIDs: number[] = [];
 
@@ -138,6 +137,7 @@ export class ContentMethods {
 
             // Default behavior: wait for completion and return IDs
             var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID, guid));
+            BatchFailedException.throwIfFailed(batch);
             let contentIDs: number[] = [];
 
             batch.items.forEach(element => contentIDs.push(element.itemID));
@@ -161,6 +161,7 @@ export class ContentMethods {
 
             // Default behavior: wait for completion and return IDs
             var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID, guid));
+            BatchFailedException.throwIfFailed(batch);
             let contentIDs: number[] = [];
 
             batch.items.forEach(element => contentIDs.push(element.itemID));
@@ -184,6 +185,7 @@ export class ContentMethods {
 
             // Default behavior: wait for completion and return IDs
             var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID, guid));
+            BatchFailedException.throwIfFailed(batch);
             let contentIDs: number[] = [];
 
             batch.items.forEach(element => contentIDs.push(element.itemID));
@@ -207,6 +209,7 @@ export class ContentMethods {
 
             // Default behavior: wait for completion and return IDs
             var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID, guid));
+            BatchFailedException.throwIfFailed(batch);
             let contentIDs: number[] = [];
 
             batch.items.forEach(element => contentIDs.push(element.itemID));
@@ -230,6 +233,7 @@ export class ContentMethods {
 
             // Default behavior: wait for completion and return IDs
             var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID, guid));
+            BatchFailedException.throwIfFailed(batch);
             let contentIDs: number[] = [];
             batch.items.forEach(element => contentIDs.push(element.itemID));
             return contentIDs;
@@ -252,6 +256,7 @@ export class ContentMethods {
 
             // Default behavior: wait for completion and return IDs
             var batch = await this._batchMethods.Retry(async () => await this._batchMethods.getBatch(batchID, guid));
+            BatchFailedException.throwIfFailed(batch);
             let contentIDs: number[] = [];
 
             batch.items.forEach(element => contentIDs.push(element.itemID));

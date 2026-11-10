@@ -106,63 +106,58 @@ if (await validatePath('/blog')) {
 
 ### getPageHistory
 
-Retrieves the version history for a specific page.
+Retrieves the version history for a specific page, newest first.
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `pageID` | `number` | Yes | The page ID |
+| `locale` | `string` | Yes | The locale code (e.g. `en-us`) |
 | `guid` | `string` | Yes | Current website GUID |
+| `pageID` | `number` | Yes | The page ID |
+| `take` | `number` | No | How many versions to return (default 50) |
+| `skip` | `number` | No | How many versions to skip (default 0) |
 
-**Returns:** `PageHistory[]` - Array of historical versions
+**Returns:** `PageHistoryResponse` - `items` (the versions on this page of results) and `totalCount`
 
 **Usage Example:**
 ```typescript
-const history = await apiClient.pageMethods.getPageHistory(123, guid);
-console.log(`Found ${history.length} historical versions`);
+const history = await apiClient.pageMethods.getPageHistory("en-us", guid, 123);
+console.log(`${history.totalCount} versions`);
 
-// Display version details
-history.forEach((version, index) => {
-    console.log(`Version ${index + 1}:`);
-    console.log(`  Date: ${version.modifiedDate}`);
-    console.log(`  User: ${version.modifiedByUser}`);
-    console.log(`  Action: ${version.action}`);
-    console.log(`  Notes: ${version.notes}`);
+history.items.forEach(version => {
+    console.log(`v${version.VersionNumber} ${version.State} by ${version.CreatedBy} on ${version.CreatedDate}`);
+    if (version.Comment) console.log(`  Comment: ${version.Comment}`);
 });
-
-// Get latest version
-const latestVersion = history[0];
-console.log('Latest change:', latestVersion.action);
 ```
 
 **Error Handling:**
-- Throws `Exception` when page not found
+- Throws `Exception` when the request fails
 
 ### getPageComments
 
-Retrieves all comments for a specific page.
+Retrieves the comments on a specific page.
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `pageID` | `number` | Yes | The page ID |
+| `locale` | `string` | Yes | The locale code (e.g. `en-us`) |
 | `guid` | `string` | Yes | Current website GUID |
+| `pageID` | `number` | Yes | The page ID |
+| `take` | `number` | No | How many comments to return (default 50) |
+| `skip` | `number` | No | How many comments to skip (default 0) |
 
-**Returns:** `ItemComments[]` - Array of page comments
+**Returns:** `ItemComments` - `items` (the comments on this page of results) and `totalCount`
 
 **Usage Example:**
 ```typescript
-const comments = await apiClient.pageMethods.getPageComments(123, guid);
-console.log(`Found ${comments.length} comments`);
+const comments = await apiClient.pageMethods.getPageComments("en-us", guid, 123);
+console.log(`${comments.totalCount} comments`);
 
-// Display comments
-comments.forEach(comment => {
-    console.log(`${comment.userName} (${comment.date}):`);
-    console.log(`  ${comment.comment}`);
-    console.log(`  Status: ${comment.status}`);
+comments.items.forEach(comment => {
+    console.log(`${comment.createdBy} (${comment.createdOn}): ${comment.commentText}`);
 });
 ```
 
 **Error Handling:**
-- Throws `Exception` when page not found
+- Throws `Exception` when the request fails
 
 ### getPageList
 
@@ -524,6 +519,7 @@ console.log('Batch created with ID:', batchId);
 
 **Error Handling:**
 - Throws `Exception` when validation fails or save operation fails
+- When it waits for the batch (`returnBatchId` false), throws `Exception` whose `innerError` is a `BatchFailedException` if the batch reports a failed item. With `returnBatchId` true, check the batch yourself with `batchMethods.getBatch`
 
 **GEO / AEO and the extra SEO properties:**
 
