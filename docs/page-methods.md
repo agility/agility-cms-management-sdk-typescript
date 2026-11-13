@@ -28,7 +28,7 @@ This class provides comprehensive page management operations for Agility CMS. Pa
 - [getPageContentZones](#getpagecontentzones) - Retrieves content zones for a page
 - [savePage](#savepage) - Creates or updates a page
 - [savePageSecurity](#savepagesecurity) - Updates page security settings
-- [movePageItem](#movepageitem) - Moves a page item within the hierarchy
+- [movePage](#movepage) - Moves a page under a parent, before a sibling
 - [deletePage](#deletepage) - Deletes a page by ID
 - [batchWorkflowPages](#batchworkflowpages) - Batch workflow operation on multiple pages
 
@@ -593,42 +593,41 @@ await apiClient.pageMethods.savePageSecurity(123, restrictedSecurity, guid);
 **Error Handling:**
 - Throws `Exception` when page not found or security update fails
 
-### movePageItem
+### movePage
 
-Moves a page item within the page hierarchy.
+Moves a page to a new place in its sitemap: under a parent page, before one of that parent's pages. This is the same move as dragging the page in the page tree.
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `pageID` | `number` | Yes | The page ID to move |
-| `parentPageID` | `number` | Yes | The new parent page ID (0 for root level) |
-| `sortOrder` | `number` | Yes | The sort order within the parent |
+| `pageID` | `number` | Yes | The page to move |
 | `guid` | `string` | Yes | Current website GUID |
+| `locale` | `string` | Yes | The locale to look the pages up in. The move applies to every locale |
+| `parentPageID` | `number` | No | The new parent page, or -1 (default) for the root of the sitemap |
+| `placeBeforePageID` | `number` | No | The page to place it before, or -1 (default) to place it last. Must already be under the new parent |
 
-**Returns:** `PageItem` - Updated page object
+**Returns:** `PageMoveResult` - `{ pageID, parentPageID, versionID, moved, siblingPageIDs }`
+
+A page's place is shared by all locales. The move creates a new version of the page and puts it in staging in every locale it exists in, so publish it for the live sitemap to show the new place. When the page is already directly before `placeBeforePageID` (or already last) under `parentPageID`, nothing changes and `moved` is `false`, so it's safe to call for every page you want in a given order. A page moves within its own sitemap only, and its child pages move with it.
 
 **Usage Example:**
 ```typescript
-// Move page to root level
-const movedPage = await apiClient.pageMethods.movePageItem(123, 0, 1, guid);
+// Place page 8 before page 10, under page 7
+const result = await apiClient.pageMethods.movePage(8, guid, "en-us", 7, 10);
+console.log(result.moved, result.siblingPageIDs); // true [15, 13, 11, 8, 10, 9]
 
-// Move page under another page
-const childPage = await apiClient.pageMethods.movePageItem(123, 456, 2, guid);
+// Move a page to the root of its sitemap, last
+await apiClient.pageMethods.movePage(8, guid, "en-us");
 
-// Reorder pages
-const reorderPages = async (parentID, pageIDs) => {
-    for (let i = 0; i < pageIDs.length; i++) {
-        await apiClient.pageMethods.movePageItem(
-            pageIDs[i], 
-            parentID, 
-            i + 1, 
-            guid
-        );
-    }
-};
+// Put a parent's pages in a given order: place each page before the next one, from the end
+const order = [15, 13, 11, 8, 10, 9];
+for (let i = order.length - 1; i >= 0; i--) {
+    await apiClient.pageMethods.movePage(order[i], guid, "en-us", 7, order[i + 1] ?? -1);
+}
 ```
 
 **Error Handling:**
-- Throws `Exception` when page not found or move operation fails
+- Throws `Exception` with `statusCode` 404 when the page, the parent or the page to place before isn't found
+- Throws `Exception` with `statusCode` 400 when the move isn't allowed: under itself or one of its own pages, a page to place before that is under another parent, or another page with the same name or a dynamic page already at that level
 
 ### deletePage
 

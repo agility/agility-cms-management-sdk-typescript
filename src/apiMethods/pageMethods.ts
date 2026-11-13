@@ -10,6 +10,8 @@ import { ContentSectionDefinition } from "../models/contentSectionDefinition";
 import { PageHistoryResponse } from "../models/pageHistory";
 import { ItemComments } from "../models/itemComments";
 import { WorkflowOperationType } from "../enums/workflowOperationType";
+import { PageMoveResult } from "../models/pageMoveResult";
+import { buildQueryString } from "../util/queryString";
 
 export class PageMethods {
     _options!: Options;
@@ -339,6 +341,35 @@ export class PageMethods {
             return pageIDs;
         } catch (err) {
             throw new Exception(`Unable to save page.`, err);
+        }
+    }
+
+    /**
+     * Move a page to a new place in its sitemap: under a parent page, before one of that parent's pages.
+     *
+     * The same move as dragging the page in the page tree. Pass -1 (the default) as `parentPageID` to
+     * move the page to the root of its sitemap, and as `placeBeforePageID` to place it last. The page to
+     * place before must already be under the new parent. A page moves within its own sitemap only.
+     *
+     * The move creates a new version of the page and puts it in staging in every locale, since a page's
+     * place is shared by all locales; publish the page for the live sitemap to show it. When the page is
+     * already directly before that page (or already last) under that parent, nothing changes and `moved`
+     * is false, so it's safe to call for every page you want in a given order.
+     *
+     * Makes one request and doesn't wait on a batch. Throws `Exception` with `statusCode` 404 when the
+     * page, the parent or the page to place before isn't found, and 400 when the move isn't allowed
+     * (under itself or one of its own pages, a page to place before that is under another parent, or
+     * another page with the same name or a dynamic page already at that level).
+     */
+    async movePage(pageID: number, guid: string, locale: string, parentPageID: number = -1, placeBeforePageID: number = -1): Promise<PageMoveResult> {
+        try {
+            const queryParams = buildQueryString({ parentPageID, placeBeforePageID });
+            let apiPath = `${locale}/page/${pageID}/move${queryParams}`;
+            const resp = await this._clientInstance.executePost(apiPath, guid, this._options.token, null);
+
+            return resp.data as PageMoveResult;
+        } catch (err) {
+            throw new Exception(`Unable to move pageID: ${pageID}`, err);
         }
     }
 
