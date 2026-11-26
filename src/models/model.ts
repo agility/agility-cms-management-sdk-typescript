@@ -16,8 +16,10 @@ export class Model {
      * add or copy it into a zone, and the component picker doesn't list it. Components already on a
      * page still render, stay editable and can still be moved to another zone or page model.
      *
-     * On `saveModel`, leave it out (or `null`) to keep the stored value; a new model defaults to `true`.
-     * Older API versions don't return it.
+     * On `saveModel`, it's read only when the save creates the model (left out or `null`, a new model
+     * is visible). On an update the stored value is always kept, so a sync from another instance can't
+     * re-enable a disabled model. The API has no way yet to disable or re-enable an existing model;
+     * do that in the Manager App. Older API versions don't return it.
      */
     isVisible?: boolean | null;
 }

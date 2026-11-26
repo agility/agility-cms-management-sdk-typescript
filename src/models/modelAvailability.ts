@@ -29,7 +29,8 @@
  * empty list clears the restriction.
  *
  * Disabling a component (nobody can add or copy it; one already on a page can still be moved) is the
- * model's own `isVisible` flag (`Model.isVisible`), not part of this object.
+ * model's own `isVisible` flag (`Model.isVisible`, set only when the model is created), not part of
+ * this object.
  */
 export class ModelAvailability {
     /** The component model's ID. */

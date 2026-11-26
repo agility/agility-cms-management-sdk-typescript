@@ -245,7 +245,7 @@ Creates a new content model or updates an existing one.
 
 **Returns:** `Model` - Saved model object with updated metadata
 
-**`isVisible`:** leave it out (or `null`) to keep the stored value; a new model defaults to `true`. Set it to `false` to disable a component model: nobody can add or copy it into a zone, and the component picker doesn't list it. Components already on a page still render and can still be moved to another zone or page model. Older API versions don't return it.
+**`isVisible`:** read only when the save creates the model. Left out (or `null`), a new model is visible. On an update the stored value is always kept, whatever you send, so a sync from another instance can't re-enable a disabled model. The API has no way yet to disable or re-enable an existing model; do that in the Manager App. Create a component model with `false` to disable it: nobody can add or copy it into a zone, and the component picker doesn't list it. Components already on a page still render and can still be moved to another zone or page model. Older API versions don't return it.
 
 **Usage Example:**
 ```typescript
@@ -452,7 +452,7 @@ Retrieves the availability rules of one component model: who can add it to a pag
 **How the rules apply:**
 - **`addableBy`:** a user may add the component when they hold FullControl (Administrators are always allowed), hold a listed permission (`Manager` = Manage, `Designer` = Design), are a listed user, or belong to a listed team. These are permissions, not role names: a role that holds the Design permission passes a `Designer` rule.
 - **`allowedIn`:** the placement is allowed when the page's sitemap is allowed (no sitemaps listed, or the sitemap of the page's top-level ancestor is listed) **and** its layout is allowed (no page models or zones listed, or the page's page model is listed, which allows all of its zones, or the target zone is listed).
-- **Disabled** is the model's own `isVisible: false` (see [saveModel](#savemodel)), not part of this object. Nobody can add or copy a disabled component, but one that's already on a page can still be moved to another zone or page model (the `addableBy` and `allowedIn` rules still apply to the move).
+- **Disabled** is the model's own `isVisible: false` (see [saveModel](#savemodel): set only when the model is created), not part of this object. Nobody can add or copy a disabled component, but one that's already on a page can still be moved to another zone or page model (the `addableBy` and `allowedIn` rules still apply to the move).
 - **Deleted targets:** a sitemap, page model, zone, user or team that was deleted after the rule was saved comes back as a stale entry, with its ID and `stale: true` only. A stale entry never matches, but a list that holds only stale entries is still a restriction: if every listed sitemap is stale, the component is allowed on no sitemap.
 
 **Usage Example:**
