@@ -1,6 +1,7 @@
 import { Options } from "../models/options";
 import { ClientInstance } from "./clientInstance";
 import { Model } from "../models/model";
+import { ModelAvailability } from "../models/modelAvailability";
 import { Exception } from "../models/exception";
 
 export class ModelMethods {
@@ -28,6 +29,12 @@ export class ModelMethods {
             let apiPath = `model/${referenceName}`;
             const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
 
+            // `model/availability` is the instance's availability list, so a model whose reference name
+            // is "availability" (any case) can't be read by name. Fail clearly instead of returning the
+            // list as a Model.
+            if (Array.isArray(resp.data)) {
+                throw new Error(`"${referenceName}" is a reserved route (the match ignores case), so this model can't be read by reference name. Find its ID with getContentModules and read it with getContentModel.`);
+            }
             return resp.data as Model;
         } catch (err) {
             throw new Exception(`Unable to retrieve model for referenceName: ${referenceName}.`, err);
@@ -64,6 +71,55 @@ export class ModelMethods {
             return resp.data as Model;
         } catch (err) {
             throw new Exception(`Unable to save the model.`, err);
+        }
+    }
+
+    /**
+     * The availability rules of one component model: who can add it, and where it can go.
+     * A model with no rules comes back with `addableBy` and `allowedIn` both `null`.
+     */
+    async getModelAvailability(modelID: number, guid: string) {
+        try {
+            let apiPath = `model/${modelID}/availability`;
+            const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
+
+            return resp.data as ModelAvailability;
+        } catch (err) {
+            throw new Exception(`Unable to retrieve availability for model id: ${modelID}.`, err);
+        }
+    }
+
+    /** The availability rules of every model on the instance that has any rule. */
+    async getAllModelAvailability(guid: string) {
+        try {
+            let apiPath = `model/availability`;
+            const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
+
+            // Anything but a list (an older API answering with a model named "availability", a proxy
+            // page, a null body) is an error. Returning [] would read as "no rules", and a sync could
+            // copy that and clear another instance's rules.
+            if (!Array.isArray(resp.data)) {
+                throw new Error(`The response is not a list of availability rules. The Management API may be too old for component availability.`);
+            }
+            return resp.data as ModelAvailability[];
+        } catch (err) {
+            throw new Exception(`Unable to retrieve model availability.`, err);
+        }
+    }
+
+    /**
+     * Save the availability rules of one component model and return them as saved.
+     * A group (`addableBy`, `allowedIn`) left out or `null` keeps its stored rules; an object replaces
+     * them; an object whose lists are all empty clears them.
+     */
+    async saveModelAvailability(modelID: number, availability: ModelAvailability, guid: string) {
+        try {
+            let apiPath = `model/${modelID}/availability`;
+            const resp = await this._clientInstance.executePost(apiPath, guid, this._options.token, availability);
+
+            return resp.data as ModelAvailability;
+        } catch (err) {
+            throw new Exception(`Unable to save availability for model id: ${modelID}.`, err);
         }
     }
 
