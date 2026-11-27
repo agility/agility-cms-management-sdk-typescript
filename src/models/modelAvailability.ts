@@ -14,7 +14,9 @@
  * its portable name: a user by `emailAddress`, a team by `name`, a sitemap by `referenceName`
  * (case-insensitive), a page model by `name`, and a zone by `pageModelName` + `referenceName`. So
  * rules copied from another instance can be saved with the IDs left out. If any target can't be
- * resolved, the whole save is rejected (HTTP 400) with a list of them.
+ * resolved, the whole save is rejected (HTTP 400) with a list of them. An ID from another instance
+ * can match a different user, team, sitemap or zone that happens to have it here, so leave IDs out
+ * when copying between instances.
  *
  * Deleted targets: a read returns a target that was deleted after the rule was saved as a stale entry
  * (`stale: true`, ID only). A group that holds only stale entries is still a restriction. On a write,
@@ -24,9 +26,10 @@
  *
  * Saving rules back to the same instance: send entries as you read them, stale ones included. Stale
  * sitemaps, page models and zones are dropped, and a group with only stale entries gets a 400 rather
- * than being widened. Copying rules to another instance: leave stale entries out, and if that empties
- * a list, send that group (`addableBy` or `allowedIn`) as `null` (keep what's stored) instead. An
- * empty list clears the restriction.
+ * than being widened. Copying rules to another instance: leave IDs and stale entries out. If that
+ * empties a list, choose: send the list empty, which drops that restriction on the target (the rule
+ * widens), or send the whole group (`addableBy` or `allowedIn`) as `null`, which keeps the target's
+ * stored rules for every list in the group, the source's other lists included.
  *
  * Disabling a component (nobody can add or copy it; one already on a page can still be moved) is the
  * model's own `isVisible` flag (`Model.isVisible`, set only when the model is created), not part of

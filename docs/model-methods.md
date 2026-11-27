@@ -245,7 +245,7 @@ Creates a new content model or updates an existing one.
 
 **Returns:** `Model` - Saved model object with updated metadata
 
-**`isVisible`:** read only when the save creates the model. Left out (or `null`), a new model is visible. On an update the stored value is always kept, whatever you send, so a sync from another instance can't re-enable a disabled model. The API has no way yet to disable or re-enable an existing model; do that in the Manager App. Create a component model with `false` to disable it: nobody can add or copy it into a zone, and the component picker doesn't list it. Components already on a page still render and can still be moved to another zone or page model. Older API versions don't return it.
+**`isVisible`:** read only when the save creates the model. Left out (or `null`), a new model is visible. On an update the stored value is always kept, whatever you send, so a sync from another instance can't re-enable a disabled model. To disable or re-enable an existing model, use the Manager App (the Management API's `model/{id}/visibility` route isn't in this SDK yet). Create a component model with `false` to disable it: nobody can add or copy it into a zone, and the component picker doesn't list it. Components already on a page still render and can still be moved to another zone or page model. Older API versions don't return it.
 
 **Usage Example:**
 ```typescript
@@ -485,7 +485,7 @@ const byModel = new Map(rules.map(r => [r.modelID, r]));
 
 **Error Handling:**
 - An instance whose database doesn't have availability rules yet returns an empty list, the same as an instance with no rules. A read can't tell the two apart: only [saveModelAvailability](#savemodelavailability) returns 409.
-- An older Management API without this route answers with an error (usually 404), or, when the instance has a model whose reference name is `availability`, with that model instead of a list. Treat both as "no rules".
+- An older Management API without this route answers with an error (usually 404), or, when the instance has a model whose reference name is `availability`, with that model instead of a list. The SDK returns an empty list for the second; treat both as "no rules".
 
 ### saveModelAvailability
 
@@ -509,7 +509,7 @@ Saves the availability rules of one component model, and returns them as saved. 
 **Stale targets are dropped on save.** A sitemap, page model or zone sent back by the ID of a stale entry (see [getModelAvailability](#getmodelavailability)) is left out of the saved rules. If a non-empty `sitemaps` list, or a non-empty `pageModels` + `zones` set, would be left with only stale targets, the save is rejected (HTTP 400) instead, because saving it empty would allow the component everywhere. Stale users and teams are kept.
 
 - **Saving back to the same instance:** send entries as you read them, stale ones (`stale: true`) included. Stale sitemaps, page models and zones are dropped, and a group with only stale entries gets a 400 instead of being widened.
-- **Copying to another instance:** leave stale entries out. If that empties a list, send that group (`addableBy` or `allowedIn`) as `null` (keep what's stored) instead, because an empty list clears the restriction.
+- **Copying to another instance:** leave IDs and stale entries out. An ID from the source can match a different user, team, sitemap or zone on the target, and IDs win over names. If leaving stale entries out empties a list, choose: send the list empty, which drops that restriction on the target (the rule widens), or send the whole group (`addableBy` or `allowedIn`) as `null`, which keeps the target's stored rules for every list in the group, the source's other lists included.
 
 **Usage Example:**
 ```typescript

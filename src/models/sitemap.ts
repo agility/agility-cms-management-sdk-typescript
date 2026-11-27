@@ -2,7 +2,7 @@ export class Sitemap {
     digitalChannelID: number | null;
     name: string | null;
     /** The sitemap's reference name, a stable key across instances. Older API versions don't return it. */
-    referenceName?: string;
+    referenceName?: string | null;
     digitalChannelTypeName: string | null;
     isDefaultChannel: boolean;
     pages: (SitemapItem | null)[];

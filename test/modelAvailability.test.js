@@ -166,9 +166,9 @@ test("a 400 listing unresolved targets reaches the caller with its message", asy
     });
 });
 
-test("saveModel posts isVisible when it is set", async () => {
+test("saveModel posts isVisible when it creates a model", async () => {
     respond({ id: 12, isVisible: false });
-    const saved = await client().modelMethods.saveModel({ id: 12, referenceName: "HeroBanner", fields: [], isVisible: false }, guid);
+    const saved = await client().modelMethods.saveModel({ id: -1, referenceName: "HeroBanner", fields: [], isVisible: false }, guid);
     assert.equal(JSON.parse(requests[0].raw).isVisible, false);
     assert.equal(saved.isVisible, false);
 });
@@ -187,4 +187,15 @@ test("getSitemap carries each sitemap's referenceName, and tolerates an API that
     const sitemaps = await client().pageMethods.getSitemap(guid, "en-us");
     assert.equal(sitemaps[0].referenceName, "website");
     assert.equal(sitemaps[1].referenceName, undefined);
+});
+
+test("getAllModelAvailability returns an empty list when an older API answers with a model instead", async () => {
+    respond({ id: 7, referenceName: "availability", fields: [] });
+    const rules = await client().modelMethods.getAllModelAvailability(guid);
+    assert.deepEqual(rules, []);
+});
+
+test("getModelByReferenceName refuses the reserved name instead of returning the availability list", async () => {
+    respond([{ modelID: 3, addableBy: null, allowedIn: null }]);
+    await assert.rejects(client().modelMethods.getModelByReferenceName("availability", guid));
 });

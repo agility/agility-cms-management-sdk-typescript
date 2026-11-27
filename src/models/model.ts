@@ -18,8 +18,8 @@ export class Model {
      *
      * On `saveModel`, it's read only when the save creates the model (left out or `null`, a new model
      * is visible). On an update the stored value is always kept, so a sync from another instance can't
-     * re-enable a disabled model. The API has no way yet to disable or re-enable an existing model;
-     * do that in the Manager App. Older API versions don't return it.
+     * re-enable a disabled model. To disable or re-enable an existing model, use the Manager App (the
+     * Management API's `model/{id}/visibility` route isn't in this SDK yet). Older API versions don't return it.
      */
     isVisible?: boolean | null;
 }
