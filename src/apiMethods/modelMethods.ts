@@ -30,9 +30,10 @@ export class ModelMethods {
             const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
 
             // `model/availability` is the instance's availability list, so a model whose reference name
-            // is "availability" can't be read by name. Fail clearly instead of returning the list as a Model.
+            // is "availability" (any case) can't be read by name. Fail clearly instead of returning the
+            // list as a Model.
             if (Array.isArray(resp.data)) {
-                throw new Error(`"${referenceName}" is a reserved route; read this model with getContentModel.`);
+                throw new Error(`"${referenceName}" is a reserved route (the match ignores case), so this model can't be read by reference name. Find its ID with getContentModules and read it with getContentModel.`);
             }
             return resp.data as Model;
         } catch (err) {
@@ -94,9 +95,13 @@ export class ModelMethods {
             let apiPath = `model/availability`;
             const resp = await this._clientInstance.executeGet(apiPath, guid, this._options.token);
 
-            // An older API without this route can answer with a model named "availability" instead of a
-            // list. That means no rules, so return an empty list rather than an object typed as an array.
-            return Array.isArray(resp.data) ? (resp.data as ModelAvailability[]) : [];
+            // Anything but a list (an older API answering with a model named "availability", a proxy
+            // page, a null body) is an error. Returning [] would read as "no rules", and a sync could
+            // copy that and clear another instance's rules.
+            if (!Array.isArray(resp.data)) {
+                throw new Error(`The response is not a list of availability rules. The Management API may be too old for component availability.`);
+            }
+            return resp.data as ModelAvailability[];
         } catch (err) {
             throw new Exception(`Unable to retrieve model availability.`, err);
         }

@@ -150,7 +150,7 @@ test("saveModelAvailability posts name-only targets and empty groups as given", 
 
 test("a 409 from an instance without the feature reaches the caller with its status", async () => {
     respond("Component availability isn't available on this instance yet.", 409);
-    await assert.rejects(client().modelMethods.getAllModelAvailability(guid), (err) => {
+    await assert.rejects(client().modelMethods.saveModelAvailability(12, hero, guid), (err) => {
         assert.equal(err.statusCode, 409);
         assert.match(err.message, /isn't available on this instance yet/);
         return true;
@@ -189,13 +189,17 @@ test("getSitemap carries each sitemap's referenceName, and tolerates an API that
     assert.equal(sitemaps[1].referenceName, undefined);
 });
 
-test("getAllModelAvailability returns an empty list when an older API answers with a model instead", async () => {
+test("getAllModelAvailability throws when an older API answers with a model instead of a list", async () => {
     respond({ id: 7, referenceName: "availability", fields: [] });
-    const rules = await client().modelMethods.getAllModelAvailability(guid);
-    assert.deepEqual(rules, []);
+    await assert.rejects(client().modelMethods.getAllModelAvailability(guid), /not a list of availability rules/);
+});
+
+test("getAllModelAvailability throws for a 200 that isn't a list, so it never reads as no rules", async () => {
+    respond("<html>Sign in</html>");
+    await assert.rejects(client().modelMethods.getAllModelAvailability(guid), /not a list of availability rules/);
 });
 
 test("getModelByReferenceName refuses the reserved name instead of returning the availability list", async () => {
     respond([{ modelID: 3, addableBy: null, allowedIn: null }]);
-    await assert.rejects(client().modelMethods.getModelByReferenceName("availability", guid));
+    await assert.rejects(client().modelMethods.getModelByReferenceName("availability", guid), /reserved route/);
 });

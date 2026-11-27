@@ -25,8 +25,8 @@
  * dropping them would widen the rule to "anywhere". Stale users and teams are kept.
  *
  * Saving rules back to the same instance: send entries as you read them, stale ones included. Stale
- * sitemaps, page models and zones are dropped, and a group with only stale entries gets a 400 rather
- * than being widened. Copying rules to another instance: leave IDs and stale entries out. If that
+ * sitemaps, page models and zones are dropped, and a `sitemaps` list, or a `pageModels` + `zones`
+ * set, with only stale entries gets a 400 rather than being widened. Copying rules to another instance: leave IDs and stale entries out. If that
  * empties a list, choose: send the list empty, which drops that restriction on the target (the rule
  * widens), or send the whole group (`addableBy` or `allowedIn`) as `null`, which keeps the target's
  * stored rules for every list in the group, the source's other lists included.
@@ -36,7 +36,7 @@
  * this object.
  */
 export class ModelAvailability {
-    /** The component model's ID. */
+    /** The component model's ID. Ignored on a write: the model is the `modelID` argument of `saveModelAvailability`. */
     modelID?: number | null;
     /** The component model's reference name. Read-only: ignored on a write. */
     modelReferenceName?: string | null;

@@ -485,7 +485,7 @@ const byModel = new Map(rules.map(r => [r.modelID, r]));
 
 **Error Handling:**
 - An instance whose database doesn't have availability rules yet returns an empty list, the same as an instance with no rules. A read can't tell the two apart: only [saveModelAvailability](#savemodelavailability) returns 409.
-- An older Management API without this route answers with an error (usually 404), or, when the instance has a model whose reference name is `availability`, with that model instead of a list. The SDK returns an empty list for the second; treat both as "no rules".
+- An older Management API without this route answers with an error (usually 404), or, when the instance has a model whose reference name is `availability`, with that model instead of a list. The SDK throws an `Exception` in both cases, and for any other response that isn't a list, so a bad response is never read as "no rules".
 
 ### saveModelAvailability
 
@@ -508,7 +508,7 @@ Saves the availability rules of one component model, and returns them as saved. 
 
 **Stale targets are dropped on save.** A sitemap, page model or zone sent back by the ID of a stale entry (see [getModelAvailability](#getmodelavailability)) is left out of the saved rules. If a non-empty `sitemaps` list, or a non-empty `pageModels` + `zones` set, would be left with only stale targets, the save is rejected (HTTP 400) instead, because saving it empty would allow the component everywhere. Stale users and teams are kept.
 
-- **Saving back to the same instance:** send entries as you read them, stale ones (`stale: true`) included. Stale sitemaps, page models and zones are dropped, and a group with only stale entries gets a 400 instead of being widened.
+- **Saving back to the same instance:** send entries as you read them, stale ones (`stale: true`) included. Stale sitemaps, page models and zones are dropped, and a `sitemaps` list, or a `pageModels` + `zones` set, with only stale entries gets a 400 instead of being widened. Stale users and teams are kept, so an `addableBy` group of only stale entries saves without an error.
 - **Copying to another instance:** leave IDs and stale entries out. An ID from the source can match a different user, team, sitemap or zone on the target, and IDs win over names. If leaving stale entries out empties a list, choose: send the list empty, which drops that restriction on the target (the rule widens), or send the whole group (`addableBy` or `allowedIn`) as `null`, which keeps the target's stored rules for every list in the group, the source's other lists included.
 
 **Usage Example:**
