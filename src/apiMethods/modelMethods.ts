@@ -32,7 +32,7 @@ export class ModelMethods {
             // `model/availability` is the instance's availability list, so a model whose reference name
             // is "availability" can't be read by name. Fail clearly instead of returning the list as a Model.
             if (Array.isArray(resp.data)) {
-                throw new Error(`"${referenceName}" is a reserved route; read this model with getModelByID.`);
+                throw new Error(`"${referenceName}" is a reserved route; read this model with getContentModel.`);
             }
             return resp.data as Model;
         } catch (err) {
